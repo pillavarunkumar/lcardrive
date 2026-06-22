@@ -10,6 +10,7 @@ const navItems = [
   { href: '/portal/profile', label: 'Profile Editor', icon: 'edit_note' },
   { href: '/portal/leads', label: 'Leads', icon: 'group' },
   { href: '/portal/service-areas', label: 'Service Areas', icon: 'map' },
+  { href: '/portal/rates', label: 'Rates & Packages', icon: 'payments' },
   { href: '/portal/availability', label: 'Availability', icon: 'calendar_month' },
 ];
 
@@ -23,26 +24,13 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const sidebarContent = (
     <>
       <div className="flex items-center gap-3 mb-6 p-2">
-        <div className="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest border-2 border-surface-container-lowest">
-          {user ? (
-            <img
-              alt="Profile"
-              className="w-full h-full object-cover"
-              src={user.imageUrl}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-secondary-container text-on-secondary-container text-lg font-bold">
-              ?
-            </div>
-          )}
-        </div>
+        <UserButton afterSignOutUrl="/" />
         <div className="flex-1 min-w-0">
           <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface truncate">
             {user?.fullName || 'Instructor Portal'}
           </h2>
           <p className="font-label-sm text-label-sm text-on-surface-variant">Manage your listing</p>
         </div>
-        <UserButton afterSignOutUrl="/" />
       </div>
       <nav className="flex-1 flex flex-col gap-1">
         {navItems.map((item) => {
@@ -64,13 +52,9 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           );
         })}
       </nav>
-      <div className="mt-auto pt-4 border-t border-outline-variant space-y-2">
-        <button className="w-full bg-secondary text-on-secondary rounded-lg py-3 font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:brightness-110 transition-colors">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>sensors</span>
-          Go Online
-        </button>
+      <div className="mt-auto pt-4 border-t border-outline-variant">
         <button onClick={() => signOut({ redirectUrl: '/' })}
-          className="w-full bg-surface-container-highest text-on-surface rounded-lg py-3 font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:brightness-95 transition-colors">
+          className="w-full bg-secondary text-on-secondary rounded-lg py-3 font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:brightness-110 transition-colors">
           <span className="material-symbols-outlined">logout</span>
           Logout
         </button>

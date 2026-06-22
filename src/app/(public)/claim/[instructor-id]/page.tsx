@@ -4,11 +4,49 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 
 export default function ClaimPage() {
+  const params = useParams();
   const [step, setStep] = useState<'signup' | 'submit' | 'done'>('signup');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [adiNumber, setAdiNumber] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent) => { e.preventDefault(); setStep('submit'); };
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setStep('done'); };
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStep('submit');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/claims', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instructor_id: params['instructor-id'],
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          adi_number: adiNumber || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStep('done');
+      } else {
+        setError(data.error || 'Failed to submit claim');
+      }
+    } catch {
+      setError('Failed to submit claim');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-lg mx-auto px-margin-mobile py-stack-lg">
@@ -23,11 +61,17 @@ export default function ClaimPage() {
       <div className="card-shadow bg-white rounded-2xl p-8">
         {step === 'signup' && (
           <form onSubmit={handleSignup} className="space-y-4">
-            <h3 className="font-bold text-on-surface mb-2">Create Your Account</h3>
-            <input type="text" placeholder="First Name" className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
-            <input type="text" placeholder="Last Name" className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
-            <input type="email" placeholder="Email" className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
-            <input type="password" placeholder="Password" className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required minLength={8} />
+            <h3 className="font-bold text-on-surface mb-2">Your Details</h3>
+            {error && (
+              <div className="p-3 bg-error-container text-on-error-container rounded-xl text-sm flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px]">error</span>
+                {error}
+              </div>
+            )}
+            <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
+            <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required minLength={8} />
             <button type="submit" className="w-full bg-secondary text-white py-3 rounded-lg font-bold text-sm hover:brightness-110 transition-all">
               Continue
             </button>
@@ -38,9 +82,15 @@ export default function ClaimPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <h3 className="font-bold text-on-surface mb-2">Verify Your ADI Registration</h3>
             <p className="text-sm text-on-surface-variant">Enter your ADI registration number to verify your identity.</p>
-            <input type="text" placeholder="ADI Registration Number" value={adiNumber} onChange={(e) => setAdiNumber(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
-            <button type="submit" disabled={!adiNumber} className="w-full bg-secondary text-white py-3 rounded-lg font-bold text-sm hover:brightness-110 transition-all disabled:opacity-50">
-              Submit for Review
+            {error && (
+              <div className="p-3 bg-error-container text-on-error-container rounded-xl text-sm flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px]">error</span>
+                {error}
+              </div>
+            )}
+            <input type="text" placeholder="ADI Registration Number" value={adiNumber} onChange={(e) => setAdiNumber(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" />
+            <button type="submit" disabled={loading} className="w-full bg-secondary text-white py-3 rounded-lg font-bold text-sm hover:brightness-110 transition-all disabled:opacity-50">
+              {loading ? 'Submitting...' : 'Submit for Review'}
             </button>
           </form>
         )}

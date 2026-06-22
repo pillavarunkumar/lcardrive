@@ -128,7 +128,7 @@ const reviewTemplates = [
 ];
 
 function slugify(first: string, last: string, suburb: string) {
-  return `${first.toLowerCase()}-${last.toLowerCase().replace(/'/, '')}-${suburb.toLowerCase().replace(/\s+/, '-')}`;
+  return `${first.toLowerCase()}-${last.toLowerCase().replace(/'/g, '')}-${suburb.toLowerCase().replace(/\s+/g, '-')}`;
 }
 
 export async function GET() {

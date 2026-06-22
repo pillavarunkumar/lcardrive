@@ -55,23 +55,6 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center max-w-[180px] w-full">
-            <div className="bg-surface-container rounded-full px-4 py-2 border border-outline-variant focus-within:border-secondary flex items-center gap-2 w-full transition-colors">
-              <span className="material-symbols-outlined text-outline text-sm">search</span>
-              <input
-                type="text"
-                placeholder="Search suburb..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && searchQuery.trim()) {
-                    router.push(`/search?suburb=${encodeURIComponent(searchQuery.trim())}`);
-                  }
-                }}
-                className="bg-transparent border-none focus:ring-0 text-sm outline-none w-full text-on-surface placeholder:text-outline font-body"
-              />
-            </div>
-          </div>
           <div className="flex gap-2">
             <Link href="/signup" className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:brightness-110 transition-all">
               <span className="truncate">Sign Up</span>

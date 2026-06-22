@@ -25,28 +25,28 @@ export default function Footer() {
           <h4 className="font-bold mb-6 font-display text-sm">For Learners</h4>
           <ul className={`flex flex-col gap-4 text-sm ${isHome ? 'opacity-80' : 'text-on-surface-variant'}`}>
             <li><Link href="/search" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Find an Instructor</Link></li>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Learning App</span></li>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Driving Test Tips</span></li>
+            <li><Link href="/learning-app" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Learning App</Link></li>
+            <li><Link href="/driving-test-tips" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Driving Test Tips</Link></li>
           </ul>
         </div>
 
         <div>
           <h4 className="font-bold mb-6 font-display text-sm">For Instructors</h4>
           <ul className={`flex flex-col gap-4 text-sm ${isHome ? 'opacity-80' : 'text-on-surface-variant'}`}>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Join as Instructor</span></li>
+            <li><Link href="/join" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Join as Instructor</Link></li>
             <li><Link href="/portal" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Instructor Portal</Link></li>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Marketing Tools</span></li>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Insurance Partners</span></li>
+            <li><Link href="/marketing-tools" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Marketing Tools</Link></li>
+            <li><Link href="/insurance-partners" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Insurance Partners</Link></li>
           </ul>
         </div>
 
         <div>
           <h4 className="font-bold mb-6 font-display text-sm">Support</h4>
           <ul className={`flex flex-col gap-4 text-sm ${isHome ? 'opacity-80' : 'text-on-surface-variant'}`}>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Help Center</span></li>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Contact Us</span></li>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Privacy Policy</span></li>
-            <li><span className={`transition-colors cursor-default ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Terms of Service</span></li>
+            <li><Link href="/help" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Help Center</Link></li>
+            <li><Link href="/contact" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Contact Us</Link></li>
+            <li><Link href="/privacy" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Privacy Policy</Link></li>
+            <li><Link href="/terms" className={`transition-colors ${isHome ? 'hover:text-secondary-fixed' : 'hover:text-secondary'}`}>Terms of Service</Link></li>
           </ul>
         </div>
       </div>

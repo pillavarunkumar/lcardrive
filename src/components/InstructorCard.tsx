@@ -11,6 +11,8 @@ interface Props {
 export default function InstructorCard({ instructor, aiReason, variant = 'stacked', limitedSpots }: Props) {
   const initial = `${instructor.first_name} ${instructor.last_name[0]}.`;
   const initials = `${instructor.first_name[0]}${instructor.last_name[0]}`;
+  const nameVerified = !!instructor.verified_name;
+  const avatarUrl = instructor.profile_photo_url;
 
   if (variant === 'horizontal') {
     return (
@@ -31,9 +33,9 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
           )}
         </div>
         <div className="flex gap-4 mb-4">
-          {instructor.profile_photo_url ? (
+          {avatarUrl ? (
             <img
-              src={instructor.profile_photo_url}
+              src={avatarUrl}
               alt=""
               className="w-20 h-20 rounded-full object-cover border-2 border-surface-container-high shadow-sm flex-shrink-0"
             />
@@ -43,7 +45,12 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
             </div>
           )}
           <div className="flex flex-col justify-center">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface group-hover:text-secondary transition-colors">{initial}</h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="font-headline-sm text-headline-sm text-on-surface group-hover:text-secondary transition-colors">{initial}</h2>
+              {nameVerified && (
+                <span className="material-symbols-outlined text-secondary text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+              )}
+            </div>
             <div className="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm mt-0.5">
               <span className="material-symbols-outlined text-[16px] text-[#facc15]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
               <span className="font-bold text-on-surface">{instructor.average_rating.toFixed(1)}</span>
@@ -103,9 +110,9 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
       className="bg-white border border-outline-variant rounded-xl overflow-hidden card-shadow transition-all group block"
     >
       <div className="relative h-48 overflow-hidden">
-        {instructor.profile_photo_url ? (
+        {avatarUrl ? (
           <img
-            src={instructor.profile_photo_url}
+            src={avatarUrl}
             alt={instructor.first_name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -129,7 +136,12 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
       </div>
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-xl font-display font-semibold text-on-surface">{initial}</h3>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-xl font-display font-semibold text-on-surface">{initial}</h3>
+            {nameVerified && (
+              <span className="material-symbols-outlined text-secondary text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+            )}
+          </div>
           <div className="flex items-center gap-1 bg-tertiary-fixed text-on-tertiary-fixed px-2 py-1 rounded-md">
             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
             <span className="text-sm font-bold">{instructor.average_rating.toFixed(1)}</span>

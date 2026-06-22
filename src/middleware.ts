@@ -13,12 +13,25 @@ const isAdminLoginRoute = createRouteMatcher([
   '/admin/login',
 ]);
 
+const isAdminApiRoute = createRouteMatcher([
+  '/api/admin(.*)',
+]);
+
+const isAdminLoginApiRoute = createRouteMatcher([
+  '/api/admin/login',
+]);
+
 export default clerkMiddleware((auth, req) => {
   if (isProtectedRoute(req)) {
     auth().protect();
   }
 
-  if (isAdminRoute(req) && !isAdminLoginRoute(req)) {
+  if (isAdminApiRoute(req) && !isAdminLoginApiRoute(req)) {
+    const adminSession = req.cookies.get('admin_session');
+    if (!adminSession?.value) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  } else if (isAdminRoute(req) && !isAdminLoginRoute(req)) {
     const adminSession = req.cookies.get('admin_session');
     if (!adminSession?.value) {
       return NextResponse.redirect(new URL('/admin/login', req.url));

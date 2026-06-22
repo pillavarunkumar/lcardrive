@@ -3,35 +3,17 @@
 import { useState } from 'react';
 import type { Instructor, Review } from '@/types';
 
-const MOCK_INSTRUCTOR: Instructor = {
-  id: '1', slug: 'sarah-m-footscray', first_name: 'Sarah', last_name: 'Mitchell', email: 'sarah@example.com', phone: '0400 123 456',
-  suburb: 'Footscray', state: 'VIC', postcode: '3011',
-  bio: 'I specialize in helping nervous drivers build confidence behind the wheel. With a background in teaching before becoming an ADI, I understand that everyone learns at their own pace. My lessons are structured, patient, and tailored entirely to your learning style.',
-  hourly_rate: 75, transmission: 'both', licence_types: ['car'], specialises_anxiety: true, accepts_international: true,
-  familiar_test_centres: ['Sunshine', 'Moorabbin'], languages: ['English', 'Spanish'], years_experience: 8, is_verified: true, is_claimed: true,
-  profile_completeness: 90, service_suburbs: ['Footscray', 'Sunshine', 'Yarraville', 'Seddon', 'Kingsville'], service_radius_km: 10,
-  dual_controls: true, vehicle_make: 'Toyota', vehicle_model: 'Yaris', vehicle_year: 2022,
-  availability_days: ['mon', 'tue', 'wed', 'thu', 'fri'], average_rating: 4.8, review_count: 124,
-  avg_rating_patience: 4.9, avg_rating_communication: 4.8, avg_rating_value: 4.7, avg_rating_punctuality: 4.9,
-  social_facebook: 'https://facebook.com/sarahmitchell',
-  package_options: [{ hours: 5, price: 300, label: '5-Hour Pack' }, { hours: 10, price: 580, label: '10-Hour Pack' }],
-  profile_photo_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDeenRA5958koQ54BRpXYDFWK382hdfEwy-j5Cfo4nK5bKhWcw-jqOz5NAwzK15TafyRrIYfjU69kYqscjrcFdQF04glvkKRWpyoqqHypncdS29oha_xrFoYctpF3muVODXsmzRTH-08hVHxGRTtCVjGl2FKhufSP7tmp4-7q6n9uLyEysj65fBBtTZbu7bLstM_hAQ8phHdY0F5qfnDzsh2UobfDmEdyoLYZyV7b68x3qnpitylw4M_diNC8Zm7TANptQ8moo_',
-  created_at: '2026-01-15', updated_at: '2026-05-20',
-};
-
-const MOCK_REVIEWS: Review[] = [
-  { id: 'r1', instructor_id: '1', reviewer_name: 'Tom', reviewer_email: 'tom@example.com', rating_overall: 5, rating_patience: 5, rating_communication: 5, rating_value: 4, rating_punctuality: 5, pass_outcome: 'passed_first', review_text: 'Sarah is amazing. I was really nervous but she made me feel so calm. Passed first go!', is_approved: true, created_at: '2026-04-15' },
-  { id: 'r2', instructor_id: '1', reviewer_name: 'Mia', reviewer_email: 'mia@example.com', rating_overall: 5, rating_patience: 5, rating_communication: 4, rating_value: 5, rating_punctuality: 5, pass_outcome: 'passed_first', review_text: 'Best driving instructor in Footscray! Very patient and explains everything clearly.', is_approved: true, created_at: '2026-03-20' },
-  { id: 'r3', instructor_id: '1', reviewer_name: 'Jake', reviewer_email: 'jake@example.com', rating_overall: 4, rating_patience: 4, rating_communication: 5, rating_value: 4, rating_punctuality: 5, pass_outcome: 'passed_retry', review_text: 'Great instructor. Helped me fix my mistakes and I passed on my second attempt.', is_approved: true, created_at: '2026-02-10' },
-];
+interface Props {
+  instructor: Instructor | null;
+  reviews: Review[];
+}
 
 const TABS = ['About', 'Availability', 'Reviews'] as const;
 
-export default function InstructorProfileClient() {
+export default function InstructorProfileClient({ instructor: propInstructor, reviews }: Props) {
   const [activeTab, setActiveTab] = useState<string>('About');
   const [copied, setCopied] = useState(false);
-  const instructor = MOCK_INSTRUCTOR;
-  const reviews = MOCK_REVIEWS;
+  const [instructor, setInstructor] = useState<Instructor | null>(propInstructor);
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   const copyLink = () => {
@@ -40,6 +22,17 @@ export default function InstructorProfileClient() {
       setTimeout(() => setCopied(false), 2000);
     });
   };
+
+  if (!instructor) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <span className="material-symbols-outlined text-[48px] text-outline mb-4">error_outline</span>
+          <p className="font-body-lg text-body-lg text-on-surface-variant">Instructor not found.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-md flex flex-col gap-stack-lg">
@@ -210,7 +203,7 @@ export default function InstructorProfileClient() {
                     </div>
                     <p className="text-sm text-on-surface-variant mb-2">{review.review_text}</p>
                     <span className="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-xs font-semibold">
-                      {review.pass_outcome === 'passed_first' ? 'Passed first attempt' : 'Passed after retries'}
+                      {review.pass_outcome === 'passed_first' ? 'Passed first attempt' : review.pass_outcome === 'passed_retry' ? 'Passed after retries' : review.pass_outcome === 'still_learning' ? 'Still learning' : 'Not yet tested'}
                     </span>
                   </div>
                 ))}

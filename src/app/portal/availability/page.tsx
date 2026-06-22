@@ -1,11 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function PortalAvailability() {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const [available, setAvailable] = useState(days.slice(0, 5));
   const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/portal/profile')
+      .then(r => r.json())
+      .then(d => {
+        const inst = d.instructor;
+        if (inst?.availability_days?.length) setAvailable(inst.availability_days);
+      })
+      .catch(() => {});
+  }, []);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -16,6 +27,22 @@ export default function PortalAvailability() {
     setAvailable((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
     );
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/portal/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ availability_days: available }),
+      });
+      showToast(res.ok ? 'Availability saved successfully!' : 'Failed to save.');
+    } catch {
+      showToast('Failed to save.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -45,7 +72,10 @@ export default function PortalAvailability() {
             ))}
           </div>
           <p className="text-xs text-outline mt-4">* Self-reported availability. Learners will contact you to confirm times.</p>
-          <button onClick={() => showToast('Availability saved successfully!')} className="bg-secondary text-white px-6 py-3 rounded-lg text-sm font-bold hover:brightness-110 transition-all mt-6">Save Changes</button>
+          <button onClick={handleSave} disabled={saving}
+            className="bg-secondary text-white px-6 py-3 rounded-lg text-sm font-bold hover:brightness-110 transition-all disabled:opacity-50 mt-6">
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
         </div>
       </div>
     </>

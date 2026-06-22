@@ -1,59 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import InstructorCard from '@/components/InstructorCard';
-
-const FEATURED = [
-  {
-    id: '1', slug: 'sarah-jenkins', first_name: 'Sarah', last_name: 'Jenkins',
-    suburb: 'Footscray', state: 'VIC', postcode: '3011',
-    bio: '12 years experience helping nervous students pass their first time in Footscray and Yarraville area.',
-    hourly_rate: 75, transmission: 'both', licence_types: ['car'],
-    specialises_anxiety: true, accepts_international: false,
-    familiar_test_centres: [], languages: ['English'], is_verified: true, is_claimed: true,
-    profile_completeness: 100, service_suburbs: [], service_radius_km: 10,
-    dual_controls: true, availability_days: [],
-    average_rating: 4.9, review_count: 128,
-    avg_rating_patience: 4.9, avg_rating_communication: 4.8, avg_rating_value: 4.7, avg_rating_punctuality: 4.9,
-    package_options: [], created_at: '', updated_at: '',
-    profile_photo_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAg94NwVX4QBE3yzobbLQTtnKxSWROnVNEhNcJZX5WqAaI1q_kfOGcuB8HLGfCh15EfLo-jKRbs2NoG26yv2n5gjRXCALvUrBdI64AxSiHqSOM2tkQnmM6mdpaPLsEURVnplU8TW3FsUwOJfCIqCKnd6yk5YOZF4SL_OUC_ByKOdpwF-kxcNBdxFjtj9m9lPFmSK6hFgmSgTeyJHSdKEIRdfk0y1WqUka4MftXQ-zKaOeS9G39OjO5bPl0gyfAQN42xAoGWowhQ',
-  },
-  {
-    id: '2', slug: 'david-chen', first_name: 'David', last_name: 'Chen',
-    suburb: 'Sunshine', state: 'VIC', postcode: '3020',
-    bio: 'Specialist in converting international licences and advanced defensive driving techniques.',
-    hourly_rate: 80, transmission: 'both', licence_types: ['car'],
-    specialises_anxiety: false, accepts_international: true,
-    familiar_test_centres: [], languages: ['English', 'Mandarin'], is_verified: true, is_claimed: true,
-    profile_completeness: 100, service_suburbs: [], service_radius_km: 15,
-    dual_controls: true, availability_days: [],
-    average_rating: 5.0, review_count: 84,
-    avg_rating_patience: 4.9, avg_rating_communication: 4.8, avg_rating_value: 4.7, avg_rating_punctuality: 4.9,
-    package_options: [], created_at: '', updated_at: '',
-    profile_photo_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHIl8KavrhxPGd7dvqSbdA-gQt7odXAaAUMsHKpq2ePJi2SJ5tEmYFFPSaLzIhan9_7oMQXE47DjyeMiYgzMKBJsjuLwBalb5wZPjglCDY3Imf1N3FVMEfIdi5CoRxxYSKpoDD2Hi4uD_-s9dFefzipUaalEswK-Kq9IGDppuHrHFG6leC1vlJj3YgskyJy73koYrO2p7RYn_o9-4_Nl9AzHlV_j80nJV49-BijOWRZNKly5Shw_KAuzoPitE8JRSIBYcFyumK',
-  },
-  {
-    id: '3', slug: 'amara-okafor', first_name: 'Amara', last_name: 'Okafor',
-    suburb: 'Werribee', state: 'VIC', postcode: '3030',
-    bio: 'Patient and flexible. Amara offers weekend and evening slots to accommodate busy students.',
-    hourly_rate: 72, transmission: 'auto', licence_types: ['car'],
-    specialises_anxiety: true, accepts_international: false,
-    familiar_test_centres: [], languages: ['English'], is_verified: true, is_claimed: true,
-    profile_completeness: 100, service_suburbs: [], service_radius_km: 10,
-    dual_controls: true, availability_days: [],
-    average_rating: 4.8, review_count: 96,
-    avg_rating_patience: 4.9, avg_rating_communication: 4.8, avg_rating_value: 4.7, avg_rating_punctuality: 4.9,
-    package_options: [], created_at: '', updated_at: '',
-    profile_photo_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAn3Fx4QfrEvZaKsQhbMBtxyMnJDDia-f81eiT6XUqTi02FZt-v0YHYeTlE6NS7E0UuKkokxZfE4j21G4y9Ba92WeNRLGyjuklZJMPXfPo3tg5SsIire-f1bUIlJCnYWqew-JIxKtfWzzef3Twk0suc0UZZRITkQOfhbtYLJkXdr2dw72IF-dPN6fCXB4kzx21QHS33pjQ6Nti1g6zoZce2yoLqRq8IMFpSr35GO75mmis2nrFdtdC8KbcpJIWMuvikdLbno1pt',
-  },
-];
+import type { Instructor } from '@/types';
 
 export default function HomePage() {
   const [suburb, setSuburb] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [radius, setRadius] = useState('10km');
+  const [suggestions, setSuggestions] = useState<{ display: string; suburb: string; state: string }[]>([]);
+  const [radius, setRadius] = useState('5');
+  const [customRadius, setCustomRadius] = useState('');
+  const [showCustomRadius, setShowCustomRadius] = useState(false);
   const [quickFilters, setQuickFilters] = useState<Record<string, string>>({});
+  const [featured, setFeatured] = useState<Instructor[]>([]);
+  const [instructorCount, setInstructorCount] = useState<number | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    fetch('/api/search?limit=3&sort=rating')
+      .then((r) => r.json())
+      .then((data) => {
+        setFeatured(data.instructors || []);
+        if (data.total) setInstructorCount(data.total);
+      })
+      .catch(() => {});
+  }, []);
+
+  const fetchSuggestions = useCallback(async (query: string) => {
+    if (query.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/location/autocomplete?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setSuggestions(data.suggestions || []);
+    } catch {
+      setSuggestions([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchSuggestions(suburb), 250);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [suburb, fetchSuggestions]);
 
   const toggleFilter = (key: string, value: string) => {
     setQuickFilters((prev) => {
@@ -66,11 +58,8 @@ export default function HomePage() {
     });
   };
 
-  const suggestions = ['Footscray, VIC 3011', 'West Footscray, VIC 3012', 'Yarraville, VIC 3013'];
-
   return (
     <>
-      {/* Hero */}
       <section className="relative">
         <div
           className="flex min-h-[520px] flex-col gap-6 bg-cover bg-center bg-no-repeat items-center justify-center p-6 text-center"
@@ -83,14 +72,15 @@ export default function HomePage() {
               Find your perfect driving instructor.
             </h1>
             <p className="text-white text-lg font-body opacity-90">
-              Book professional lessons and pass your test with confidence.
+              {instructorCount !== null
+                ? `Book from ${instructorCount}+ verified instructors and pass your test with confidence.`
+                : 'Book professional lessons and pass your test with confidence.'}
             </p>
           </div>
 
-          {/* Search Bar */}
           <div className="w-full max-w-[720px] bg-white p-2 rounded-xl shadow-2xl mt-4">
             <div className="flex flex-col md:flex-row items-stretch gap-2">
-              <div className="flex flex-1 items-center px-4 py-2 border border-outline-variant rounded-lg bg-white relative">
+              <div className="flex flex-1 items-center px-4 border border-outline-variant rounded-lg bg-white relative h-10">
                 <span className="material-symbols-outlined text-outline text-base">search</span>
                 <input
                   type="text"
@@ -100,45 +90,82 @@ export default function HomePage() {
                   onFocus={() => setShowSuggestions(true)}
                   className="flex-1 border-none focus:ring-0 text-on-surface font-body text-sm bg-transparent outline-none"
                 />
-                {showSuggestions && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!navigator.geolocation) return;
+                    navigator.geolocation.getCurrentPosition(async (pos) => {
+                      const res = await fetch(`/api/location/reverse-geocode?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`);
+                      const data = await res.json();
+                      if (data.suburb) {
+                        setSuburb(data.display);
+                        setShowSuggestions(false);
+                      }
+                    }, () => {});
+                  }}
+                  className="text-outline hover:text-secondary p-1"
+                  title="Use my location"
+                >
+                  <span className="material-symbols-outlined text-base">my_location</span>
+                </button>
+                {showSuggestions && suggestions.length > 0 && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-outline-variant rounded-b-lg shadow-lg z-50 text-left" id="autocomplete">
                     {suggestions.map((s) => (
                       <div
-                        key={s}
-                        onClick={() => { setSuburb(s); setShowSuggestions(false); }}
+                        key={s.display}
+                        onClick={() => { setSuburb(s.suburb); setShowSuggestions(false); setSuggestions([]); }}
                         className="p-3 hover:bg-surface-container cursor-pointer font-body text-sm border-b border-outline-variant last:border-b-0"
                       >
-                        {s}
+                        {s.display}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <div className="bg-surface-container p-1 rounded-lg flex">
-                  {['5km', '10km', '20km'].map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => setRadius(r)}
-                      className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${
-                        radius === r ? 'bg-white shadow-sm' : 'text-on-surface-variant'
-                      }`}
-                    >
-                      {r}
-                    </button>
-                  ))}
-                </div>
+                {showCustomRadius ? (
+                  <input
+                    type="number"
+                    min="1"
+                    max="200"
+                    placeholder="Custom km"
+                    value={customRadius}
+                    onChange={(e) => setCustomRadius(e.target.value)}
+                    className="w-24 px-3 py-3 border border-outline-variant rounded-lg text-xs font-bold text-on-surface bg-surface-container focus:ring-2 focus:ring-secondary focus:border-secondary outline-none h-10"
+                    autoFocus
+                  />
+                ) : (
+                  <select
+                    value={radius}
+                    onChange={(e) => {
+                      if (e.target.value === 'custom') {
+                        setShowCustomRadius(true);
+                        setCustomRadius('');
+                      } else {
+                        setRadius(e.target.value);
+                      }
+                    }}
+                    className="bg-surface-container border border-outline-variant rounded-lg px-3 py-3 text-xs font-bold text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary outline-none cursor-pointer h-10"
+                  >
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="20">20 km</option>
+                    <option value="30">30 km</option>
+                    <option value="50">50 km</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                )}
                 <Link
-                  href={`/search?suburb=${encodeURIComponent(suburb)}${Object.entries(quickFilters).map(([k, v]) => `&${k}=${encodeURIComponent(v)}`).join('')}`}
-                  className="bg-secondary text-white px-8 py-3 rounded-lg font-bold hover:brightness-110 transition-all flex items-center gap-2"
+                  href={`/search?suburb=${encodeURIComponent(suburb)}&radius_km=${showCustomRadius ? customRadius : radius}${Object.entries(quickFilters).map(([k, v]) => `&${k}=${encodeURIComponent(v)}`).join('')}`}
+                  className="bg-secondary text-white px-6 py-3 rounded-lg font-bold hover:brightness-110 transition-all flex items-center gap-2 h-10"
                 >
+                  <span className="material-symbols-outlined text-sm">search</span>
                   Search
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Quick Filters */}
           <div className="flex flex-wrap justify-center gap-3 mt-4">
             {[
               { icon: 'directions_car', label: 'Auto', key: 'transmission', value: 'auto' },
@@ -166,7 +193,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* AI Match Banner */}
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
         <div className="ai-gradient rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-secondary/20 relative overflow-hidden">
           <div className="relative z-10 max-w-[560px]">
@@ -207,26 +233,32 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Instructors */}
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg bg-white rounded-t-3xl shadow-sm">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-on-surface">Top rated instructors in Melbourne West</h2>
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-on-surface">
+              {featured.length > 0 ? 'Top rated instructors near you' : 'Top rated instructors in Melbourne West'}
+            </h2>
             <p className="text-on-surface-variant font-body">Vetted professionals with 4.8+ average ratings</p>
           </div>
           <Link href="/search" className="text-secondary font-bold flex items-center gap-1 hover:underline">
-            View all <span className="material-symbols-outlined text-sm">chevron_right</span>
+            View all{instructorCount !== null ? ` (${instructorCount})` : ''} <span className="material-symbols-outlined text-sm">chevron_right</span>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {FEATURED.map((instructor) => (
-            <InstructorCard key={instructor.id} instructor={instructor as any} />
-          ))}
-        </div>
+        {featured.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featured.map((instructor) => (
+              <InstructorCard key={instructor.id} instructor={instructor} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-outline">
+            <span className="material-symbols-outlined text-[48px] mb-2">local_taxi</span>
+            <p>Loading instructors...</p>
+          </div>
+        )}
       </section>
-
-
     </>
   );
 }

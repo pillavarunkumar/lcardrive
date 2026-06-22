@@ -20,3 +20,12 @@ export async function geocodeSuburb(suburb: string, state: string) {
   if (!data.length) return null;
   return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
 }
+
+export async function reverseGeocode(lat: number, lng: number) {
+  if (!LOCATIONIQ_KEY) return null;
+  const res = await fetch(
+    `${BASE}/reverse?key=${LOCATIONIQ_KEY}&lat=${lat}&lon=${lng}&format=json&normalizeaddress=1`,
+  );
+  if (!res.ok) return null;
+  return res.json();
+}
