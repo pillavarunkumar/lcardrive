@@ -5,6 +5,24 @@ import Link from 'next/link';
 import InstructorCard from '@/components/InstructorCard';
 import type { Instructor } from '@/types';
 
+function Star({ filled }: { filled: boolean }) {
+  return (
+    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: filled ? "'FILL' 1" : "'FILL' 0" }}>
+      {filled ? 'star' : 'star_half'}
+    </span>
+  );
+}
+
+function StarRow({ count = 5 }: { count?: number }) {
+  return (
+    <div className="flex items-center gap-1 text-primary">
+      {Array.from({ length: count }, (_, i) => (
+        <Star key={i} filled={true} />
+      ))}
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [suburb, setSuburb] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -17,8 +35,10 @@ export default function HomePage() {
   const [instructorCount, setInstructorCount] = useState<number | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
+  const [faqOpen, setFaqOpen] = useState<number | null>(null);
+
   useEffect(() => {
-    fetch('/api/search?limit=3&sort=rating')
+    fetch('/api/search?limit=4&sort=rating')
       .then((r) => r.json())
       .then((data) => {
         setFeatured(data.instructors || []);
@@ -58,37 +78,34 @@ export default function HomePage() {
     });
   };
 
+  const searchHref = `/search?suburb=${encodeURIComponent(suburb)}&radius_km=${showCustomRadius ? customRadius : radius}${Object.entries(quickFilters).map(([k, v]) => `&${k}=${encodeURIComponent(v)}`).join('')}`;
+
   return (
     <>
-      <section className="relative">
-        <div
-          className="flex min-h-[520px] flex-col gap-6 bg-cover bg-center bg-no-repeat items-center justify-center p-6 text-center"
-          style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%), url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1600&q=80')`,
-          }}
-        >
-          <div className="flex flex-col gap-4 max-w-[800px]">
-            <h1 className="text-white text-4xl font-black leading-tight tracking-[-0.033em] md:text-6xl font-display">
-              Find your perfect driving instructor.
-            </h1>
-            <p className="text-white text-lg font-body opacity-90">
-              {instructorCount !== null
-                ? `Book from ${instructorCount}+ verified instructors and pass your test with confidence.`
-                : 'Book professional lessons and pass your test with confidence.'}
-            </p>
-          </div>
+      {/* Hero Section */}
+      <section className="relative pt-20 pb-24 md:pt-32 md:pb-36 px-margin-mobile md:px-margin-desktop overflow-hidden bg-surface">
+        <div className="max-w-container-max mx-auto text-center relative z-10">
+          <h1 className="text-display-lg-mobile md:text-display-lg font-display-lg text-on-surface mb-6 max-w-3xl mx-auto leading-tight">
+            Find the Right <span className="text-primary underline decoration-primary/20 decoration-8 underline-offset-4">Driving Instructor</span> Near You
+          </h1>
+          <p className="text-body-lg text-secondary mb-12 max-w-2xl mx-auto">
+            {instructorCount !== null
+              ? `Search from ${instructorCount}+ verified instructors, compare prices, read reviews, and find an instructor that matches your learning style.`
+              : 'Search verified driving instructors, compare prices, read reviews, and find an instructor that matches your learning style.'}
+          </p>
 
-          <div className="w-full max-w-[720px] bg-white p-2 rounded-xl shadow-2xl mt-4">
-            <div className="flex flex-col md:flex-row items-stretch gap-2">
-              <div className="flex flex-1 items-center px-4 border border-outline-variant rounded-lg bg-white relative h-10">
-                <span className="material-symbols-outlined text-outline text-base">search</span>
+          {/* Search Module */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="bg-surface-container-lowest border border-outline-variant p-2 md:p-3 rounded-xl search-container-shadow flex flex-col md:flex-row items-stretch md:items-center gap-2">
+              <div className="flex-1 flex items-center px-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-outline-variant relative">
+                <span className="material-symbols-outlined text-primary mr-3 text-xl">location_on</span>
                 <input
                   type="text"
-                  placeholder="Enter suburb or postcode (e.g. Footscray)"
+                  placeholder="Suburb or Postcode"
                   value={suburb}
                   onChange={(e) => setSuburb(e.target.value)}
                   onFocus={() => setShowSuggestions(true)}
-                  className="flex-1 border-none focus:ring-0 text-on-surface font-body text-sm bg-transparent outline-none"
+                  className="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline p-0 text-body-md outline-none"
                 />
                 <button
                   type="button"
@@ -103,13 +120,13 @@ export default function HomePage() {
                       }
                     }, () => {});
                   }}
-                  className="text-outline hover:text-secondary p-1"
+                  className="text-outline hover:text-primary p-1"
                   title="Use my location"
                 >
-                  <span className="material-symbols-outlined text-base">my_location</span>
+                  <span className="material-symbols-outlined text-xl">my_location</span>
                 </button>
                 {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-outline-variant rounded-b-lg shadow-lg z-50 text-left" id="autocomplete">
+                  <div className="absolute top-full left-0 right-0 bg-white border border-outline-variant rounded-b-lg shadow-lg z-50 text-left mt-1">
                     {suggestions.map((s) => (
                       <div
                         key={s.display}
@@ -122,7 +139,8 @@ export default function HomePage() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="w-full md:w-48 flex items-center px-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-outline-variant">
+                <span className="material-symbols-outlined text-primary mr-3 text-xl">distance</span>
                 {showCustomRadius ? (
                   <input
                     type="number"
@@ -131,7 +149,7 @@ export default function HomePage() {
                     placeholder="Custom km"
                     value={customRadius}
                     onChange={(e) => setCustomRadius(e.target.value)}
-                    className="w-24 px-3 py-3 border border-outline-variant rounded-lg text-xs font-bold text-on-surface bg-surface-container focus:ring-2 focus:ring-secondary focus:border-secondary outline-none h-10"
+                    className="w-full bg-transparent border-none focus:ring-0 text-on-surface p-0 outline-none text-body-md"
                     autoFocus
                   />
                 ) : (
@@ -145,119 +163,322 @@ export default function HomePage() {
                         setRadius(e.target.value);
                       }
                     }}
-                    className="bg-surface-container border border-outline-variant rounded-lg px-3 py-3 text-xs font-bold text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary outline-none cursor-pointer h-10"
+                    className="w-full bg-transparent border-none focus:ring-0 text-on-surface p-0 outline-none text-body-md appearance-none cursor-pointer"
                   >
-                    <option value="5">5 km</option>
-                    <option value="10">10 km</option>
-                    <option value="20">20 km</option>
-                    <option value="30">30 km</option>
-                    <option value="50">50 km</option>
+                    <option value="5">5 km radius</option>
+                    <option value="10">10 km radius</option>
+                    <option value="20">20 km radius</option>
+                    <option value="30">30 km radius</option>
+                    <option value="50">50 km radius</option>
                     <option value="custom">Custom...</option>
                   </select>
                 )}
-                <Link
-                  href={`/search?suburb=${encodeURIComponent(suburb)}&radius_km=${showCustomRadius ? customRadius : radius}${Object.entries(quickFilters).map(([k, v]) => `&${k}=${encodeURIComponent(v)}`).join('')}`}
-                  className="bg-secondary text-white px-6 py-3 rounded-lg font-bold hover:brightness-110 transition-all flex items-center gap-2 h-10"
-                >
-                  <span className="material-symbols-outlined text-sm">search</span>
-                  Search
-                </Link>
               </div>
+              <Link
+                href={searchHref}
+                className="bg-primary text-white px-8 py-4 rounded font-bold flex items-center justify-center gap-2 hover:opacity-95 transition-all text-body-md shrink-0"
+              >
+                <span>Search Instructors</span>
+                <span className="material-symbols-outlined text-xl">search</span>
+              </Link>
+            </div>
+
+            {/* Quick Filter Chips */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <span className="text-label-sm text-secondary uppercase font-bold tracking-wider mr-2">Quick Filters:</span>
+              {[
+                { label: 'Automatic', key: 'transmission', value: 'auto' },
+                { label: 'Manual', key: 'transmission', value: 'manual' },
+                { label: 'Anxiety Friendly', key: 'anxiety_friendly', value: 'true' },
+                { label: 'Intl. Licence Conversion', key: 'international_conversion', value: 'true' },
+              ].map((f) => {
+                const active = quickFilters[f.key] === f.value;
+                return (
+                  <button
+                    key={f.label}
+                    onClick={() => toggleFilter(f.key, f.value)}
+                    className={`px-4 py-1.5 border border-outline-variant rounded-full text-body-md transition-all duration-300 ${
+                      active
+                        ? 'bg-primary text-white border-primary shadow-sm'
+                        : 'bg-surface-container-lowest text-on-surface hover:border-primary hover:text-primary hover:bg-primary/5'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-3 mt-4">
-            {[
-              { icon: 'directions_car', label: 'Auto', key: 'transmission', value: 'auto' },
-              { icon: 'settings', label: 'Manual', key: 'transmission', value: 'manual' },
-              { icon: 'sentiment_satisfied', label: 'Anxiety-friendly', key: 'anxiety_friendly', value: 'true' },
-              { icon: 'public', label: 'Intl. Licence', key: 'international_conversion', value: 'true' },
-            ].map((f) => {
-              const active = quickFilters[f.key] === f.value;
-              return (
-                <button
-                  key={f.label}
-                  onClick={() => toggleFilter(f.key, f.value)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                    active
-                      ? 'bg-white text-secondary border border-white'
-                      : 'bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/40'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-sm">{f.icon}</span>
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
-        <div className="ai-gradient rounded-xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-secondary/20 relative overflow-hidden">
-          <div className="relative z-10 max-w-[560px]">
-            <div className="inline-flex items-center gap-2 bg-secondary text-white px-3 py-1 rounded-full text-xs font-bold mb-4">
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-                auto_awesome
-              </span>
-              SMART MATCHING
-            </div>
-            <h2 className="text-on-surface text-3xl md:text-4xl font-display font-bold mb-4">Not sure who to pick?</h2>
-            <p className="text-on-surface-variant text-lg font-body mb-6">
-              Answer 5 simple questions about your goals and experience — our AI will recommend your best instructor match instantly.
-            </p>
-            <Link
-              href="/find-my-instructor"
-              className="bg-primary text-white px-8 py-4 rounded-lg font-bold hover:scale-[1.02] transition-transform inline-flex items-center gap-2"
-            >
-              Find My Match <span className="material-symbols-outlined">arrow_forward</span>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/find-my-instructor" className="text-primary font-bold hover:underline decoration-2 underline-offset-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-xl">help_outline</span>
+              Help Me Find the Right Instructor
             </Link>
           </div>
-          <div className="relative z-10 w-full md:w-1/3 flex justify-center">
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/50">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-secondary">
-                  <span className="material-symbols-outlined">smart_toy</span>
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-secondary">98% Match</div>
-                  <div className="text-sm font-bold text-on-surface">Suggested for Sarah</div>
-                </div>
-              </div>
-              <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                <div className="h-full bg-secondary w-[98%] rounded-full"></div>
-              </div>
-            </div>
-          </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
         </div>
       </section>
 
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg bg-white rounded-t-3xl shadow-sm">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-on-surface">
-              {featured.length > 0 ? 'Top rated instructors near you' : 'Top rated instructors in Melbourne West'}
-            </h2>
-            <p className="text-on-surface-variant font-body">Vetted professionals with 4.8+ average ratings</p>
+      {/* AI Match Section */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-lowest overflow-hidden">
+        <div className="max-w-container-max mx-auto">
+          <div className="bg-primary/5 rounded-3xl p-10 md:p-16 border border-primary/10 flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2 text-left">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-label-sm font-bold uppercase tracking-widest mb-6">
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                AI Personalized Match
+              </div>
+              <h2 className="text-display-lg-mobile md:text-headline-lg font-headline-lg text-on-surface mb-6 leading-tight">Not Sure Who To Pick?</h2>
+              <p className="text-body-lg text-secondary mb-10 max-w-xl">
+                Answer 5 simple questions about your goals and experience — our AI will recommend your best instructor match instantly.
+              </p>
+              <Link
+                href="/find-my-instructor"
+                className="bg-primary text-white px-10 py-5 rounded-xl font-bold text-body-lg inline-flex items-center gap-3 hover:scale-105 transition-transform shadow-lg shadow-primary/20"
+              >
+                Start AI Matching Now
+                <span className="material-symbols-outlined">arrow_forward</span>
+              </Link>
+            </div>
+            <div className="md:w-1/2 flex justify-center">
+              <img
+                alt="AI-powered driving instructor matching service illustration showing a futuristic transparent vehicle connecting student and instructor icons"
+                className="w-full h-auto rounded-2xl shadow-lg object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtitf9VoYbvIboIrvtNl1HpSXpTcBEc3IgjowVW-UhyG5Ufg_Bdav05GQi7I4HF-NaWaVIFpnshN-ak4UZXRKE4ineefUGT75cugdHuLXDw3eUdP-UWjqaXGbvSbWNAud4_ghrCFB3eTeNoma4jvANqUBKpO2ZKChS767HuSPFvOnFOQ4cA47LcY3vjrsoCYGQD6Xb5Pmpr0O2yRzXdR8CTvQB2fs2JefYlrqoRaDAD4AicpQ4Ky5SFIuCzsBDe6SOGrJ3-5t-AII"
+              />
+            </div>
           </div>
-          <Link href="/search" className="text-secondary font-bold flex items-center gap-1 hover:underline">
-            View all{instructorCount !== null ? ` (${instructorCount})` : ''} <span className="material-symbols-outlined text-sm">chevron_right</span>
-          </Link>
         </div>
+      </section>
 
-        {featured.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featured.map((instructor) => (
-              <InstructorCard key={instructor.id} instructor={instructor} />
+      {/* Featured Instructors */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface">
+        <div className="max-w-container-max mx-auto">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-4">
+            <div>
+              <h2 className="text-headline-md font-headline-md text-on-surface mb-2">Popular Instructors Near You</h2>
+              <p className="text-body-lg text-secondary">Trusted professionals with proven success rates.</p>
+            </div>
+            <Link href="/search" className="hidden md:flex items-center gap-2 text-primary font-bold group">
+              <span>Browse All Instructors{instructorCount !== null ? ` (${instructorCount})` : ''}</span>
+              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </Link>
+          </div>
+
+          {featured.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featured.map((instructor) => (
+                <InstructorCard key={instructor.id} instructor={instructor} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-outline">
+              <span className="material-symbols-outlined text-[48px] mb-2">local_taxi</span>
+              <p>Loading instructors...</p>
+            </div>
+          )}
+
+          <div className="mt-12 text-center md:hidden">
+            <Link href="/search" className="w-full block py-4 border border-primary text-primary font-bold rounded-lg">
+              Browse All Instructors
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Learners Choose LCarDrive */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-lowest">
+        <div className="max-w-container-max mx-auto">
+          <h2 className="text-headline-md font-headline-md text-on-surface mb-16 text-center">Why Learners Choose LCarDrive</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <div className="feature-card">
+              <span className="material-symbols-outlined text-primary text-4xl mb-6">bolt</span>
+              <h3 className="text-body-lg font-bold text-on-surface mb-4">Find Instructors Faster</h3>
+              <p className="text-body-md text-secondary">No more calling around. Our instant search gives you real-time availability in seconds.</p>
+            </div>
+            <div className="feature-card">
+              <span className="material-symbols-outlined text-primary text-4xl mb-6">compare_arrows</span>
+              <h3 className="text-body-lg font-bold text-on-surface mb-4">Compare With Confidence</h3>
+              <p className="text-body-md text-secondary">Compare instructors side-by-side based on price, vehicle type, and verified learner ratings.</p>
+            </div>
+            <div className="feature-card">
+              <span className="material-symbols-outlined text-primary text-4xl mb-6">psychology</span>
+              <h3 className="text-body-lg font-bold text-on-surface mb-4">Learn With The Right Match</h3>
+              <p className="text-body-md text-secondary">Find instructors that specialise in your specific needs, like anxiety-friendly teaching styles.</p>
+            </div>
+            <div className="feature-card">
+              <span className="material-symbols-outlined text-primary text-4xl mb-6">verified</span>
+              <h3 className="text-body-lg font-bold text-on-surface mb-4">Verified Profiles</h3>
+              <p className="text-body-md text-secondary">Every instructor on our platform is pre-vetted with valid working with children checks and licenses.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface">
+        <div className="max-w-container-max mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-headline-md font-headline-md text-on-surface mb-4">How It Works</h2>
+            <p className="text-body-lg text-secondary">Getting your license is easier than you think.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-px border-t border-dashed border-primary/30 -translate-y-12"></div>
+            {[
+              { num: '1', title: 'Search', desc: 'Enter your suburb and filter by car type, transmission, or special requirements.' },
+              { num: '2', title: 'Compare', desc: 'Read reviews, check prices, and view detailed profiles of instructors near you.' },
+              { num: '3', title: 'Contact', desc: 'Message instructors directly or book your first lesson through their profile.' },
+            ].map((step) => (
+              <div key={step.num} className="text-center relative">
+                <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-headline-md font-bold mx-auto mb-6 shadow-lg">
+                  {step.num}
+                </div>
+                <h3 className="text-body-lg font-bold text-on-surface mb-4">{step.title}</h3>
+                <p className="text-body-md text-secondary">{step.desc}</p>
+              </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12 text-outline">
-            <span className="material-symbols-outlined text-[48px] mb-2">local_taxi</span>
-            <p>Loading instructors...</p>
+        </div>
+      </section>
+
+      {/* Instructor CTA */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-primary text-white overflow-hidden relative">
+        <div className="max-w-container-max mx-auto flex flex-col md:flex-row items-center gap-12">
+          <div className="md:w-1/2">
+            <h2 className="text-display-lg-mobile md:text-headline-lg font-headline-lg mb-6 leading-tight">Are You A Driving Instructor?</h2>
+            <p className="text-body-lg text-primary-fixed/80 mb-8">
+              Join Australia&apos;s fastest-growing instructor marketplace and grow your business with premium leads and professional tools.
+            </p>
+            <ul className="space-y-4 mb-10">
+              <li className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-primary-fixed">check_circle</span>
+                <span className="text-body-md">Free listing with zero upfront costs</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-primary-fixed">check_circle</span>
+                <span className="text-body-md">AI-powered bio generation for your profile</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-primary-fixed">check_circle</span>
+                <span className="text-body-md">Full booking and student management dashboard</span>
+              </li>
+            </ul>
+            <Link href="/claim" className="bg-white text-primary px-10 py-4 rounded-xl font-bold text-body-lg hover:bg-surface-container-low transition-all inline-block">
+              Claim Your Profile
+            </Link>
           </div>
-        )}
+          <div className="md:w-1/2 flex justify-center">
+            <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/20">
+              <div className="bg-white text-on-surface p-6 rounded-xl shadow-2xl max-w-sm rotate-2">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-lg">
+                    JD
+                  </div>
+                  <div>
+                    <p className="font-bold text-on-surface">Jason D.</p>
+                    <p className="text-label-sm text-secondary">Melbourne Instructor</p>
+                  </div>
+                </div>
+                <p className="text-body-md text-on-surface-variant italic">
+                  &ldquo;I filled my weekly schedule within 14 days of claiming my profile. The AI bio tool made me look professional instantly.&rdquo;
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface">
+        <div className="max-w-container-max mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-headline-md font-headline-md text-on-surface mb-4">Success Stories</h2>
+            <p className="text-body-lg text-secondary">Join thousands of Aussies who found their perfect match.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+            {[
+              {
+                name: 'Emma R.',
+                instructor: 'w/ Sarah T.',
+                text: 'I was so nervous about starting, but the AI match found me Sarah who specialised in anxious learners. Passed first go!',
+              },
+              {
+                name: 'Liam W.',
+                instructor: 'w/ David C.',
+                text: 'Great platform. I could see David\'s availability and book instantly. Saved me so much time calling around different schools.',
+              },
+              {
+                name: 'Priya K.',
+                instructor: 'w/ Marcus R.',
+                text: 'The filters are amazing. I needed a manual instructor who spoke Hindi for my dad, and LCarDrive found 3 options in minutes.',
+              },
+            ].map((testimonial) => (
+              <div key={testimonial.name} className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant shadow-sm">
+                <StarRow />
+                <p className="text-body-md text-on-surface mb-6 italic mt-4">&ldquo;{testimonial.text}&rdquo;</p>
+                <div className="border-t border-outline-variant pt-4 flex items-center justify-between">
+                  <span className="font-bold text-on-surface">{testimonial.name}</span>
+                  <span className="text-label-sm text-secondary">{testimonial.instructor}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface-container-lowest">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-headline-md font-headline-md text-on-surface mb-12 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {[
+              {
+                q: 'How do I know if an instructor is qualified?',
+                a: 'Every instructor on LCarDrive must upload their current driving instructor license and Working With Children Check (WWCC). We verify these documents before their profile goes live.',
+              },
+              {
+                q: 'Can I switch instructors if it\'s not a good match?',
+                a: 'Absolutely. We believe the student-instructor connection is vital. If you\'re not happy after your first lesson, our support team can help you find a new match or you can use our AI search again.',
+              },
+              {
+                q: 'What\'s the difference between Automatic and Manual lessons?',
+                a: 'Automatic cars handle gear shifts for you, while manual cars require you to use a clutch and gear stick. If you pass in an automatic, your license may be restricted to automatic vehicles only.',
+              },
+            ].map((faq, i) => (
+              <div key={i} className="border border-outline-variant rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setFaqOpen(faqOpen === i ? null : i)}
+                  className="w-full px-6 py-5 text-left font-bold flex justify-between items-center hover:bg-surface transition-colors text-on-surface"
+                >
+                  {faq.q}
+                  <span className="material-symbols-outlined text-primary transition-transform duration-300" style={{ transform: faqOpen === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+                    add
+                  </span>
+                </button>
+                <div className={`overflow-hidden transition-all duration-300 ${faqOpen === i ? 'max-h-96' : 'max-h-0'}`}>
+                  <div className="px-6 pb-6 text-body-md text-secondary">
+                    {faq.a}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-24 px-margin-mobile md:px-margin-desktop bg-surface border-t border-outline-variant">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-display-lg-mobile md:text-headline-md font-headline-md text-on-surface mb-8">Ready To Start Your Driving Journey?</h2>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link href="/search" className="w-full sm:w-auto bg-primary text-white px-10 py-4 rounded-xl font-bold text-body-lg shadow-lg hover:shadow-xl transition-all">
+              Search Instructors
+            </Link>
+            <Link href="/find-my-instructor" className="w-full sm:w-auto border-2 border-primary text-primary px-10 py-3.5 rounded-xl font-bold text-body-lg hover:bg-primary/5 transition-all">
+              Start AI Match
+            </Link>
+          </div>
+        </div>
       </section>
     </>
   );

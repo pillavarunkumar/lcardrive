@@ -29,6 +29,7 @@ export default function PortalProfile() {
   const [verifiedName, setVerifiedName] = useState<string | null>(null);
   const [hasPendingReview, setHasPendingReview] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     fetch('/api/portal/verify/status').then(r => r.json()).then(d => {
@@ -46,6 +47,8 @@ export default function PortalProfile() {
         setBioText(inst.bio || '');
         setLicenceTypes(inst.licence_types || ['car']);
         setTransmission(inst.transmission || 'both');
+        setTeachingStyle(inst.teaching_style || 'Patient & Calm');
+        setLearnerTypes(inst.primary_learner_types || '');
         setSpecialisesAnxiety(inst.specialises_anxiety || false);
         setAcceptsInternational(inst.accepts_international || false);
         setLanguages(inst.languages?.length ? inst.languages : ['English']);
@@ -54,7 +57,7 @@ export default function PortalProfile() {
         setVehicleYear(inst.vehicle_year || new Date().getFullYear());
         setVehicleRego(inst.vehicle_rego || '');
         setVehicleColor(inst.vehicle_color || '');
-        setTransmissionType(inst.transmission === 'manual' ? 'manual' : 'auto');
+        setTransmissionType(inst.vehicle_transmission || 'auto');
         setDualControls(inst.dual_controls ?? true);
         setDriversLicenceNumber(inst.drivers_licence_number || '');
         setDriversLicenceExpiry(inst.drivers_licence_expiry || '');
@@ -145,7 +148,7 @@ export default function PortalProfile() {
     vehicleRego,
     vehicleColor,
     vehicleImageUrl,
-  }), [user?.firstName, user?.lastName, user?.imageUrl, bioText, driversLicenceNumber, driversLicenceImageUrl, adiRegNumber, adiRegImageUrl, certIVReference, certIVImageUrl, wwccNumber, wwccImageUrl, policeCheckDate, policeCheckImageUrl, medAssessmentDate, medAssessmentImageUrl, pubLiabProvider, pubLiabExpiry, pubLiabImageUrl, vehicleMake, vehicleModel, vehicleRego, vehicleColor, vehicleImageUrl]);
+  }), [user?.firstName, user?.lastName, user?.imageUrl, verifiedName, bioText, driversLicenceNumber, driversLicenceImageUrl, adiRegNumber, adiRegImageUrl, certIVReference, certIVImageUrl, wwccNumber, wwccImageUrl, policeCheckDate, policeCheckImageUrl, medAssessmentDate, medAssessmentImageUrl, pubLiabProvider, pubLiabExpiry, pubLiabImageUrl, vehicleMake, vehicleModel, vehicleRego, vehicleColor, vehicleImageUrl]);
 
   const handleVerify = async () => {
     try {
@@ -221,36 +224,6 @@ export default function PortalProfile() {
       case 'Personal Info':
         return (
           <>
-            {/* Basic Information */}
-            <div className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-[0px_4px_20px_rgba(15,23,42,0.04)] border border-outline-variant/20 relative overflow-hidden">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface">Basic Information</h3>
-                {verifiedName && (
-                  <div className="flex items-center gap-1.5 bg-secondary-container/40 text-secondary px-3 py-1 rounded-full text-xs font-bold">
-                    <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                    Name verified — {verifiedName}
-                  </div>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
-                {[
-                  { label: 'First Name', value: user?.firstName || '', type: 'text' },
-                  { label: 'Last Name', value: user?.lastName || '', type: 'text' },
-                  { label: 'Email Address', value: user?.primaryEmailAddress?.emailAddress || '', type: 'email' },
-                  { label: 'Phone Number', value: user?.primaryPhoneNumber?.phoneNumber || '', type: 'tel' },
-                ].map((f) => (
-                  <div key={f.label} className="flex flex-col gap-1.5">
-                    <label className="font-label-sm text-label-sm text-on-surface-variant">{f.label}</label>
-                    <input
-                      type={f.type}
-                      defaultValue={f.value}
-                      className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Professional Bio */}
             <div className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-[0px_4px_20px_rgba(15,23,42,0.04)] border border-outline-variant/20 relative group">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
@@ -260,15 +233,15 @@ export default function PortalProfile() {
                 </div>
                 <button
                   onClick={toggleAIModal}
-                  className="flex items-center gap-2 bg-surface-container-low hover:bg-surface-container border border-secondary/20 text-secondary rounded-full px-4 py-2 font-label-md text-label-md transition-all shadow-sm hover:shadow-md group"
+                  className="flex items-center gap-2 bg-surface-container-low hover:bg-surface-container border border-primary/20 text-primary rounded-full px-4 py-2 font-label-md text-label-md transition-all shadow-sm hover:shadow-md group"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-secondary group-hover:rotate-12 transition-transform duration-300" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                  <span className="material-symbols-outlined text-[18px] text-primary group-hover:rotate-12 transition-transform duration-300" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
                   Generate bio with AI
                 </button>
               </div>
               <div className="relative">
                 <textarea
-                  className="w-full bg-surface border border-outline-variant/60 rounded-lg p-4 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all resize-y custom-scrollbar"
+                  className="w-full bg-surface border border-outline-variant/60 rounded-lg p-4 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-y custom-scrollbar"
                   placeholder="Write a compelling bio that highlights your experience and teaching style..."
                   rows={6}
                   value={bioText}
@@ -290,13 +263,13 @@ export default function PortalProfile() {
                 <div className="flex flex-wrap gap-2">
                   {['car', 'motorbike', 'truck', 'bus'].map((t) => (
                     <label key={t} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                      licenceTypes.includes(t) ? 'border-secondary bg-surface-container' : 'border-outline-variant'
+                      licenceTypes.includes(t) ? 'border-primary bg-primary/10' : 'border-outline-variant'
                     }`}>
                       <input
                         type="checkbox"
                         checked={licenceTypes.includes(t)}
                         onChange={() => toggleLicenceType(t)}
-                        className="accent-secondary rounded"
+                        className="accent-primary rounded"
                       />
                       <span className="text-sm font-medium text-on-surface capitalize">{t}</span>
                     </label>
@@ -314,14 +287,14 @@ export default function PortalProfile() {
                     { value: 'manual', label: 'Manual Only' },
                   ].map((t) => (
                     <label key={t.value} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                      transmission === t.value ? 'border-secondary bg-surface-container' : 'border-outline-variant'
+                      transmission === t.value ? 'border-primary bg-primary/10' : 'border-outline-variant'
                     }`}>
                       <input
                         type="radio"
                         name="transmission"
                         checked={transmission === t.value}
                         onChange={() => setTransmission(t.value)}
-                        className="accent-secondary"
+                        className="accent-primary"
                       />
                       <span className="text-sm font-medium text-on-surface">{t.label}</span>
                     </label>
@@ -335,14 +308,14 @@ export default function PortalProfile() {
                 <div className="flex flex-wrap gap-2">
                   {['Patient & Calm', 'Structured & Strict', 'Adaptable & Fun'].map((s) => (
                     <label key={s} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                      teachingStyle === s ? 'border-secondary bg-surface-container' : 'border-outline-variant'
+                      teachingStyle === s ? 'border-primary bg-primary/10' : 'border-outline-variant'
                     }`}>
                       <input
                         type="radio"
                         name="teachingStyle"
                         checked={teachingStyle === s}
                         onChange={() => setTeachingStyle(s)}
-                        className="accent-secondary"
+                        className="accent-primary"
                       />
                       <span className="text-sm font-medium text-on-surface">{s}</span>
                     </label>
@@ -359,7 +332,7 @@ export default function PortalProfile() {
                   </div>
                   <button
                     onClick={() => setSpecialisesAnxiety(!specialisesAnxiety)}
-                    className={`relative w-10 h-5 rounded-full transition-colors ${specialisesAnxiety ? 'bg-secondary' : 'bg-surface-variant'}`}
+                    className={`relative w-10 h-5 rounded-full transition-colors ${specialisesAnxiety ? 'bg-primary' : 'bg-surface-variant'}`}
                   >
                     <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${specialisesAnxiety ? 'translate-x-5' : ''}`} />
                   </button>
@@ -371,7 +344,7 @@ export default function PortalProfile() {
                   </div>
                   <button
                     onClick={() => setAcceptsInternational(!acceptsInternational)}
-                    className={`relative w-10 h-5 rounded-full transition-colors ${acceptsInternational ? 'bg-secondary' : 'bg-surface-variant'}`}
+                    className={`relative w-10 h-5 rounded-full transition-colors ${acceptsInternational ? 'bg-primary' : 'bg-surface-variant'}`}
                   >
                     <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${acceptsInternational ? 'translate-x-5' : ''}`} />
                   </button>
@@ -395,7 +368,7 @@ export default function PortalProfile() {
                   value={langInput}
                   onChange={(e) => setLangInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && langInput.trim()) { e.preventDefault(); addLanguage(langInput.trim()); } }}
-                  className="w-full max-w-xs px-4 py-2.5 rounded-lg border border-outline-variant text-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
+                  className="w-full max-w-xs px-4 py-2.5 rounded-lg border border-outline-variant text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 />
               </div>
 
@@ -407,7 +380,7 @@ export default function PortalProfile() {
                   placeholder="e.g. Anxious beginners, Teens, Seniors"
                   value={learnerTypes}
                   onChange={(e) => setLearnerTypes(e.target.value)}
-                  className="w-full max-w-xs px-4 py-2.5 rounded-lg border border-outline-variant text-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
+                  className="w-full max-w-xs px-4 py-2.5 rounded-lg border border-outline-variant text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 />
               </div>
             </div>
@@ -444,7 +417,7 @@ export default function PortalProfile() {
                     value={vehicleMake}
                     onChange={(e) => setVehicleMake(e.target.value)}
                     required
-                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
+                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -455,7 +428,7 @@ export default function PortalProfile() {
                     value={vehicleModel}
                     onChange={(e) => setVehicleModel(e.target.value)}
                     required
-                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
+                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -467,7 +440,7 @@ export default function PortalProfile() {
                     min={2000}
                     max={new Date().getFullYear() + 1}
                     required
-                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
+                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   />
                 </div>
               </div>
@@ -480,7 +453,7 @@ export default function PortalProfile() {
                     value={vehicleRego}
                     onChange={(e) => setVehicleRego(e.target.value)}
                     required
-                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
+                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -490,7 +463,7 @@ export default function PortalProfile() {
                     placeholder="e.g. White"
                     value={vehicleColor}
                     onChange={(e) => setVehicleColor(e.target.value)}
-                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
+                    className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   />
                 </div>
               </div>
@@ -502,14 +475,14 @@ export default function PortalProfile() {
                     { value: 'manual', label: 'Manual' },
                   ].map((t) => (
                     <label key={t.value} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                      transmissionType === t.value ? 'border-secondary bg-surface-container' : 'border-outline-variant'
+                      transmissionType === t.value ? 'border-primary bg-primary/10' : 'border-outline-variant'
                     }`}>
                       <input
                         type="radio"
                         name="vehicleTransmission"
                         checked={transmissionType === t.value}
                         onChange={() => setTransmissionType(t.value)}
-                        className="accent-secondary"
+                        className="accent-primary"
                       />
                       <span className="text-sm font-medium text-on-surface">{t.label}</span>
                     </label>
@@ -523,7 +496,7 @@ export default function PortalProfile() {
                 </div>
                 <button
                   onClick={() => setDualControls(!dualControls)}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${dualControls ? 'bg-secondary' : 'bg-surface-variant'}`}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${dualControls ? 'bg-primary' : 'bg-surface-variant'}`}
                 >
                   <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${dualControls ? 'translate-x-5' : ''}`} />
                 </button>
@@ -555,11 +528,11 @@ export default function PortalProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Licence Number</label>
-                  <input type="text" placeholder="e.g. 12345678" value={driversLicenceNumber} onChange={(e) => setDriversLicenceNumber(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="text" placeholder="e.g. 12345678" value={driversLicenceNumber} onChange={(e) => setDriversLicenceNumber(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Expiry Date</label>
-                  <input type="date" value={driversLicenceExpiry} onChange={(e) => setDriversLicenceExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="date" value={driversLicenceExpiry} onChange={(e) => setDriversLicenceExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
               </div>
             </div>
@@ -585,11 +558,11 @@ export default function PortalProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">ADI Registration Number</label>
-                  <input type="text" placeholder="e.g. ADI-123456" value={adiRegNumber} onChange={(e) => setAdiRegNumber(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="text" placeholder="e.g. ADI-123456" value={adiRegNumber} onChange={(e) => setAdiRegNumber(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Expiry Date</label>
-                  <input type="date" value={adiRegExpiry} onChange={(e) => setAdiRegExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="date" value={adiRegExpiry} onChange={(e) => setAdiRegExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
               </div>
             </div>
@@ -615,11 +588,11 @@ export default function PortalProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Certificate Reference</label>
-                  <input type="text" placeholder="e.g. CERT-98765" value={certIVReference} onChange={(e) => setCertIVReference(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="text" placeholder="e.g. CERT-98765" value={certIVReference} onChange={(e) => setCertIVReference(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Date Issued</label>
-                  <input type="date" value={certIVDate} onChange={(e) => setCertIVDate(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="date" value={certIVDate} onChange={(e) => setCertIVDate(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
               </div>
             </div>
@@ -645,11 +618,11 @@ export default function PortalProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">WWCC Number</label>
-                  <input type="text" placeholder="e.g. WWC-1234567" value={wwccNumber} onChange={(e) => setWwccNumber(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="text" placeholder="e.g. WWC-1234567" value={wwccNumber} onChange={(e) => setWwccNumber(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Expiry Date</label>
-                  <input type="date" value={wwccExpiry} onChange={(e) => setWwccExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="date" value={wwccExpiry} onChange={(e) => setWwccExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
               </div>
             </div>
@@ -673,7 +646,7 @@ export default function PortalProfile() {
               <p className="font-label-sm text-label-sm text-on-surface-variant mb-4">Must be no more than 3 months old for initial applications in most states.</p>
               <div className="flex flex-col gap-1.5 max-w-xs">
                 <label className="font-label-sm text-label-sm text-on-surface-variant">Date of Check</label>
-                <input type="date" value={policeCheckDate} onChange={(e) => setPoliceCheckDate(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                <input type="date" value={policeCheckDate} onChange={(e) => setPoliceCheckDate(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
               </div>
             </div>
 
@@ -698,11 +671,11 @@ export default function PortalProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Assessment Date</label>
-                  <input type="date" value={medAssessmentDate} onChange={(e) => setMedAssessmentDate(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="date" value={medAssessmentDate} onChange={(e) => setMedAssessmentDate(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Expiry Date</label>
-                  <input type="date" value={medAssessmentExpiry} onChange={(e) => setMedAssessmentExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="date" value={medAssessmentExpiry} onChange={(e) => setMedAssessmentExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
               </div>
             </div>
@@ -729,15 +702,15 @@ export default function PortalProfile() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Insurance Provider</label>
-                  <input type="text" placeholder="e.g. AAMI" value={pubLiabProvider} onChange={(e) => setPubLiabProvider(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="text" placeholder="e.g. AAMI" value={pubLiabProvider} onChange={(e) => setPubLiabProvider(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Policy Number</label>
-                  <input type="text" placeholder="e.g. POL-123456" value={pubLiabPolicy} onChange={(e) => setPubLiabPolicy(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="text" placeholder="e.g. POL-123456" value={pubLiabPolicy} onChange={(e) => setPubLiabPolicy(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Expiry Date</label>
-                  <input type="date" value={pubLiabExpiry} onChange={(e) => setPubLiabExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  <input type="date" value={pubLiabExpiry} onChange={(e) => setPubLiabExpiry(e.target.value)} className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
                 </div>
               </div>
             </div>
@@ -752,22 +725,50 @@ export default function PortalProfile() {
   return (
     <>
       {toast && (
-        <div className="fixed top-6 right-6 z-[60] bg-secondary text-on-secondary px-5 py-3 rounded-xl shadow-lg font-label-md text-label-md animate-in fade-in">
+        <div className="fixed top-6 right-6 z-[60] bg-primary text-white px-5 py-3 rounded-xl shadow-lg font-label-md text-label-md animate-in fade-in">
           {toast}
         </div>
       )}
 
       <div className="h-full flex flex-col">
-        <div className="sticky top-0 z-10 bg-surface border-b border-outline-variant/40 -mx-margin-mobile md:-mx-margin-desktop px-margin-mobile md:px-margin-desktop pt-4 pb-2 -mt-margin-mobile md:-mt-margin-desktop" style={{ top: '0px' }}>
-          <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Edit Profile</h1>
-          <div className="flex overflow-x-auto hide-scrollbar gap-8 mt-2">
+        <div className="sticky top-0 z-10 bg-surface border-b border-outline-variant/40 pt-6 pb-0">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Edit Profile</h1>
+            {verifiedName && (
+              <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold">
+                <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                Name verified — {verifiedName}
+              </div>
+            )}
+          </div>
+
+          {/* Basic Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 pb-6 border-b border-outline-variant/20">
+            {[
+              { label: 'First Name', value: user?.firstName || '', type: 'text' },
+              { label: 'Last Name', value: user?.lastName || '', type: 'text' },
+              { label: 'Email Address', value: user?.primaryEmailAddress?.emailAddress || '', type: 'email' },
+              { label: 'Phone Number', value: user?.primaryPhoneNumber?.phoneNumber || '', type: 'tel' },
+            ].map((f) => (
+              <div key={f.label} className="flex flex-col gap-1.5">
+                <label className="font-label-sm text-label-sm text-on-surface-variant">{f.label}</label>
+                <input
+                  type={f.type}
+                  defaultValue={f.value}
+                  className="bg-surface border border-outline-variant/60 rounded-lg px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="flex overflow-x-auto hide-scrollbar gap-8">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`font-label-md text-label-md whitespace-nowrap px-1 pb-3 transition-colors ${
                   activeTab === tab
-                    ? 'text-secondary border-b-2 border-secondary'
+                    ? 'text-primary border-b-2 border-primary'
                     : 'text-on-surface-variant hover:text-on-surface'
                 }`}
               >
@@ -866,7 +867,40 @@ export default function PortalProfile() {
         {/* Bottom Actions */}
         <div className="mt-stack-lg flex justify-end gap-4 pt-6 border-t border-outline-variant/30">
           <button
-            onClick={() => { setBioText(''); showToast('Changes discarded.'); }}
+            onClick={() => {
+              setBioText('');
+              setSpecialisesAnxiety(true);
+              setAcceptsInternational(true);
+              setLanguages(['English']);
+              setVehicleMake('');
+              setVehicleModel('');
+              setVehicleYear(new Date().getFullYear());
+              setVehicleRego('');
+              setVehicleColor('');
+              setDualControls(true);
+              setDriversLicenceNumber('');
+              setDriversLicenceExpiry('');
+              setDriversLicenceImageUrl(null);
+              setAdiRegNumber('');
+              setAdiRegExpiry('');
+              setAdiRegImageUrl(null);
+              setCertIVReference('');
+              setCertIVDate('');
+              setCertIVImageUrl(null);
+              setWwccNumber('');
+              setWwccExpiry('');
+              setWwccImageUrl(null);
+              setPoliceCheckDate('');
+              setPoliceCheckImageUrl(null);
+              setMedAssessmentDate('');
+              setMedAssessmentExpiry('');
+              setMedAssessmentImageUrl(null);
+              setPubLiabProvider('');
+              setPubLiabPolicy('');
+              setPubLiabExpiry('');
+              setPubLiabImageUrl(null);
+              showToast('Changes discarded.');
+            }}
             className="bg-transparent text-primary hover:bg-surface-container border border-outline-variant rounded-lg px-6 py-2.5 font-label-md text-label-md transition-colors"
           >
             Discard Changes
@@ -898,14 +932,20 @@ export default function PortalProfile() {
           )}
           <button
             onClick={async () => {
+              setSavingProfile(true);
               try {
                 const res = await fetch('/api/portal/profile', {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
+                    first_name: user?.firstName || '',
+                    last_name: user?.lastName || '',
                     bio: bioText,
                     licence_types: licenceTypes,
-                    transmission: transmission as any,
+                    transmission,
+                    teaching_style: teachingStyle,
+                    primary_learner_types: learnerTypes,
+                    vehicle_transmission: transmissionType,
                     specialises_anxiety: specialisesAnxiety,
                     accepts_international: acceptsInternational,
                     languages,
@@ -929,17 +969,32 @@ export default function PortalProfile() {
                     public_liability_provider: pubLiabProvider,
                     public_liability_policy_number: pubLiabPolicy,
                     public_liability_expiry: pubLiabExpiry || null,
+                    drivers_licence_image_url: driversLicenceImageUrl,
+                    adi_registration_image_url: adiRegImageUrl,
+                    certificate_iv_image_url: certIVImageUrl,
+                    wwcc_image_url: wwccImageUrl,
+                    police_check_image_url: policeCheckImageUrl,
+                    medical_assessment_image_url: medAssessmentImageUrl,
+                    public_liability_image_url: pubLiabImageUrl,
+                    vehicle_image_url: vehicleImageUrl,
                   }),
                 });
-                if (res.ok) showToast('Profile saved successfully!');
-                else showToast('Failed to save profile.');
+                if (res.ok) {
+                  showToast('Profile saved successfully!');
+                } else {
+                  const err = await res.json().catch(() => ({}));
+                  showToast(err.error || 'Failed to save profile.');
+                }
               } catch {
                 showToast('Failed to save profile.');
+              } finally {
+                setSavingProfile(false);
               }
             }}
-            className="bg-secondary hover:bg-secondary/90 text-on-secondary rounded-lg px-6 py-2.5 font-label-md text-label-md transition-colors shadow-sm"
+            disabled={savingProfile}
+            className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 py-2.5 font-label-md text-label-md transition-colors shadow-sm disabled:opacity-50"
           >
-            Save Profile
+            {savingProfile ? 'Saving...' : 'Save Profile'}
           </button>
         </div>
       </div>
@@ -953,7 +1008,7 @@ export default function PortalProfile() {
             {/* Modal Header */}
             <div className="ai-gradient-bg px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="bg-surface-container-highest text-secondary rounded-lg p-2 flex items-center justify-center">
+                <div className="bg-surface-container-highest text-primary rounded-lg p-2 flex items-center justify-center">
                   <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
                 </div>
                 <div>
@@ -973,11 +1028,11 @@ export default function PortalProfile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
                   <div className="flex flex-col gap-1.5">
                        <label className="font-label-sm text-label-sm text-on-surface-variant">Years of Experience</label>
-                       <input className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" placeholder="e.g. 5" type="number" value={aiInputs.experience} onChange={(e) => setAiInputs({ ...aiInputs, experience: e.target.value })} />
+                       <input className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="e.g. 5" type="number" value={aiInputs.experience} onChange={(e) => setAiInputs({ ...aiInputs, experience: e.target.value })} />
                      </div>
                      <div className="flex flex-col gap-1.5">
                        <label className="font-label-sm text-label-sm text-on-surface-variant">Licence Types</label>
-                       <select className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" value={aiInputs.licenceTypes} onChange={(e) => setAiInputs({ ...aiInputs, licenceTypes: e.target.value })}>
+                       <select className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" value={aiInputs.licenceTypes} onChange={(e) => setAiInputs({ ...aiInputs, licenceTypes: e.target.value })}>
                          <option>Manual & Automatic</option>
                          <option>Automatic Only</option>
                          <option>Manual Only</option>
@@ -985,7 +1040,7 @@ export default function PortalProfile() {
                      </div>
                      <div className="flex flex-col gap-1.5">
                        <label className="font-label-sm text-label-sm text-on-surface-variant">Teaching Style</label>
-                       <select className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" value={aiInputs.teachingStyle} onChange={(e) => setAiInputs({ ...aiInputs, teachingStyle: e.target.value })}>
+                       <select className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" value={aiInputs.teachingStyle} onChange={(e) => setAiInputs({ ...aiInputs, teachingStyle: e.target.value })}>
                          <option>Patient & Calm</option>
                          <option>Structured & Strict</option>
                          <option>Adaptable & Fun</option>
@@ -993,30 +1048,30 @@ export default function PortalProfile() {
                      </div>
                      <div className="flex flex-col gap-1.5">
                        <label className="font-label-sm text-label-sm text-on-surface-variant">Primary Learner Types</label>
-                       <input className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" placeholder="e.g. Anxious beginners, Teens" type="text" value={aiInputs.learnerTypes} onChange={(e) => setAiInputs({ ...aiInputs, learnerTypes: e.target.value })} />
+                       <input className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="e.g. Anxious beginners, Teens" type="text" value={aiInputs.learnerTypes} onChange={(e) => setAiInputs({ ...aiInputs, learnerTypes: e.target.value })} />
                      </div>
                    </div>
                    <div className="flex flex-col gap-1.5">
                      <label className="font-label-sm text-label-sm text-on-surface-variant">Specialisations</label>
-                     <input className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" placeholder="e.g. Defensive driving, intensive courses" type="text" value={aiInputs.specialisations} onChange={(e) => setAiInputs({ ...aiInputs, specialisations: e.target.value })} />
+                     <input className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="e.g. Defensive driving, intensive courses" type="text" value={aiInputs.specialisations} onChange={(e) => setAiInputs({ ...aiInputs, specialisations: e.target.value })} />
                    </div>
                    <div className="flex flex-col gap-1.5">
                      <label className="font-label-sm text-label-sm text-on-surface-variant">What are you most proud of as an instructor?</label>
-                     <textarea className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all resize-none" placeholder="e.g. High first-time pass rate, helping very nervous students." rows={2} value={aiInputs.proudest} onChange={(e) => setAiInputs({ ...aiInputs, proudest: e.target.value })}></textarea>
+                     <textarea className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="e.g. High first-time pass rate, helping very nervous students." rows={2} value={aiInputs.proudest} onChange={(e) => setAiInputs({ ...aiInputs, proudest: e.target.value })}></textarea>
                    </div>
                 </div>
               )}
 
               {aiStep === 'loading' && (
                 <div className="flex flex-col items-center justify-center py-8 gap-3">
-                  <span className="material-symbols-outlined animate-spin text-secondary text-[32px]">sync</span>
+                  <span className="material-symbols-outlined animate-spin text-primary text-[32px]">sync</span>
                   <p className="font-label-sm text-label-sm text-on-surface-variant">Crafting your professional story...</p>
                 </div>
               )}
 
               {aiStep === 'preview' && (
                 <div className="flex flex-col gap-4">
-                  <div className="bg-surface border border-secondary/30 rounded-xl p-5 relative">
+                  <div className="bg-surface border border-primary/30 rounded-xl p-5 relative">
                     <div className="absolute -top-3 left-4 bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Draft 1</div>
                     <p className="font-body-md text-body-md text-on-surface leading-relaxed mt-2">{aiBioPreview}</p>
                   </div>
@@ -1029,7 +1084,7 @@ export default function PortalProfile() {
               {aiStep === 'input' && (
                 <div className="flex gap-3 w-full justify-end">
                   <button onClick={toggleAIModal} className="text-primary hover:bg-surface-container px-4 py-2 rounded-lg font-label-md text-label-md transition-colors">Cancel</button>
-                  <button onClick={generateBio} className="bg-secondary hover:bg-secondary/90 text-on-secondary px-6 py-2 rounded-lg font-label-md text-label-md transition-colors flex items-center gap-2 shadow-sm">
+                  <button onClick={generateBio} className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-xl font-label-md text-label-md transition-colors flex items-center gap-2 shadow-sm">
                     Generate <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                   </button>
                 </div>
@@ -1041,14 +1096,17 @@ export default function PortalProfile() {
                   </button>
                   <div className="flex gap-3">
                     <button
-                      onClick={() => { applyBio(aiBioPreview); }}
+                      onClick={() => {
+                        toggleAIModal();
+                        showToast('Bio copied to editor. You can now edit it manually.');
+                      }}
                       className="border border-outline-variant text-primary hover:bg-surface-container px-4 py-2 rounded-lg font-label-md text-label-md transition-colors"
                     >
                       Edit in Canvas
                     </button>
                     <button
                       onClick={() => { applyBio(aiBioPreview); }}
-                      className="bg-secondary hover:bg-secondary/90 text-on-secondary px-6 py-2 rounded-lg font-label-md text-label-md transition-colors shadow-sm"
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-xl font-label-md text-label-md transition-colors shadow-sm"
                     >
                       Use this Bio
                     </button>

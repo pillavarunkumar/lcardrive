@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Instructor, Review } from '@/types';
+import { getAvatarUrl } from '@/lib/utils';
 
 interface Props {
   instructor: Instructor | null;
@@ -37,21 +38,16 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
   return (
     <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-md flex flex-col gap-stack-lg">
       {/* Profile Header — Glass Card */}
-      <section className="glass-card rounded-xl p-6 md:p-10 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-secondary-fixed-dim opacity-20 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2"></div>
-        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden flex-shrink-0 border-4 border-surface z-10 shadow-lg">
-          {instructor.profile_photo_url ? (
-            <img src={instructor.profile_photo_url} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl font-display font-bold text-on-surface-variant">
-              {instructor.first_name[0]}{instructor.last_name[0]}
-            </div>
-          )}
+      <section className="glass-card rounded-2xl p-6 md:p-10 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden">
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-primary/5 blur-3xl rounded-full"></div>
+        <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-primary/5 blur-3xl rounded-full"></div>
+        <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden flex-shrink-0 border-4 border-white z-10 shadow-xl">
+          <img src={getAvatarUrl(instructor)} alt="" className="w-full h-full object-cover" />
         </div>
         <div className="flex flex-col flex-grow z-10">
           <div className="flex flex-wrap items-center gap-3 mb-2">
             <h1 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">{instructor.first_name} {instructor.last_name}</h1>
-            <span className="bg-[#e6f4ea] text-secondary px-3 py-1 rounded-full flex items-center gap-1 font-label-sm text-label-sm border border-secondary/20">
+            <span className="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 font-label-sm text-label-sm border border-primary/20">
               <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               Verified Instructor
             </span>
@@ -72,11 +68,11 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
             <span className="font-body-md text-body-md text-on-surface-variant">({instructor.review_count} Reviews)</span>
           </div>
           <div className="flex flex-wrap gap-4 mt-auto">
-            <button className="bg-secondary text-on-secondary font-label-md text-label-md px-8 py-3 rounded-full hover:brightness-110 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+            <button className="bg-primary text-white font-label-md text-label-md px-8 py-3 rounded-xl hover:opacity-90 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
               <span className="material-symbols-outlined">mail</span>
               Contact Instructor
             </button>
-            <button onClick={copyLink} className="bg-surface text-primary border border-outline font-label-md text-label-md px-6 py-3 rounded-full hover:bg-surface-container-low transition-colors flex items-center gap-2">
+            <button onClick={copyLink} className="border-2 border-primary text-primary rounded-xl hover:bg-primary/5 font-label-md text-label-md px-6 py-3 flex items-center gap-2">
               <span className="material-symbols-outlined">share</span>
               {copied ? 'Copied!' : 'Share Profile'}
             </button>
@@ -94,7 +90,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
           </div>
           <div>
             <p className="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider">Pass Rate</p>
-            <p className="font-headline-sm text-headline-sm text-secondary">82%</p>
+            <p className="font-headline-sm text-headline-sm text-primary">82%</p>
           </div>
         </div>
       </section>
@@ -110,7 +106,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`font-label-md text-label-md pb-3 px-1 whitespace-nowrap transition-colors border-b-2 ${
-                  activeTab === tab ? 'text-secondary border-secondary' : 'text-on-surface-variant border-transparent hover:text-on-surface'
+                  activeTab === tab ? 'text-primary border-primary' : 'text-on-surface-variant border-transparent hover:text-on-surface'
                 }`}
               >
                 {tab}
@@ -133,7 +129,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                       'Mock Test Focused',
                     ].map((item) => (
                       <li key={item} className="flex items-center gap-2 font-body-md text-body-md text-on-surface">
-                        <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                         {item}
                       </li>
                     ))}
@@ -159,7 +155,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                   const available = instructor.availability_days.includes(d);
                   return (
                     <div key={day} className={`px-4 py-2 rounded-lg text-sm font-bold ${
-                      available ? 'bg-secondary text-white' : 'bg-surface-container-low text-outline'
+                      available ? 'bg-primary text-white' : 'bg-surface-container-low text-outline'
                     }`}>
                       {day}
                     </div>
@@ -182,7 +178,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                   <div key={r.label} className="flex items-center gap-3">
                     <span className="text-sm text-on-surface-variant w-24 shrink-0">{r.label}</span>
                     <div className="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
-                      <div className="h-full bg-secondary rounded-full" style={{ width: `${(r.value / 5) * 100}%` }} />
+                      <div className="h-full bg-primary rounded-full" style={{ width: `${(r.value / 5) * 100}%` }} />
                     </div>
                     <span className="text-sm font-bold text-on-surface w-6">{r.value.toFixed(1)}</span>
                   </div>
@@ -202,7 +198,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                       </div>
                     </div>
                     <p className="text-sm text-on-surface-variant mb-2">{review.review_text}</p>
-                    <span className="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-xs font-semibold">
+                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-semibold">
                       {review.pass_outcome === 'passed_first' ? 'Passed first attempt' : review.pass_outcome === 'passed_retry' ? 'Passed after retries' : review.pass_outcome === 'still_learning' ? 'Still learning' : 'Not yet tested'}
                     </span>
                   </div>
@@ -217,7 +213,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
           {/* Vehicle Card */}
           <div className="glass-card rounded-xl overflow-hidden">
             <div className="h-32 bg-surface-container-high relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-primary/5"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5"></div>
               <span className="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[48px] text-on-surface-variant opacity-20">directions_car</span>
             </div>
             <div className="p-5">
@@ -240,7 +236,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                     <span className="material-symbols-outlined text-[20px]">health_and_safety</span> Safety
                   </span>
                   <span className="font-label-md text-label-md text-on-surface flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-secondary"></span> Dual Controls
+                    <span className="w-2 h-2 rounded-full bg-primary"></span> Dual Controls
                   </span>
                 </li>
               </ul>

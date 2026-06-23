@@ -7,7 +7,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   }
 
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -40,9 +40,19 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   }
 
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data: instructor } = await supabase
+    .from('instructors')
+    .select('id')
+    .eq('clerk_user_id', userId)
+    .maybeSingle();
+
+  if (!instructor) {
+    return NextResponse.json({ error: 'Instructor not found' }, { status: 404 });
   }
 
   const { id, status } = await req.json();
@@ -54,7 +64,8 @@ export async function PATCH(req: Request) {
   const { error } = await supabase
     .from('leads')
     .update({ status })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('instructor_id', instructor.id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

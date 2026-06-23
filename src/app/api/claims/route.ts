@@ -16,7 +16,8 @@ export async function POST(request: Request) {
   const { error } = await supabase.from('listing_flags').insert({
     instructor_id,
     reason: 'incorrect_info',
-    detail: JSON.stringify({ first_name, last_name, email, adi_number: adi_number || null }),
+    detail: 'ownership',
+    is_resolved: false,
   });
 
   if (error) {

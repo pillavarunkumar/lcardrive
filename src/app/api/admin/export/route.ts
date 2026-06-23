@@ -39,7 +39,14 @@ export async function GET(request: Request) {
   }
 
   if (!data || data.length === 0) {
-    return NextResponse.json({ error: 'No data found' }, { status: 404 });
+    const empty = format === 'json' ? '[]' : '';
+    const filename = `${table}-${new Date().toISOString().split('T')[0]}.csv`;
+    return new NextResponse(empty, {
+      headers: {
+        'Content-Type': format === 'json' ? 'application/json' : 'text/csv',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+      },
+    });
   }
 
   if (format === 'json') {

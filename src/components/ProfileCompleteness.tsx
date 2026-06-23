@@ -4,7 +4,7 @@ interface Props {
 }
 
 export default function ProfileCompleteness({ score, variant = 'default' }: Props) {
-  const color = score >= 80 ? 'bg-secondary' : score >= 50 ? 'bg-tertiary-fixed-dim' : 'bg-error';
+  const color = score >= 80 ? 'bg-primary' : score >= 50 ? 'bg-tertiary-fixed-dim' : 'bg-error';
 
   return (
     <div className={`border border-outline-variant rounded-2xl card-shadow ${variant === 'large' ? 'p-6' : 'p-5'}`}>

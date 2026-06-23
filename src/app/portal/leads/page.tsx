@@ -15,7 +15,7 @@ interface Lead {
 }
 
 const statusColors: Record<string, string> = {
-  new: 'bg-secondary-container text-on-secondary-container',
+  new: 'bg-primary/10 text-primary',
   contacted: 'bg-tertiary-fixed text-on-tertiary-fixed-variant',
   booked: 'bg-primary-fixed text-on-primary-fixed',
   archived: 'bg-surface-container-high text-on-surface-variant',
@@ -71,7 +71,7 @@ export default function PortalLeads() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${
-                activeTab === tab ? 'bg-white shadow-sm text-on-surface' : 'text-on-surface-variant'
+                activeTab === tab ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant'
               }`}
             >
               {tab}
@@ -120,7 +120,7 @@ export default function PortalLeads() {
               <div className="flex items-center gap-2 shrink-0">
                 {lead.service && <span className="text-xs font-medium text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-lg whitespace-nowrap">{lead.service}</span>}
                 {lead.status === 'new' && (
-                  <button onClick={() => updateLeadStatus(lead.id, 'contacted')} className="bg-secondary text-on-secondary px-4 py-2 rounded-lg text-xs font-bold hover:brightness-110 transition-all whitespace-nowrap">Mark Contacted</button>
+                  <button onClick={() => updateLeadStatus(lead.id, 'contacted')} className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-90 transition-all whitespace-nowrap">Mark Contacted</button>
                 )}
               </div>
             </div>

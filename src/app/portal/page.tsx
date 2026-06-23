@@ -44,33 +44,33 @@ export default function PortalDashboard() {
                 <h3 className="font-headline-sm text-headline-sm text-on-surface">Profile Completeness</h3>
                 <p className="font-body-sm text-on-surface-variant mt-1">A complete profile attracts 3x more students.</p>
               </div>
-              <span className="font-headline-md text-headline-md font-bold text-secondary">{comp}%</span>
+              <span className="font-headline-md text-headline-md font-bold text-primary">{comp}%</span>
             </div>
             <div className="w-full bg-surface-container-highest rounded-full h-3 mb-2 overflow-hidden">
-              <div className="bg-secondary h-3 rounded-full transition-all duration-1000 ease-out" style={{ width: `${comp}%` }}></div>
+              <div className="bg-primary h-3 rounded-full transition-all duration-1000 ease-out" style={{ width: `${comp}%` }}></div>
             </div>
           </div>
         </div>
 
         <div className="bento-card bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-center items-center text-center">
-          <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-3">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
             <span className="material-symbols-outlined text-tertiary-fixed-dim" style={{ fontVariationSettings: "'FILL' 1", fontSize: '28px' }}>star</span>
           </div>
           <h3 className="font-headline-sm text-headline-sm text-on-surface">{avgRating > 0 ? avgRating.toFixed(1) : '—'}</h3>
           <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-1">Average Rating</p>
-          <div className="mt-3 inline-block bg-inverse-on-surface text-on-secondary-fixed-variant px-2 py-1 rounded font-label-sm text-label-sm">
+          <div className="mt-3 inline-block bg-primary/10 text-primary px-2 py-1 rounded font-label-sm text-label-sm">
             Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
           </div>
         </div>
 
         <div className="bento-card bg-surface-container-lowest rounded-xl p-6 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-inverse-on-surface text-secondary flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
             <span className="material-symbols-outlined">visibility</span>
           </div>
           <div>
             <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Profile Views</p>
             <div className="flex items-end gap-2">
-              <h3 className="font-headline-md text-headline-md text-on-surface">{instructor ? '—' : '—'}</h3>
+              <h3 className="font-headline-md text-headline-md text-on-surface">—</h3>
             </div>
             <p className="font-label-sm text-label-sm text-outline mt-1">Coming soon</p>
           </div>
@@ -90,7 +90,7 @@ export default function PortalDashboard() {
         </div>
 
         <div className="bento-card bg-surface-container-lowest rounded-xl p-6 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-inverse-on-surface text-secondary flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
             <span className="material-symbols-outlined">event_available</span>
           </div>
           <div>
@@ -104,7 +104,7 @@ export default function PortalDashboard() {
 
         <div className="bento-card bg-surface-container-lowest rounded-xl p-6 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <span className="material-symbols-outlined text-secondary">checklist</span>
+            <span className="material-symbols-outlined text-primary">checklist</span>
             <h3 className="font-headline-sm text-headline-sm text-on-surface">Next Steps to Boost Visibility</h3>
           </div>
           <ul className="space-y-3">

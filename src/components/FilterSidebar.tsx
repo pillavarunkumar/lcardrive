@@ -15,7 +15,7 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
   };
 
   return (
-    <aside className="flex flex-col gap-6 sidebar-scroll max-h-[calc(100vh-120px)] overflow-y-auto pr-2">
+    <aside className="flex flex-col gap-6 pr-2">
       {/* Transmission */}
       <div className="border-b border-outline-variant pb-6">
         <h3 className="font-headline-sm text-headline-sm mb-4 text-on-surface">Transmission</h3>
@@ -25,8 +25,8 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
               type="radio"
               name="transmission"
               checked={(filters.transmission || '') === ''}
-              onChange={() => update({ transmission: undefined as any })}
-              className="w-5 h-5 text-secondary border-outline-variant focus:ring-secondary focus:ring-offset-surface"
+              onChange={() => update({ transmission: undefined as SearchFilters['transmission'] | undefined })}
+              className="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface"
             />
             <span className="font-body-md text-body-md text-on-surface-variant group-hover:text-on-surface transition-colors">Any</span>
           </label>
@@ -36,7 +36,7 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
               name="transmission"
               checked={filters.transmission === 'auto'}
               onChange={() => update({ transmission: 'auto' })}
-              className="w-5 h-5 text-secondary border-outline-variant focus:ring-secondary focus:ring-offset-surface"
+              className="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface"
             />
             <span className="font-body-md text-body-md text-on-surface-variant group-hover:text-on-surface transition-colors">Automatic</span>
           </label>
@@ -46,7 +46,7 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
               name="transmission"
               checked={filters.transmission === 'manual'}
               onChange={() => update({ transmission: 'manual' })}
-              className="w-5 h-5 text-secondary border-outline-variant focus:ring-secondary focus:ring-offset-surface"
+              className="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface"
             />
             <span className="font-body-md text-body-md text-on-surface-variant group-hover:text-on-surface transition-colors">Manual</span>
           </label>
@@ -63,11 +63,11 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
             max={150}
             value={filters.max_price || 150}
             onChange={(e) => update({ max_price: Number(e.target.value) })}
-            className="w-full h-2 bg-surface-container rounded-lg appearance-none cursor-pointer accent-secondary"
+            className="w-full h-2 bg-surface-container rounded-lg appearance-none cursor-pointer accent-primary"
           />
           <div className="flex justify-between items-center font-label-sm text-label-sm text-on-surface-variant">
             <span>$0</span>
-            <span className="font-bold text-secondary bg-surface-container px-2 py-1 rounded">Up to ${filters.max_price || 150}</span>
+            <span className="font-bold text-primary bg-primary/10 px-2 py-1 rounded">Up to ${filters.max_price || 150}</span>
             <span>$150+</span>
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
                 onChange={(e) => update({ anxiety_friendly: e.target.checked || undefined })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-surface-variant peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+              <div className="w-11 h-6 bg-outline-variant peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </div>
           </label>
           <label className="flex items-center justify-between cursor-pointer group">
@@ -98,7 +98,7 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
                 onChange={(e) => update({ international_conversion: e.target.checked || undefined })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-surface-variant peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+              <div className="w-11 h-6 bg-outline-variant peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </div>
           </label>
           <label className="flex items-center justify-between cursor-pointer group">
@@ -110,7 +110,7 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
                 onChange={(e) => update({ test_centre_familiarity: e.target.checked || undefined })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-surface-variant peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+              <div className="w-11 h-6 bg-outline-variant peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </div>
           </label>
         </div>
@@ -132,7 +132,7 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
                 }}
                 className={`px-3 py-1.5 rounded-full font-label-sm text-label-sm cursor-pointer transition-colors ${
                   active
-                    ? 'border border-secondary bg-surface-container text-secondary'
+                    ? 'border border-primary bg-primary/10 text-primary'
                     : 'border border-outline-variant text-on-surface-variant hover:bg-surface-container'
                 }`}
               >

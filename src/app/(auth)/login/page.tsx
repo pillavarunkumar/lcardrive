@@ -5,6 +5,16 @@ import { useState, useEffect } from 'react';
 import { useSignIn, useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
+const redirectAfterLogin = async (router: any, defaultPath: string) => {
+  try {
+    const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+    const data = await res.json();
+    router.push(data.isAdmin ? '/admin' : defaultPath);
+  } catch {
+    router.push(defaultPath);
+  }
+};
+
 export default function LoginPage() {
   const { signIn, isLoaded, setActive } = useSignIn();
   const { isSignedIn } = useAuth();
@@ -12,7 +22,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isSignedIn) {
-      router.push('/portal');
+      redirectAfterLogin(router, '/portal');
     }
   }, [isSignedIn, router]);
   const [email, setEmail] = useState('');
@@ -31,7 +41,7 @@ export default function LoginPage() {
       const result = await signIn.create({ identifier: email, password });
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        router.push('/portal');
+        await redirectAfterLogin(router, '/portal');
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -46,7 +56,7 @@ export default function LoginPage() {
     if (!isLoaded) return;
     setError('');
     if (isSignedIn) {
-      router.push('/portal');
+      redirectAfterLogin(router, '/portal');
       return;
     }
     signIn.authenticateWithRedirect({
@@ -55,7 +65,7 @@ export default function LoginPage() {
       redirectUrlComplete: '/portal',
     }).catch((err: any) => {
       if (err.errors?.[0]?.code === 'session_exists') {
-        router.push('/portal');
+        redirectAfterLogin(router, '/portal');
       } else {
         setError(err.errors?.[0]?.message || 'OAuth sign in failed');
       }
@@ -73,7 +83,7 @@ export default function LoginPage() {
           src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop"
         />
         <div className="absolute bottom-12 left-12 z-20 max-w-md">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/90 text-on-secondary rounded-full mb-6 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/90 text-white rounded-full mb-6 backdrop-blur-md">
             <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
             <span className="text-xs font-semibold tracking-wide">Trusted by 50,000+ Students</span>
           </div>
@@ -81,7 +91,7 @@ export default function LoginPage() {
           <p className="text-white/80 text-lg leading-relaxed mt-4 font-body">Connect with the best certified instructors and accelerate your journey to getting your license.</p>
         </div>
         <div className="absolute top-1/2 right-12 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-xl p-6 rounded-2xl shadow-2xl flex items-center gap-4 border border-white/20">
-          <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+          <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
             <span className="material-symbols-outlined">safety_check</span>
           </div>
           <div>
@@ -133,31 +143,31 @@ export default function LoginPage() {
               <div className="relative mt-1">
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">mail</span>
                 <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" required
-                  className="w-full pl-9 pr-3 py-2.5 md:py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm md:text-base font-body" />
+                  className="w-full pl-9 pr-3 py-2.5 md:py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm md:text-base font-body" />
               </div>
             </div>
             <div>
               <div className="flex justify-between items-center">
                 <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="password">Password</label>
-                <Link href="/forgot-password" className="text-[10px] md:text-xs font-medium text-secondary hover:text-on-secondary-container transition-colors font-body">Forgot password?</Link>
+                <Link href="/forgot-password" className="text-[10px] md:text-xs font-medium text-primary hover:text-primary transition-colors font-body">Forgot password?</Link>
               </div>
               <div className="relative mt-1">
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">lock</span>
                 <input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required
-                  className="w-full pl-9 pr-9 py-2.5 md:py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm md:text-base font-body" />
+                  className="w-full pl-9 pr-9 py-2.5 md:py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm md:text-base font-body" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary transition-colors">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors">
                   <span className="material-symbols-outlined text-[18px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
                 </button>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <input id="remember" type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)}
-                className="w-3.5 h-3.5 md:w-4 md:h-4 rounded border-outline-variant text-secondary focus:ring-secondary" />
+                className="w-3.5 h-3.5 md:w-4 md:h-4 rounded border-outline-variant text-primary focus:ring-primary" />
               <label htmlFor="remember" className="text-[10px] md:text-xs font-medium text-on-surface-variant select-none cursor-pointer font-body">Remember me for 30 days</label>
             </div>
             <button type="submit" disabled={loading}
-              className="w-full py-3 md:py-4 bg-secondary text-on-secondary font-semibold text-sm md:text-base rounded-xl shadow-lg shadow-secondary/20 hover:bg-on-secondary-container transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-body">
+              className="w-full py-3 md:py-4 bg-primary text-white font-bold text-sm md:text-base rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-body">
               {loading ? 'Signing in...' : 'Sign In'}
               <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </button>
@@ -165,13 +175,13 @@ export default function LoginPage() {
 
           <p className="text-center text-xs md:text-base text-on-surface-variant mt-4 md:pt-4 font-body">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-secondary font-bold hover:underline transition-all">Sign Up</Link>
+            <Link href="/signup" className="text-primary font-bold hover:underline transition-all">Sign Up</Link>
           </p>
 
           <div className="hidden md:flex pt-8 text-center lg:text-left gap-x-6 justify-center lg:justify-start">
             <span className="text-[10px] font-medium text-on-surface-variant/60 font-body">&copy; 2024 LCarDrive</span>
-            <Link href="/privacy" className="text-[10px] font-medium text-on-surface-variant/60 hover:text-secondary transition-colors font-body">Privacy Policy</Link>
-            <Link href="/terms" className="text-[10px] font-medium text-on-surface-variant/60 hover:text-secondary transition-colors font-body">Terms of Service</Link>
+            <Link href="/privacy" className="text-[10px] font-medium text-on-surface-variant/60 hover:text-primary transition-colors font-body">Privacy Policy</Link>
+            <Link href="/terms" className="text-[10px] font-medium text-on-surface-variant/60 hover:text-primary transition-colors font-body">Terms of Service</Link>
           </div>
         </div>
       </section>

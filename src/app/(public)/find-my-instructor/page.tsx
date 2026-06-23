@@ -178,14 +178,14 @@ export default function FindMyInstructorPage() {
         <section className="w-full max-w-container-max mx-auto z-10 fade-in">
           {initialLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <span className="material-symbols-outlined text-[48px] text-secondary animate-spin mb-4">refresh</span>
+              <span className="material-symbols-outlined text-[48px] text-primary animate-spin mb-4">refresh</span>
               <h2 className="font-headline-md text-headline-md text-on-surface mb-2">Analyzing your preferences...</h2>
               <p className="font-body-md text-body-md text-on-surface-variant">Our AI is cross-referencing availability, ratings, and teaching styles.</p>
             </div>
           ) : (
             <>
               <div className="text-center mb-stack-lg">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container mb-stack-sm shadow-sm">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary mb-stack-sm shadow-sm">
                   <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
                   <span className="font-label-sm text-label-sm font-bold">Analysis Complete</span>
                 </div>
@@ -199,12 +199,12 @@ export default function FindMyInstructorPage() {
               {aiMatches && aiMatches.length > 0 && (
                 <div className="mb-stack-xl">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
                     <h3 className="font-headline-sm text-headline-sm text-on-surface">Top AI Picks</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
                     {aiMatches.map((r) => (
-                      <div key={r.name} className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_10px_25px_rgba(15,23,42,0.12)] transition-all duration-300 border border-secondary flex flex-col group">
+                      <div key={r.name} className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_10px_25px_rgba(15,23,42,0.12)] transition-all duration-300 border border-primary flex flex-col group">
                         <div className="relative h-48 w-full bg-surface-container">
                           {r.image ? (
                             <img src={r.image} alt="" className="w-full h-full object-cover" />
@@ -214,30 +214,30 @@ export default function FindMyInstructorPage() {
                             </div>
                           )}
                           {r.verified && (
-                            <div className="absolute top-4 left-4 bg-secondary-container text-on-secondary-container px-2 py-1 rounded text-xs font-bold flex items-center gap-1 shadow-sm">
+                            <div className="absolute top-4 left-4 bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold flex items-center gap-1 shadow-sm">
                               <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
                             </div>
                           )}
                         </div>
                         <div className="p-6 flex-grow flex flex-col">
                           <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-headline-sm text-headline-sm text-on-surface group-hover:text-secondary transition-colors">{r.name}</h3>
+                            <h3 className="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">{r.name}</h3>
                             <div className="flex items-center gap-1 bg-surface-container px-2 py-1 rounded text-sm">
                               <span className="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                               <span className="font-label-sm font-bold text-on-surface">{r.rating}</span>
                             </div>
                           </div>
                           <p className="font-body-md text-body-md text-on-surface-variant mb-4">{r.bio}</p>
-                          <div className="mt-auto ai-gradient-bg border-l-4 border-secondary rounded-r-lg p-4 mb-4">
+                          <div className="mt-auto ai-gradient-bg border-l-4 border-primary rounded-r-lg p-4 mb-4">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="material-symbols-outlined text-secondary text-[16px]">psychology</span>
+                              <span className="material-symbols-outlined text-primary text-[16px]">psychology</span>
                               <span className="font-label-sm text-label-sm font-bold text-on-surface">Why this match?</span>
                             </div>
                             <p className="font-label-sm text-label-sm text-on-surface-variant">{r.reason}</p>
                           </div>
                           <Link
                             href={`/instructors/${r.suburb.toLowerCase().replace(/\s+/g, '-')}/${r.slug}`}
-                            className="w-full font-label-md text-label-md text-secondary border border-secondary px-4 py-2 rounded-lg hover:bg-secondary hover:text-on-secondary transition-colors text-center block"
+                            className="w-full font-label-md text-label-md text-primary border border-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-center block"
                           >
                             View Profile
                           </Link>
@@ -264,7 +264,7 @@ export default function FindMyInstructorPage() {
                     <h3 className="font-headline-sm text-headline-sm text-on-surface">
                       All Matching Instructors
                       {loading && (
-                        <span className="material-symbols-outlined text-secondary animate-spin text-[18px] ml-2 inline-block align-middle">refresh</span>
+                        <span className="material-symbols-outlined text-primary animate-spin text-[18px] ml-2 inline-block align-middle">refresh</span>
                       )}
                     </h3>
                     <span className="font-label-sm text-label-sm text-on-surface-variant">
@@ -284,7 +284,7 @@ export default function FindMyInstructorPage() {
                             </div>
                           )}
                           {inst.is_verified && (
-                            <div className="absolute top-3 left-3 bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 shadow-sm">
+                            <div className="absolute top-3 left-3 bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 shadow-sm">
                               <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
                             </div>
                           )}
@@ -301,12 +301,12 @@ export default function FindMyInstructorPage() {
                             <span className="material-symbols-outlined text-[14px] align-text-bottom">location_on</span> {inst.suburb}, {inst.state}
                           </p>
                           {inst.hourly_rate && (
-                            <p className="font-label-md text-label-md font-bold text-secondary mb-3">${inst.hourly_rate}/hr</p>
+                            <p className="font-label-md text-label-md font-bold text-primary mb-3">${inst.hourly_rate}/hr</p>
                           )}
                           <div className="mt-auto">
                             <Link
                               href={`/instructors/${inst.suburb.toLowerCase().replace(/\s+/g, '-')}/${inst.slug}`}
-                              className="w-full font-label-sm text-label-sm text-on-surface-variant border border-outline-variant px-3 py-2 rounded-lg hover:border-secondary hover:text-secondary transition-colors text-center block"
+                              className="w-full font-label-sm text-label-sm text-on-surface-variant border border-outline-variant px-3 py-2 rounded-lg hover:border-primary hover:text-primary transition-colors text-center block"
                             >
                               View Profile
                             </Link>
@@ -325,7 +325,7 @@ export default function FindMyInstructorPage() {
               )}
 
               <div className="mt-stack-lg text-center">
-                <button onClick={reset} className="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors flex items-center justify-center gap-2 mx-auto">
+                <button onClick={reset} className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-2 mx-auto">
                   <span className="material-symbols-outlined">restart_alt</span> Start New Search
                 </button>
               </div>
@@ -342,12 +342,12 @@ export default function FindMyInstructorPage() {
         <div className="mb-stack-lg">
           <div className="flex justify-between items-end mb-2">
             <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Step {step + 1} of {QUESTIONS.length}</span>
-            <span className="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+            <span className="font-label-sm text-label-sm text-primary flex items-center gap-1">
               <span className="material-symbols-outlined text-[14px]">psychology</span> AI Assisting
             </span>
           </div>
           <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden">
-            <div className="h-full bg-secondary rounded-full" style={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}></div>
+            <div className="h-full bg-primary rounded-full" style={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}></div>
           </div>
         </div>
 
@@ -362,7 +362,7 @@ export default function FindMyInstructorPage() {
               placeholder={current.placeholder}
               value={answers[current.id] || ''}
               onChange={(e) => setAnswer(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-outline-variant rounded-lg font-body-lg text-body-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all shadow-sm"
+              className="w-full pl-12 pr-4 py-4 border border-outline-variant rounded-lg font-body-lg text-body-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
               autoFocus
             />
           </div>
@@ -376,8 +376,8 @@ export default function FindMyInstructorPage() {
                 onClick={() => setAnswer(opt)}
                 className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all ${
                   answers[current.id] === opt
-                    ? 'border-secondary bg-surface-container text-on-surface font-semibold'
-                    : 'border-outline-variant text-on-surface-variant hover:border-secondary'
+                    ? 'border-primary bg-primary/10 text-primary font-semibold'
+                    : 'border-outline-variant text-on-surface-variant hover:border-primary'
                 }`}
               >
                 {opt}
@@ -390,7 +390,7 @@ export default function FindMyInstructorPage() {
           <button onClick={handlePrev} disabled={step === 0} className="font-label-md text-label-md text-on-surface-variant hover:text-on-surface px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-30">
             <span className="material-symbols-outlined">arrow_back</span> Back
           </button>
-          <button onClick={handleNext} disabled={!answers[current.id]} className="font-label-md text-label-md bg-secondary text-on-secondary px-8 py-3 rounded-lg hover:brightness-110 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50">
+          <button onClick={handleNext} disabled={!answers[current.id]} className="font-label-md text-label-md bg-primary text-white px-8 py-3 rounded-xl hover:brightness-110 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50">
             {step === QUESTIONS.length - 1 ? (
               <>Find My Match <span className="material-symbols-outlined">auto_awesome</span></>
             ) : (

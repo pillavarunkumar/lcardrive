@@ -76,6 +76,11 @@ export async function POST(request: Request) {
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
 
+    if (!r.first_name || !r.last_name || !r.suburb) {
+      results.push({ row: i + 2, status: 'error', error: 'Missing required fields (first_name, last_name, suburb)' });
+      continue;
+    }
+
     const slug = r.slug || `${r.first_name?.toLowerCase()}-${r.last_name?.toLowerCase()}-${r.suburb?.toLowerCase().replace(/\s+/g, '-')}`;
 
     const { error } = await supabase.from('instructors').insert({

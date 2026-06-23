@@ -3,7 +3,8 @@ import { supabase } from '@/lib/supabase';
 
 const ALL_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs'] as const;
 
-const FK_ORDER: readonly (typeof ALL_TABLES[number])[] = ['listing_flags', 'reviews', 'instructors', 'search_logs'];
+const DELETE_ORDER: readonly (typeof ALL_TABLES[number])[] = ['listing_flags', 'reviews', 'instructors', 'search_logs'];
+const INSERT_ORDER: readonly (typeof ALL_TABLES[number])[] = ['search_logs', 'instructors', 'reviews', 'listing_flags'];
 
 export async function POST(request: Request) {
   if (!supabase) {
@@ -24,17 +25,19 @@ export async function POST(request: Request) {
 
   const results: { table: string; inserted: number; error?: string }[] = [];
 
-  for (const table of FK_ORDER) {
-    const rows = backup[table] as Record<string, unknown>[];
-
-    if (rows.length === 0) {
-      results.push({ table, inserted: 0 });
-      continue;
-    }
-
+  for (const table of DELETE_ORDER) {
+    if (!backup[table]) continue;
     const { error: delErr } = await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
     if (delErr) {
       results.push({ table, inserted: 0, error: `delete failed: ${delErr.message}` });
+    }
+  }
+
+  for (const table of INSERT_ORDER) {
+    const rows = backup[table] as Record<string, unknown>[];
+
+    if (!rows || rows.length === 0) {
+      results.push({ table, inserted: 0 });
       continue;
     }
 
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
       inserted += batch.length;
     }
 
-    if (!results.find((r) => r.table === table)) {
+    if (!results.find((r) => r.table === table && r.inserted !== undefined)) {
       results.push({ table, inserted });
     }
   }

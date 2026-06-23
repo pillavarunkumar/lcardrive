@@ -12,7 +12,16 @@ export default function SignUpPage() {
 
   useEffect(() => {
     if (isSignedIn) {
-      router.push('/portal');
+      const checkAdmin = async () => {
+        try {
+          const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+          const data = await res.json();
+          router.push(data.isAdmin ? '/admin' : '/portal');
+        } catch {
+          router.push('/portal');
+        }
+      };
+      checkAdmin();
     }
   }, [isSignedIn, router]);
   const [fullName, setFullName] = useState('');
@@ -23,6 +32,8 @@ export default function SignUpPage() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,17 +51,54 @@ export default function SignUpPage() {
       });
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        router.push('/portal');
-      } else {
-        if (result.status === 'missing_requirements' && result.missingFields?.includes('email_address')) {
-          await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-          setError('Please check your email for a verification code.');
-        } else {
-          setError('Something went wrong. Please try again.');
+        if (isInstructor) {
+          await fetch('/api/portal/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
+          });
         }
+        const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+        const adminData = await adminRes.json();
+        router.push(adminData.isAdmin ? '/admin' : '/portal');
+      } else if (result.status === 'missing_requirements') {
+        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+        setVerifying(true);
+      } else {
+        setError('Something went wrong. Please try again.');
       }
     } catch (err: any) {
       setError(err.errors?.[0]?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isLoaded) return;
+    setError('');
+    setLoading(true);
+    try {
+      const result = await signUp.attemptEmailAddressVerification({ code: verificationCode });
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        if (isInstructor) {
+          const nameParts = fullName.trim().split(/\s+/);
+          await fetch('/api/portal/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
+          });
+        }
+        const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+        const adminData = await adminRes.json();
+        router.push(adminData.isAdmin ? '/admin' : '/portal');
+      } else {
+        setError('Verification failed. Please try again.');
+      }
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || 'Invalid verification code');
     } finally {
       setLoading(false);
     }
@@ -60,7 +108,16 @@ export default function SignUpPage() {
     if (!isLoaded) return;
     setError('');
     if (isSignedIn) {
-      router.push('/portal');
+      const checkAdmin = async () => {
+        try {
+          const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+          const data = await res.json();
+          router.push(data.isAdmin ? '/admin' : '/portal');
+        } catch {
+          router.push('/portal');
+        }
+      };
+      checkAdmin();
       return;
     }
     signUp.authenticateWithRedirect({
@@ -69,7 +126,16 @@ export default function SignUpPage() {
       redirectUrlComplete: '/portal',
     }).catch((err: any) => {
       if (err.errors?.[0]?.code === 'session_exists') {
-        router.push('/portal');
+        const checkAdmin = async () => {
+          try {
+            const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+            const data = await res.json();
+            router.push(data.isAdmin ? '/admin' : '/portal');
+          } catch {
+            router.push('/portal');
+          }
+        };
+        checkAdmin();
       } else {
         setError(err.errors?.[0]?.message || 'OAuth sign up failed');
       }
@@ -116,32 +182,58 @@ export default function SignUpPage() {
             </div>
           )}
 
+          {verifying ? (
+            <form onSubmit={handleVerifyCode} className="space-y-2.5 md:space-y-3">
+              <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="material-symbols-outlined text-primary">mail</span>
+                  <p className="font-label-md text-label-md text-on-surface">Check your email</p>
+                </div>
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  We sent a verification code to <strong>{email}</strong>. Enter it below to activate your account.
+                </p>
+              </div>
+              <div>
+                <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="code">Verification Code</label>
+                <input id="code" type="text" value={verificationCode} onChange={(e) => setVerificationCode(e.target.value)} placeholder="Enter your 6-digit code" required
+                  className="w-full px-3 py-2.5 md:py-3 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm md:text-base text-center text-on-surface placeholder:text-outline-variant transition-all font-body mt-1 tracking-[0.5em]" />
+              </div>
+              <button type="submit" disabled={loading || !verificationCode}
+                className="w-full bg-primary text-white font-bold text-sm md:text-base py-2.5 md:py-3.5 rounded-xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed font-body">
+                {loading ? 'Verifying...' : 'Verify Email'}
+              </button>
+              <button type="button" onClick={() => setVerifying(false)}
+                className="w-full text-center text-sm text-on-surface-variant hover:text-primary py-2 font-body">
+                Back to sign up
+              </button>
+            </form>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-2.5 md:space-y-3">
             <div>
               <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="fullname">Full Name</label>
               <input id="fullname" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" required
-                className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body mt-0.5" />
+                className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body mt-0.5" />
             </div>
             <div>
               <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="email">Email</label>
               <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required
-                className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body mt-0.5" />
+                className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body mt-0.5" />
             </div>
             <div>
               <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="password">Password</label>
               <div className="relative mt-0.5">
                 <input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" required minLength={8}
-                  className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body" />
+                  className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-secondary">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary">
                   <span className="material-symbols-outlined text-[18px] md:text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
                 </button>
               </div>
             </div>
 
-            <div className="p-2.5 md:p-3 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-between group hover:border-secondary transition-colors">
+            <div className="p-2.5 md:p-3 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-between group hover:border-primary transition-colors">
               <div className="flex items-center gap-2 md:gap-3">
-                <div className="w-7 h-7 md:w-9 md:h-9 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container">
+                <div className="w-7 h-7 md:w-9 md:h-9 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container">
                   <span className="material-symbols-outlined text-sm md:text-base">school</span>
                 </div>
                 <div>
@@ -151,27 +243,28 @@ export default function SignUpPage() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" checked={isInstructor} onChange={(e) => setIsInstructor(e.target.checked)} className="sr-only peer" />
-                <div className="w-9 h-5 md:w-11 md:h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 md:after:h-5 md:after:w-5 after:transition-all peer-checked:bg-secondary" />
+                <div className="w-9 h-5 md:w-11 md:h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 md:after:h-5 md:after:w-5 after:transition-all peer-checked:bg-primary" />
               </label>
             </div>
 
             <div className="flex items-start gap-1.5 md:gap-2">
               <input id="terms" type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="mt-0.5 w-3.5 h-3.5 md:w-4 md:h-4 rounded border-outline-variant text-secondary focus:ring-secondary cursor-pointer" />
+                className="mt-0.5 w-3.5 h-3.5 md:w-4 md:h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
               <label htmlFor="terms" className="text-xs md:text-sm font-medium text-on-surface-variant leading-relaxed font-body">
-                I agree to the <Link href="/terms" className="text-secondary font-bold hover:underline">Terms</Link> and <Link href="/privacy" className="text-secondary font-bold hover:underline">Privacy Policy</Link>.
+                I agree to the <Link href="/terms" className="text-primary font-bold hover:underline">Terms</Link> and <Link href="/privacy" className="text-primary font-bold hover:underline">Privacy Policy</Link>.
               </label>
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full bg-secondary text-on-secondary font-semibold text-sm md:text-base py-2.5 md:py-3.5 rounded-xl shadow-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed font-body">
+              className="w-full bg-primary text-white font-bold text-sm md:text-base py-2.5 md:py-3.5 rounded-xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed font-body">
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
+          )}
 
           <p className="text-center text-xs md:text-base text-on-surface-variant mt-3 md:pt-3 font-body">
             Already have an account?{' '}
-            <Link href="/login" className="text-secondary font-bold hover:underline transition-all">Login</Link>
+            <Link href="/login" className="text-primary font-bold hover:underline transition-all">Login</Link>
           </p>
         </div>
       </section>
@@ -183,7 +276,7 @@ export default function SignUpPage() {
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-primary-container/90 via-primary-container/40 to-transparent z-10 flex flex-col justify-end p-6 md:p-8 lg:p-12">
           <div className="max-w-xl">
-            <div className="inline-flex items-center gap-1.5 bg-secondary-container/20 backdrop-blur-md px-2.5 py-1 rounded-full text-secondary-fixed mb-4 border border-secondary-fixed/30">
+            <div className="inline-flex items-center gap-1.5 bg-primary-container/20 backdrop-blur-md px-2.5 py-1 rounded-full text-primary mb-4 border border-primary/30">
               <span className="material-symbols-outlined text-[10px] md:text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               <span className="text-[9px] md:text-xs uppercase tracking-wider font-semibold font-body">Trusted by 10k+ Learners</span>
             </div>
@@ -213,10 +306,10 @@ export default function SignUpPage() {
         <div className="absolute top-1/4 right-8 z-20 hidden xl:block">
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-4 md:p-5 rounded-2xl shadow-2xl max-w-[220px]">
             <div className="flex items-center gap-3 mb-3">
-              <img alt="Instructor" className="w-10 h-10 rounded-full border-2 border-secondary" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop" />
+              <img alt="Instructor" className="w-10 h-10 rounded-full border-2 border-primary" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop" />
               <div>
                 <p className="text-[11px] md:text-sm font-semibold text-white font-body">David Miller</p>
-                <p className="text-[10px] text-secondary-fixed font-body">Top Rated Instructor</p>
+                <p className="text-[10px] text-primary font-body">Top Rated Instructor</p>
               </div>
             </div>
             <div className="flex gap-0.5 text-[#FFD700]">

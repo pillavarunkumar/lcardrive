@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser, UserButton, useClerk } from '@clerk/nextjs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const navItems = [
-  { href: '/portal', label: 'Dashboard', icon: 'dashboard' },
-  { href: '/portal/profile', label: 'Profile Editor', icon: 'edit_note' },
-  { href: '/portal/leads', label: 'Leads', icon: 'group' },
+  { href: '/portal', label: 'Dashboard', icon: 'grid_view' },
+  { href: '/portal/profile', label: 'Profile Editor', icon: 'edit_square' },
+  { href: '/portal/leads', label: 'Leads', icon: 'concierge' },
   { href: '/portal/service-areas', label: 'Service Areas', icon: 'map' },
   { href: '/portal/rates', label: 'Rates & Packages', icon: 'payments' },
   { href: '/portal/availability', label: 'Availability', icon: 'calendar_month' },
@@ -20,6 +20,19 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const { user } = useUser();
   const { signOut } = useClerk();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetch('/api/admin/login-via-clerk', { method: 'POST' })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.isAdmin) {
+            router.push('/admin');
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user, router]);
 
   const sidebarContent = (
     <>
@@ -41,9 +54,9 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               href={item.href}
               onClick={() => setMobileSidebarOpen(false)}
               className={`flex items-center gap-3 rounded-lg p-3 font-label-md text-label-md transition-all duration-200 ease-in-out ${
-                active
-                  ? 'bg-secondary-container text-on-secondary-container font-bold'
-                  : 'text-on-surface-variant hover:bg-surface-container-highest'
+active
+                    ? 'bg-primary/10 text-primary font-bold'
+                    : 'text-on-surface-variant hover:bg-surface-container-highest'
               }`}
             >
               <span className="material-symbols-outlined" style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>{item.icon}</span>
@@ -54,7 +67,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       </nav>
       <div className="mt-auto pt-4 border-t border-outline-variant">
         <button onClick={() => signOut({ redirectUrl: '/' })}
-          className="w-full bg-secondary text-on-secondary rounded-lg py-3 font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:brightness-110 transition-colors">
+          className="w-full bg-primary text-white rounded-lg py-3 font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-colors">
           <span className="material-symbols-outlined">logout</span>
           Logout
         </button>
@@ -93,15 +106,15 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           <span className="font-headline-sm text-headline-sm font-bold">LCarDrive</span>
         </div>
         <div className="w-8 h-8 rounded-full bg-surface-container overflow-hidden">
-          {user ? (
+          {user?.imageUrl ? (
             <img
               alt="Profile"
               className="w-full h-full object-cover"
               src={user.imageUrl}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-secondary-container text-on-secondary-container text-xs font-bold">
-              ?
+            <div className="w-full h-full flex items-center justify-center bg-primary-container text-on-primary-container text-xs font-bold">
+              {user?.fullName ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '?'}
             </div>
           )}
         </div>

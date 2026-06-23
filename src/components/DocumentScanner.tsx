@@ -50,6 +50,7 @@ export default function DocumentScanner({ docType, label, existingImageUrl, onSc
       URL.revokeObjectURL(objectUrl);
       setPreviewUrl(existingImageUrl || null);
     } finally {
+      URL.revokeObjectURL(objectUrl);
       setScanning(false);
       e.target.value = '';
     }

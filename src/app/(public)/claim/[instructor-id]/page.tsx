@@ -51,8 +51,8 @@ export default function ClaimPage() {
   return (
     <div className="max-w-lg mx-auto px-margin-mobile py-stack-lg">
       <div className="text-center mb-8">
-        <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto mb-4">
-          <span className="material-symbols-outlined text-secondary text-3xl">verified</span>
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <span className="material-symbols-outlined text-primary text-3xl">verified</span>
         </div>
         <h1 className="font-display text-3xl font-bold text-on-surface mb-2">Claim This Profile</h1>
         <p className="text-on-surface-variant">Is this your listing? Verify your identity to take ownership.</p>
@@ -68,11 +68,11 @@ export default function ClaimPage() {
                 {error}
               </div>
             )}
-            <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
-            <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" required minLength={8} />
-            <button type="submit" className="w-full bg-secondary text-white py-3 rounded-lg font-bold text-sm hover:brightness-110 transition-all">
+            <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" required />
+            <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" required />
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" required />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" required minLength={8} />
+            <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all">
               Continue
             </button>
           </form>
@@ -88,8 +88,8 @@ export default function ClaimPage() {
                 {error}
               </div>
             )}
-            <input type="text" placeholder="ADI Registration Number" value={adiNumber} onChange={(e) => setAdiNumber(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" />
-            <button type="submit" disabled={loading} className="w-full bg-secondary text-white py-3 rounded-lg font-bold text-sm hover:brightness-110 transition-all disabled:opacity-50">
+            <input type="text" placeholder="ADI Registration Number" value={adiNumber} onChange={(e) => setAdiNumber(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" />
+            <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50">
               {loading ? 'Submitting...' : 'Submit for Review'}
             </button>
           </form>
@@ -97,7 +97,7 @@ export default function ClaimPage() {
 
         {step === 'done' && (
           <div className="text-center py-6">
-            <span className="material-symbols-outlined text-4xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+            <span className="material-symbols-outlined text-4xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
             <h3 className="font-bold text-on-surface text-lg mt-4 mb-2">Claim Submitted!</h3>
             <p className="text-sm text-on-surface-variant">You&apos;ll receive an email once it&apos;s approved, usually within 1–2 business days.</p>
           </div>

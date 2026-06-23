@@ -3,8 +3,8 @@
 import { useState } from 'react';
 
 const TABLES = [
-  { value: 'instructors', label: 'Instructors', icon: 'local_taxi', desc: 'All instructor profiles and details' },
-  { value: 'reviews', label: 'Reviews', icon: 'rate_review', desc: 'Student reviews and ratings' },
+  { value: 'instructors', label: 'Instructors', icon: 'group', desc: 'All instructor profiles' },
+  { value: 'reviews', label: 'Reviews', icon: 'rate_review', desc: 'Student reviews & ratings' },
   { value: 'listing_flags', label: 'Listing Flags', icon: 'flag', desc: 'Reported listing issues' },
   { value: 'search_logs', label: 'Search Logs', icon: 'search_insights', desc: 'User search analytics' },
 ];
@@ -40,66 +40,64 @@ export default function AdminExport() {
   };
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-xl">
       <div>
-        <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Export Data</h1>
-        <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
-          Download table data as CSV or JSON.
-        </p>
+        <h1 className="text-xl font-bold text-gray-900">Export Data</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Download table data as CSV or JSON.</p>
       </div>
 
-      <div className="mt-6 bg-surface-container-lowest rounded-xl border border-outline-variant/40 p-6 space-y-6">
+      <div className="mt-4 bg-white rounded-xl border border-gray-100 p-5 space-y-4">
         <div>
-          <label className="font-label-md text-label-md font-bold text-on-surface mb-3 block">Table</label>
-          <div className="grid grid-cols-2 gap-3">
+          <label className="text-xs font-semibold text-gray-700 mb-2 block">Table</label>
+          <div className="grid grid-cols-2 gap-2">
             {TABLES.map((t) => (
               <button
                 key={t.value}
                 onClick={() => setTable(t.value)}
-                className={`p-4 rounded-xl text-left transition-all border-2 ${
+                className={`p-3 rounded-xl text-left transition-all border ${
                   table === t.value
-                    ? 'bg-secondary-container/30 border-secondary'
-                    : 'bg-surface-container-low border-transparent hover:border-outline-variant/60'
+                    ? 'bg-primary/5 border-primary/40'
+                    : 'bg-white border-gray-100 hover:border-gray-200'
                 }`}
               >
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-2 ${
-                  table === t.value ? 'bg-secondary text-on-secondary' : 'bg-surface-container-highest text-on-surface-variant'
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-1.5 ${
+                  table === t.value ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'
                 }`}>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>{t.icon}</span>
+                  <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>{t.icon}</span>
                 </div>
-                <p className="font-label-md text-label-md font-bold text-on-surface">{t.label}</p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">{t.desc}</p>
+                <p className="text-xs font-bold text-gray-900">{t.label}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">{t.desc}</p>
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="font-label-md text-label-md font-bold text-on-surface mb-3 block">Format</label>
-          <div className="flex gap-3">
+          <label className="text-xs font-semibold text-gray-700 mb-2 block">Format</label>
+          <div className="flex gap-2">
             {(['csv', 'json'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFormat(f)}
-                className={`flex-1 p-4 rounded-xl text-center transition-all border-2 ${
+                className={`flex-1 p-3 rounded-xl text-center transition-all border ${
                   format === f
-                    ? 'bg-secondary-container/30 border-secondary'
-                    : 'bg-surface-container-low border-transparent hover:border-outline-variant/60'
+                    ? 'bg-primary/5 border-primary/40'
+                    : 'bg-white border-gray-100 hover:border-gray-200'
                 }`}
               >
-                <span className={`material-symbols-outlined text-[24px] ${
-                  format === f ? 'text-secondary' : 'text-on-surface-variant'
+                <span className={`material-symbols-outlined text-[20px] ${
+                  format === f ? 'text-primary' : 'text-gray-400'
                 }`} style={{ fontVariationSettings: "'FILL' 1" }}>{f === 'csv' ? 'table_rows' : 'data_object'}</span>
-                <p className="font-label-md text-label-md font-bold text-on-surface mt-1">.{f}</p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant">{f === 'csv' ? 'Spreadsheet' : 'Structured data'}</p>
+                <p className="text-xs font-bold text-gray-900 mt-1">.{f}</p>
+                <p className="text-[10px] text-gray-500">{f === 'csv' ? 'Spreadsheet' : 'Structured data'}</p>
               </button>
             ))}
           </div>
         </div>
 
         {error && (
-          <div className="p-3 bg-error-container text-on-error-container rounded-xl text-sm flex items-center gap-2">
-            <span className="material-symbols-outlined text-[16px]">error</span>
+          <div className="p-3 bg-red-50 text-red-700 rounded-xl text-xs flex items-center gap-2 border border-red-100">
+            <span className="material-symbols-outlined text-[14px]">error</span>
             {error}
           </div>
         )}
@@ -107,16 +105,16 @@ export default function AdminExport() {
         <button
           onClick={handleExport}
           disabled={exporting}
-          className="w-full bg-secondary text-on-secondary py-3 rounded-xl font-label-md text-label-md font-bold hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
         >
           {exporting ? (
             <>
-              <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+              <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
               Exporting...
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined text-[18px]">download</span>
+              <span className="material-symbols-outlined text-[16px]">file_download</span>
               Export as .{format}
             </>
           )}

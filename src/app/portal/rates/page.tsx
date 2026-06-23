@@ -27,7 +27,7 @@ export default function PortalRates() {
       .then(d => {
         const inst = d.instructor;
         if (!inst) return;
-        if (inst.hourly_rate) setHourlyRate(inst.hourly_rate);
+        if (inst.hourly_rate !== null && inst.hourly_rate !== undefined) setHourlyRate(inst.hourly_rate);
         if (inst.lesson_duration_mins) setLessonDuration(inst.lesson_duration_mins);
         if (inst.package_options?.length) setPackages(inst.package_options);
       })
@@ -59,7 +59,12 @@ export default function PortalRates() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ hourly_rate: hourlyRate, lesson_duration_mins: lessonDuration, package_options: packages }),
       });
-      showToast(res.ok ? 'Rates saved successfully!' : 'Failed to save rates.');
+      if (res.ok) {
+        showToast('Rates saved successfully!');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Failed to save rates.');
+      }
     } catch {
       showToast('Failed to save rates.');
     } finally {
@@ -70,7 +75,7 @@ export default function PortalRates() {
   return (
     <>
       {toast && (
-        <div className="fixed top-6 right-6 z-[60] bg-secondary text-on-secondary px-5 py-3 rounded-xl shadow-lg font-label-md text-label-md animate-in fade-in">
+        <div className="fixed top-6 right-6 z-[60] bg-primary text-white px-5 py-3 rounded-xl shadow-lg font-label-md text-label-md animate-in fade-in">
           {toast}
         </div>
       )}
@@ -87,7 +92,7 @@ export default function PortalRates() {
                   value={hourlyRate}
                   onChange={(e) => setHourlyRate(parseInt(e.target.value) || 0)}
                   min={0}
-                  className="bg-surface border border-outline-variant/60 rounded-lg pl-8 pr-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all w-full"
+                  className="bg-surface border border-outline-variant/60 rounded-lg pl-8 pr-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full"
                 />
               </div>
             </div>
@@ -96,14 +101,14 @@ export default function PortalRates() {
               <div className="flex flex-wrap gap-2">
                 {[60, 90].map((d) => (
                   <label key={d} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                    lessonDuration === d ? 'border-secondary bg-surface-container' : 'border-outline-variant'
+                    lessonDuration === d ? 'border-primary bg-primary/10' : 'border-outline-variant'
                   }`}>
                     <input
                       type="radio"
                       name="duration"
                       checked={lessonDuration === d}
                       onChange={() => setLessonDuration(d)}
-                      className="accent-secondary"
+                      className="accent-primary"
                     />
                     <span className="text-sm font-medium text-on-surface">{d} min</span>
                   </label>
@@ -123,7 +128,7 @@ export default function PortalRates() {
                       <span className="text-xs text-on-surface-variant ml-3">{pkg.hours} hours</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold text-secondary">${pkg.price}</span>
+                      <span className="text-sm font-bold text-primary">${pkg.price}</span>
                       <button onClick={() => removePackage(i)} className="text-on-surface-variant hover:text-error transition-colors">
                         <span className="material-symbols-outlined text-sm">close</span>
                       </button>
@@ -136,17 +141,17 @@ export default function PortalRates() {
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-on-surface-variant">Label</label>
                 <input type="text" placeholder="e.g. Starter Pack" value={pkgLabel} onChange={(e) => setPkgLabel(e.target.value)}
-                  className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-on-surface-variant">Hours</label>
                 <input type="number" placeholder="5" value={pkgHours} onChange={(e) => setPkgHours(e.target.value)} min={1}
-                  className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-on-surface-variant">Price ($)</label>
                 <input type="number" placeholder="300" value={pkgPrice} onChange={(e) => setPkgPrice(e.target.value)} min={0}
-                  className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all" />
+                  className="bg-surface border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" />
               </div>
               <button onClick={addPackage}
                 className="bg-surface-container-high hover:bg-surface-container-higher text-on-surface rounded-lg py-2 text-sm font-medium transition-colors flex items-center justify-center gap-1">
@@ -156,7 +161,7 @@ export default function PortalRates() {
           </div>
 
           <button onClick={handleSave} disabled={saving}
-            className="bg-secondary text-white px-6 py-3 rounded-lg text-sm font-bold hover:brightness-110 transition-all disabled:opacity-50">
+            className="bg-primary text-white px-6 py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50">
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>

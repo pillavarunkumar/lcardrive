@@ -31,30 +31,28 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-[#f4f6fa] flex items-center justify-center p-4">
+      <div className="w-full max-w-[400px]">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary to-secondary/70 flex items-center justify-center text-on-secondary mx-auto mb-4 shadow-lg shadow-secondary/20">
-            <span className="material-symbols-outlined text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
-          </div>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface">LCarDrive</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">Admin Portal</p>
+          <span className="material-symbols-outlined text-[44px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
+          <h1 className="text-2xl font-bold text-gray-900 mt-2">LCarDrive</h1>
+          <p className="text-sm text-gray-500 mt-0.5 font-medium">Admin Portal</p>
         </div>
-        <form onSubmit={handleSubmit} className="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-outline-variant/40 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-7 shadow-sm border border-gray-200/80 space-y-5">
           <div>
-            <h2 className="font-headline-sm text-headline-sm text-on-surface mb-1">Welcome back</h2>
-            <p className="font-label-sm text-label-sm text-on-surface-variant">Enter the admin password to continue.</p>
+            <h2 className="text-lg font-semibold text-gray-900">Welcome back</h2>
+            <p className="text-sm text-gray-500 mt-0.5">Enter the admin password to continue.</p>
           </div>
 
           {error && (
-            <div className="p-3 bg-error-container text-on-error-container rounded-xl text-sm flex items-center gap-2">
+            <div className="p-3 bg-red-50 text-red-700 rounded-xl text-sm flex items-center gap-2 border border-red-100">
               <span className="material-symbols-outlined text-[16px]">error</span>
               {error}
             </div>
           )}
 
           <div>
-            <label className="font-label-md text-label-md font-semibold text-on-surface mb-1.5 block" htmlFor="password">Password</label>
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block" htmlFor="password">Password</label>
             <input
               id="password"
               type="password"
@@ -63,14 +61,14 @@ export default function AdminLogin() {
               placeholder="Enter admin password"
               required
               autoFocus
-              className="w-full px-4 py-2.5 bg-surface border border-outline-variant/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary text-sm transition-all"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-secondary text-on-secondary font-bold text-sm rounded-xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-2.5 bg-primary text-white font-semibold text-sm rounded-xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
           >
             {loading ? (
               <>
@@ -82,7 +80,7 @@ export default function AdminLogin() {
             )}
           </button>
 
-          <Link href="/" className="block text-center font-label-sm text-label-sm text-secondary hover:underline">
+          <Link href="/" className="block text-center text-sm text-primary font-medium hover:underline">
             Back to site
           </Link>
         </form>

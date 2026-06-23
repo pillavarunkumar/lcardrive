@@ -51,7 +51,12 @@ export default function PortalServiceAreas() {
           familiar_test_centres: familiarTestCentres,
         }),
       });
-      showToast(res.ok ? 'Service areas saved successfully!' : 'Failed to save.');
+      if (res.ok) {
+        showToast('Service areas saved successfully!');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error || 'Failed to save.');
+      }
     } catch {
       showToast('Failed to save.');
     } finally {
@@ -62,7 +67,7 @@ export default function PortalServiceAreas() {
   return (
     <>
       {toast && (
-        <div className="fixed top-6 right-6 z-[60] bg-secondary text-on-secondary px-5 py-3 rounded-xl shadow-lg font-label-md text-label-md animate-in fade-in">
+        <div className="fixed top-6 right-6 z-[60] bg-primary text-white px-5 py-3 rounded-xl shadow-lg font-label-md text-label-md animate-in fade-in">
           {toast}
         </div>
       )}
@@ -72,12 +77,12 @@ export default function PortalServiceAreas() {
         <div>
           <label className="text-sm font-bold text-on-surface block mb-1.5">Primary Suburb</label>
           <input type="text" value={suburb} onChange={(e) => setSuburb(e.target.value)}
-            className="w-full max-w-xs px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" />
+            className="w-full max-w-xs px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" />
         </div>
         <div>
           <label className="text-sm font-bold text-on-surface block mb-1.5">Service Radius (km)</label>
           <input type="number" value={serviceRadius} onChange={(e) => setServiceRadius(parseInt(e.target.value) || 10)}
-            className="w-full max-w-xs px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" min={1} max={50} />
+            className="w-full max-w-xs px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" min={1} max={50} />
         </div>
         <div>
           <label className="text-sm font-bold text-on-surface block mb-3">Suburbs You Serve</label>
@@ -92,7 +97,7 @@ export default function PortalServiceAreas() {
           <input type="text" placeholder="Type a suburb and press Enter..." value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && input.trim()) { e.preventDefault(); addSuburb(input.trim()); } }}
-            className="w-full max-w-xs px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-secondary outline-none" />
+            className="w-full max-w-xs px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" />
           <div className="flex flex-wrap gap-2 mt-3">
             {SUGGESTED.filter((s) => !serviceSuburbs.includes(s)).map((s) => (
               <button key={s} onClick={() => addSuburb(s)}
@@ -108,17 +113,17 @@ export default function PortalServiceAreas() {
             {['Sunshine', 'Moorabbin', 'Carlton', 'Werribee'].map((tc) => (
               <label key={tc}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 cursor-pointer transition-all ${
-                  familiarTestCentres.includes(tc) ? 'border-secondary bg-surface-container' : 'border-outline-variant'
+                  familiarTestCentres.includes(tc) ? 'border-primary bg-primary/10' : 'border-outline-variant'
                 }`}>
                 <input type="checkbox" checked={familiarTestCentres.includes(tc)}
-                  onChange={() => toggleTestCentre(tc)} className="accent-secondary rounded" />
+                  onChange={() => toggleTestCentre(tc)} className="accent-primary rounded" />
                 <span className="text-sm text-on-surface">{tc}</span>
               </label>
             ))}
           </div>
         </div>
         <button onClick={handleSave} disabled={saving}
-          className="bg-secondary text-white px-6 py-3 rounded-lg text-sm font-bold hover:brightness-110 transition-all disabled:opacity-50">
+          className="bg-primary text-white px-6 py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50">
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>

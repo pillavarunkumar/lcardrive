@@ -25,9 +25,13 @@ export interface Instructor {
   vehicle_rego?: string;
   vehicle_color?: string;
   dual_controls: boolean;
+  teaching_style?: string;
+  primary_learner_types?: string;
+  vehicle_transmission?: string;
   languages: string[];
   gender?: 'male' | 'female' | 'prefer_not_to_say';
   availability_days: string[];
+  availability_slots?: Record<string, string[]>;
   specialises_anxiety: boolean;
   accepts_international: boolean;
   familiar_test_centres: string[];
@@ -57,6 +61,7 @@ export interface Instructor {
   profile_completeness: number;
   is_claimed: boolean;
   is_verified: boolean;
+  has_pending_claim?: boolean;
   verified_name?: string;
   identity_verified_at?: string;
   documents_submitted_at?: string;
@@ -121,8 +126,7 @@ export interface SearchFilters {
   anxiety_friendly?: boolean;
   international_conversion?: boolean;
   test_centre_familiarity?: boolean;
-  test_centre?: string;
-  sort?: 'relevance' | 'price_asc' | 'price_desc' | 'rating' | 'newest';
+  sort?: 'price_asc' | 'price_desc' | 'rating' | 'name_asc' | 'name_desc';
 }
 
 export interface AIQuery {

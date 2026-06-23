@@ -98,7 +98,10 @@ export function computeVerification(state: ProfileFormState): VerificationResult
   const documentChecks = checks.filter(c => c.section === 'documents');
 
   const identityVerified = identityChecks.every(c => c.passed);
-  const documentsSubmitted = documentChecks.filter(c => c.label.includes('image')).every(c => c.passed);
+  const imageChecks = ['Driver\'s licence image', 'ADI registration image', 'Certificate IV image', 'WWCC image', 'Police check image', 'Medical assessment image', 'Insurance image'];
+  const documentsSubmitted = documentChecks
+    .filter(c => imageChecks.some(keyword => c.label.startsWith(keyword)))
+    .every(c => c.passed);
   const fullyVerified = identityVerified && documentsSubmitted;
 
   return { identityVerified, documentsSubmitted, fullyVerified, checks };
