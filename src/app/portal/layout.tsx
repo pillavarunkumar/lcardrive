@@ -13,7 +13,6 @@ const navItems = [
   { href: '/portal/rates', label: 'Pricing', icon: 'payments' },
   { href: '/portal/availability', label: 'Availability', icon: 'calendar_month' },
   { href: '/portal/service-areas', label: 'Service Areas', icon: 'map' },
-  { href: '/portal/vehicle', label: 'Vehicle', icon: 'directions_car' },
   { href: '/portal/reviews', label: 'Reviews', icon: 'star' },
   { href: '/portal/settings', label: 'Settings', icon: 'settings' },
 ];
@@ -25,7 +24,6 @@ const pageTitles: Record<string, string> = {
   '/portal/rates': 'Pricing Management',
   '/portal/availability': 'Availability Management',
   '/portal/service-areas': 'Service Areas',
-  '/portal/vehicle': 'Vehicle Details',
   '/portal/reviews': 'Reviews & Feedback',
   '/portal/settings': 'Account Settings',
 };
@@ -66,7 +64,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     ? { label: 'Profile verified', color: 'bg-green-500' }
     : hasPendingReview
       ? { label: 'Under review', color: 'bg-amber-500' }
-      : { label: 'Profile pending', color: 'bg-error' };
+      : { label: 'Profile pending', color: 'bg-outline-variant' };
 
   return (
     <div className="min-h-screen bg-surface">
@@ -78,7 +76,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       )}
 
       <aside
-        className={`fixed left-0 top-0 h-screen flex flex-col py-8 overflow-y-auto bg-white border-r border-outline-variant/30 w-72 z-50 transition-transform duration-300 ${
+        className={`fixed left-0 top-0 h-screen flex flex-col py-8 bg-white border-r border-outline-variant/30 w-72 z-50 transition-transform duration-300 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >

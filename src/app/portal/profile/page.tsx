@@ -21,6 +21,7 @@ export default function PortalProfile() {
   const [yearsExp, setYearsExp] = useState(10);
   const [mobileNumber, setMobileNumber] = useState('');
   const [gender, setGender] = useState('male');
+  const [lastName, setLastName] = useState('');
   const [profileCompleteness, setProfileCompleteness] = useState(85);
   const [licenceTypes, setLicenceTypes] = useState<string[]>(['car']);
   const [transmission, setTransmission] = useState('both');
@@ -122,6 +123,10 @@ export default function PortalProfile() {
       setPubLiabProvider(inst.public_liability_provider || '');
       setPubLiabPolicy(inst.public_liability_policy_number || '');
       setPubLiabExpiry(inst.public_liability_expiry || '');
+      setMobileNumber(inst.phone || '');
+      setGender(inst.gender || 'male');
+      setLastName(inst.last_name || user?.lastName || '');
+      setSocialFacebook(inst.social_facebook || '');
       if (inst.service_suburbs) setTestCentres(inst.service_suburbs);
       if (inst.is_verified) setIsVerified(true);
       if (v.is_verified && v.verified_name) setVerifiedName(v.verified_name);
@@ -181,6 +186,8 @@ export default function PortalProfile() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          first_name: user?.firstName || '',
+          last_name: lastName,
           bio: bioText,
           primary_learner_types: learnerTypes,
           licence_types: licenceTypes,
@@ -190,7 +197,7 @@ export default function PortalProfile() {
           accepts_international: acceptsInternational,
           languages,
           years_experience: yearsExp,
-          service_suburbs: testCentres,
+          familiar_test_centres: testCentres,
           vehicle_make: vehicleMake,
           vehicle_model: vehicleModel,
           vehicle_year: vehicleYear,
@@ -214,17 +221,27 @@ export default function PortalProfile() {
           public_liability_expiry: pubLiabExpiry || null,
           phone: mobileNumber,
           gender,
-          social_website: socialWebsite,
-          social_instagram: socialInstagram,
+          profile_photo_url: user?.imageUrl || '',
           social_facebook: socialFacebook,
+          drivers_licence_image_url: driversLicenceImageUrl,
+          adi_registration_image_url: adiRegImageUrl,
+          certificate_iv_image_url: certIVImageUrl,
+          wwcc_image_url: wwccImageUrl,
+          police_check_image_url: policeCheckImageUrl,
+          medical_assessment_image_url: medAssessmentImageUrl,
+          public_liability_image_url: pubLiabImageUrl,
+          vehicle_image_url: vehicleImageUrl,
         }),
       });
       if (res.ok) {
         showToast('Profile updated successfully!');
       } else {
-        showToast('Failed to save.');
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Save profile error:', err);
+        showToast(err.error || 'Failed to save.');
       }
-    } catch {
+    } catch (e) {
+      console.error('Save profile exception:', e);
       showToast('Failed to save.');
     } finally {
       setSaving(false);
@@ -320,8 +337,13 @@ export default function PortalProfile() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
-                    <label className="text-label-sm font-bold text-secondary">Full Name</label>
-                    <input type="text" value={`${user?.firstName || ''} ${user?.lastName || ''}`} readOnly
+                    <label className="text-label-sm font-bold text-secondary">First Name</label>
+                    <input type="text" value={user?.firstName || ''} readOnly
+                      className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-label-sm font-bold text-secondary">Last Name</label>
+                    <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Enter your last name"
                       className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
                   </div>
                   <div className="space-y-1.5">

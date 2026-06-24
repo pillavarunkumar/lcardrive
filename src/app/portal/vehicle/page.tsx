@@ -76,7 +76,6 @@ export default function PortalVehicle() {
           vehicle_year: year,
           vehicle_rego: form.vehicleRego.trim(),
           vehicle_color: form.vehicleColor.trim(),
-          transmission: form.transmissionType,
           vehicle_transmission: form.transmissionType,
           dual_controls: form.dualControls,
           vehicle_image_url: form.vehicleImageUrl,

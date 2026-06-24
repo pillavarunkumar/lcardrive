@@ -5,9 +5,6 @@ import Link from 'next/link';
 import { Star, Eye, Pencil, DollarSign, Calendar, Sparkles, ChevronRight, MessageSquare, TrendingUp } from 'lucide-react';
 import type { Instructor } from '@/types';
 
-const appearanceData = [32, 46, 58, 52, 74, 67, 61];
-const appearanceLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
 function getNextProfileStep(instructor: Instructor | null) {
   if (!instructor) {
     return {
@@ -78,7 +75,7 @@ function getVerificationCopy(instructor: Instructor | null, hasPendingReview: bo
   if (hasPendingReview) {
     return { label: 'Under Review', body: 'Admin is reviewing your submitted profile.' };
   }
-  return { label: 'Pending', body: 'Complete your profile and submit it for approval.' };
+  return { label: 'Pending', body: 'Complete your profile and submit for admin review.' };
 }
 
 export default function PortalDashboard() {
@@ -86,17 +83,25 @@ export default function PortalDashboard() {
   const [hasPendingReview, setHasPendingReview] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [appearanceLabels, setAppearanceLabels] = useState<string[]>([]);
+  const [appearanceTotals, setAppearanceTotals] = useState<number[]>([]);
 
   useEffect(() => {
-    fetch('/api/portal/profile')
-      .then(async (r) => {
+    Promise.all([
+      fetch('/api/portal/profile').then(async (r) => {
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || 'Failed to load dashboard');
         return data;
-      })
-      .then((d) => {
-        if (d.instructor) setInstructor(d.instructor);
-        if (d.hasPendingReview) setHasPendingReview(true);
+      }),
+      fetch('/api/portal/analytics/appearances').then(r => r.json()).catch(() => ({ days: [], totals: [] })),
+    ])
+      .then(([profileData, analytics]) => {
+        if (profileData.instructor) setInstructor(profileData.instructor);
+        if (profileData.hasPendingReview) setHasPendingReview(true);
+        if (analytics.days?.length) {
+          setAppearanceLabels(analytics.days);
+          setAppearanceTotals(analytics.totals);
+        }
       })
       .catch((err) => setLoadError(err.message || 'Failed to load dashboard'))
       .finally(() => setLoading(false));
@@ -153,12 +158,14 @@ export default function PortalDashboard() {
 
         {/* Stats */}
         <section className="grid md:grid-cols-3 gap-gutter">
-          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-6">
-            <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary mb-4">
-              <MessageSquare className="w-5 h-5" />
+          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Total Reviews</p>
             </div>
-            <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Total Reviews</p>
-            <h3 className="text-[32px] font-bold text-primary leading-tight mt-1">
+            <h3 className="text-[40px] font-bold text-primary leading-none">
               {loading ? '--' : totalReviews}
             </h3>
             <p className="text-label-sm font-label-sm text-on-surface-variant mt-2">
@@ -166,12 +173,14 @@ export default function PortalDashboard() {
             </p>
           </div>
 
-          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-6">
-            <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary mb-4">
-              <Star className="w-5 h-5" />
+          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+                <Star className="w-5 h-5" />
+              </div>
+              <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Average Rating</p>
             </div>
-            <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Average Rating</p>
-            <h3 className="text-[32px] font-bold text-primary leading-tight mt-1">
+            <h3 className="text-[40px] font-bold text-primary leading-none">
               {loading ? '--' : avgRating > 0 ? avgRating.toFixed(1) : '-'}
             </h3>
             <p className="text-label-sm font-label-sm text-on-surface-variant mt-2">
@@ -179,32 +188,47 @@ export default function PortalDashboard() {
             </p>
           </div>
 
-          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-6">
-            <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary mb-4">
-              <Eye className="w-5 h-5" />
+          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                verification.label === 'Verified' ? 'bg-primary/10 text-primary'
+                : verification.label === 'Under Review' ? 'bg-warning-container/30 text-warning'
+                : 'bg-surface-container text-on-surface-variant'
+              }`}>
+                <Eye className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Profile Status</p>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  verification.label === 'Verified'
+                    ? 'bg-primary/10 text-primary'
+                    : verification.label === 'Under Review'
+                    ? 'bg-warning-container/30 text-warning'
+                    : 'bg-surface-container-high text-on-surface-variant'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    verification.label === 'Verified' ? 'bg-primary'
+                    : verification.label === 'Under Review' ? 'bg-warning'
+                    : 'bg-outline'
+                  }`} />
+                  {verification.label}
+                </span>
+              </div>
             </div>
-            <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Profile Status</p>
-            <h3 className="text-[32px] font-bold text-primary leading-tight mt-1">
-              {loading ? '--' : verification.label}
-            </h3>
-            <p className="text-label-sm font-label-sm text-on-surface-variant mt-2">{verification.body}</p>
+            <p className="text-body-md font-body-md text-on-surface-variant">{verification.body}</p>
           </div>
         </section>
 
         {/* Analytics */}
-        <section className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-8">
+        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-headline-md font-headline-md text-primary">Search Appearances</h3>
-              <p className="text-body-md font-body-md text-secondary mt-1">Visibility in marketplace over the last 30 days</p>
+              <p className="text-body-md font-body-md text-secondary mt-1">Appearances in search results over the last 7 days</p>
             </div>
-            <select className="bg-surface-container text-body-md border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
-              <option>Last 30 days</option>
-              <option>Last 90 days</option>
-            </select>
           </div>
 
-          {!instructor || (instructor && appearanceData.length === 0) ? (
+          {!instructor || appearanceTotals.length === 0 ? (
             <div className="h-64 rounded-2xl border border-dashed border-outline-variant bg-surface flex items-center justify-center">
               <div className="text-center">
                 <TrendingUp className="w-10 h-10 text-outline mx-auto mb-3" />
@@ -215,15 +239,19 @@ export default function PortalDashboard() {
           ) : (
             <div>
               <div className="flex items-end gap-2 h-48">
-                {appearanceData.map((h, i) => (
-                  <div key={i} className="flex-1 bg-primary/5 rounded-t-lg relative group transition-all hover:bg-primary/10" style={{ height: '100%', minHeight: '4rem' }}>
-                    <div className="absolute bottom-0 w-full bg-primary/60 rounded-t-lg transition-all group-hover:bg-primary/80" style={{ height: `${h}%` }}></div>
-                  </div>
-                ))}
+                {appearanceTotals.map((h, i) => {
+                  const maxVal = Math.max(...appearanceTotals, 1);
+                  const pct = (h / maxVal) * 100;
+                  return (
+                    <div key={i} className="flex-1 bg-primary/5 rounded-t-lg relative group transition-all hover:bg-primary/10" style={{ height: '100%', minHeight: '4rem' }}>
+                      <div className="absolute bottom-0 w-full bg-primary/60 rounded-t-lg transition-all group-hover:bg-primary/80" style={{ height: `${Math.max(pct, 4)}%` }}></div>
+                    </div>
+                  );
+                })}
               </div>
               <div className="flex justify-between mt-3 text-label-sm font-label-sm text-secondary px-2">
-                {appearanceData.map((_, i) => (
-                  <span key={i}>{appearanceLabels[i] || `Week ${i + 1}`}</span>
+                {appearanceLabels.map((label, i) => (
+                  <span key={i}>{label}</span>
                 ))}
               </div>
             </div>
@@ -315,17 +343,62 @@ export default function PortalDashboard() {
 
         {/* Verification Status */}
         {!loading && (
-          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-6 flex items-center gap-6">
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 ${
-              verification.label === 'Verified' ? 'bg-primary/10 text-primary' : 'bg-surface-container text-on-surface-variant'
-            }`}>
-              <Eye className="w-6 h-6" />
+          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
+            <div className="flex items-center justify-between mb-5">
+              <span className="text-label-sm font-bold uppercase tracking-widest text-secondary">Profile Status</span>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                verification.label === 'Verified'
+                  ? 'bg-primary/10 text-primary border-primary/20'
+                  : verification.label === 'Under Review'
+                  ? 'bg-warning-container/30 text-warning border-warning/20'
+                  : 'bg-surface-container-high text-on-surface-variant border-outline-variant'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  verification.label === 'Verified' ? 'bg-primary'
+                  : verification.label === 'Under Review' ? 'bg-warning'
+                  : 'bg-outline'
+                }`} />
+                {verification.label}
+              </span>
             </div>
-            <div>
-              <p className="text-label-sm font-label-sm text-secondary uppercase tracking-widest font-bold">Status</p>
-              <h4 className="text-headline-md font-headline-md font-bold text-primary">{verification.label}</h4>
-              <p className="text-label-sm font-label-sm text-on-surface-variant">{verification.body}</p>
+
+            <div className="flex items-center gap-4 mb-5">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                verification.label === 'Verified' ? 'bg-primary/10 text-primary'
+                : verification.label === 'Under Review' ? 'bg-warning-container/30 text-warning'
+                : 'bg-surface-container text-on-surface-variant'
+              }`}>
+                <Eye className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-body-md font-body-md text-secondary">{verification.body}</h4>
+              </div>
             </div>
+
+            {/* Profile completeness bar */}
+            <div className="mb-5">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-label-sm font-bold uppercase tracking-wider text-secondary">Profile Completeness</span>
+                <span className="text-label-sm font-bold text-primary">{comp}%</span>
+              </div>
+              <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-700"
+                  style={{ width: `${Math.min(comp, 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Next action */}
+            {verification.label !== 'Verified' && (
+              <Link
+                href={nextStep.href}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-lg text-xs font-bold hover:opacity-90 transition-all"
+              >
+                {nextStep.label}
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            )}
           </div>
         )}
       </div>

@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { computeCompleteness } from '@/lib/utils';
 import type { NextRequest } from 'next/server';
+
+function generateSlug(firstName: string, lastName: string, userId: string): string {
+  const first = firstName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || 'user';
+  const last = (lastName || firstName).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || userId.substring(0, 4);
+  const suffix = userId.substring(0, 4);
+  return `${first}-${last}-${suffix}`;
+}
 
 export async function GET(req: NextRequest) {
   if (!supabase) {
@@ -22,6 +29,52 @@ export async function GET(req: NextRequest) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Auto-create row if it doesn't exist yet (catches OAuth signups, failed signup PUTs, etc.)
+  if (!data) {
+    let firstName = 'User';
+    let lastName = 'Instructor';
+    let email = '';
+    let profilePhotoUrl = '';
+    try {
+      const client = await clerkClient();
+      const clerkUser = await client.users.getUser(userId);
+      firstName = clerkUser.firstName || firstName;
+      lastName = clerkUser.lastName || clerkUser.firstName || lastName;
+      email = clerkUser.emailAddresses?.[0]?.emailAddress || '';
+      profilePhotoUrl = clerkUser.imageUrl || '';
+    } catch (e) {
+      console.warn('Could not fetch Clerk user for auto-create:', e);
+    }
+
+    const slug = generateSlug(firstName, lastName, userId);
+
+    const { error: insertError } = await supabase
+      .from('instructors')
+      .upsert({
+        clerk_user_id: userId,
+        slug,
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        profile_photo_url: profilePhotoUrl,
+        suburb: 'Unknown',
+        profile_completeness: 0,
+      }, { onConflict: 'clerk_user_id' });
+
+    if (insertError) {
+      console.error('Auto-create instructor row error:', insertError);
+      return NextResponse.json({ instructor: null, hasPendingReview: false });
+    }
+
+    const { data: newData } = await supabase
+      .from('instructors')
+      .select('*')
+      .eq('clerk_user_id', userId)
+      .maybeSingle();
+
+    return NextResponse.json({ instructor: newData ?? null, hasPendingReview: false });
   }
 
   let hasPendingReview = false;
@@ -52,7 +105,7 @@ export async function PUT(req: NextRequest) {
   const body = await req.json();
 
   const allowedFields = [
-    'first_name', 'last_name',
+    'first_name', 'last_name', 'email',
     'bio', 'phone', 'suburb', 'state', 'postcode',
     'licence_types', 'transmission', 'lesson_duration_mins',
     'specialises_anxiety', 'accepts_international', 'languages',
@@ -73,7 +126,8 @@ export async function PUT(req: NextRequest) {
     'service_suburbs', 'service_radius_km', 'familiar_test_centres',
     'availability_days', 'availability_slots',
     'teaching_style', 'primary_learner_types', 'vehicle_transmission',
-    'years_experience', 'gender', 'social_website', 'social_instagram',
+    'years_experience', 'gender',
+    'profile_photo_url',
   ];
 
   const sanitized: Record<string, unknown> = {};
@@ -100,13 +154,19 @@ export async function PUT(req: NextRequest) {
   };
 
   // Always provide slug — required NOT NULL for both new and existing records
-  upsertData.slug = existing?.slug || `user-${userId.substring(0, 8).toLowerCase()}`;
-  // Provide NOT NULL defaults for new signups
-  if (!existing) {
-    upsertData.first_name = sanitized.first_name || 'User';
-    upsertData.last_name = sanitized.last_name || userId.substring(0, 8);
-    upsertData.suburb = sanitized.suburb || 'Unknown';
+  upsertData.slug = existing?.slug || generateSlug(
+    (sanitized.first_name as string) || existing?.first_name || 'User',
+    (sanitized.last_name as string) || existing?.last_name || '',
+    userId,
+  );
+  // Ensure NOT NULL columns always have a value in the upsert row
+  upsertData.first_name = sanitized.first_name || existing?.first_name || 'User';
+  {
+    const last = existing?.last_name;
+    const isAutoGen = last && (last.includes('_') || /\d/.test(last));
+    upsertData.last_name = sanitized.last_name || (isAutoGen ? undefined : last) || sanitized.first_name as string || existing?.first_name || 'Instructor';
   }
+  upsertData.suburb = sanitized.suburb || existing?.suburb || 'Unknown';
 
   const { error } = await supabase
     .from('instructors')

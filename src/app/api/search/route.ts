@@ -117,9 +117,19 @@ export async function GET(request: Request) {
   });
 
   try {
+    const ids = instructors.map((i: any) => i.id).filter(Boolean);
     await supabase.from('search_logs').insert({
       suburb,
-      filters_applied: { transmission, max_price: maxPrice, anxiety_friendly: anxietyFriendly, international_conversion: internationalConversion, test_centre: testCentre, languages: languagesParam, available_days: availableDays, sort },
+      filters_applied: {
+        transmission, max_price: maxPrice,
+        anxiety_friendly: anxietyFriendly,
+        international_conversion: internationalConversion,
+        test_centre: testCentre,
+        languages: languagesParam,
+        available_days: availableDays,
+        sort,
+        result_instructor_ids: ids,
+      },
       results_count: count ?? 0,
     });
   } catch {};

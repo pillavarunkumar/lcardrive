@@ -52,11 +52,16 @@ export default function SignUpPage() {
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         if (isInstructor) {
-          await fetch('/api/portal/profile', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
-          });
+          try {
+            const putRes = await fetch('/api/portal/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
+            });
+            if (!putRes.ok) console.warn('Instructor profile creation failed, will be created on first visit');
+          } catch (e) {
+            console.warn('Instructor profile request failed, will be created on first visit', e);
+          }
         }
         const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
         const adminData = await adminRes.json();
@@ -85,11 +90,16 @@ export default function SignUpPage() {
         await setActive({ session: result.createdSessionId });
         if (isInstructor) {
           const nameParts = fullName.trim().split(/\s+/);
-          await fetch('/api/portal/profile', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
-          });
+          try {
+            const putRes = await fetch('/api/portal/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
+            });
+            if (!putRes.ok) console.warn('Instructor profile creation failed, will be created on first visit');
+          } catch (e) {
+            console.warn('Instructor profile request failed, will be created on first visit', e);
+          }
         }
         const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
         const adminData = await adminRes.json();
