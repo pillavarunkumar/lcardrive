@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 
 const navLinks = [
@@ -23,6 +23,29 @@ export default function Header() {
   const { user, isSignedIn } = useUser();
   const { signOut } = useClerk();
   const [open, setOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminChecked, setAdminChecked] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isSignedIn && user) {
+      fetch('/api/admin/login-via-clerk', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => { setIsAdmin(data.isAdmin); setAdminChecked(true); })
+        .catch(() => setAdminChecked(true));
+    }
+  }, [isSignedIn, user]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-outline-variant">
@@ -57,24 +80,56 @@ export default function Header() {
 
         <div className="hidden md:flex items-center gap-3">
           {isSignedIn && user ? (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => signOut({ redirectUrl: '/' })}
-                className="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-red-50"
-              >
-                <span className="material-symbols-outlined text-[18px]">logout</span>
-                Logout
-              </button>
-              <Link href="/portal" className="flex items-center gap-2.5 px-3 py-1.5 rounded-full hover:bg-gray-50 transition-colors">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold overflow-hidden">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="text-right hidden md:block">
+                <p className="text-sm font-bold text-primary">{user.fullName || 'Profile'}</p>
+                <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">
+                  {adminChecked ? (isAdmin ? 'Admin' : 'Instructor') : '...'}
+                </p>
+              </div>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border-2 border-white shadow-sm hover:ring-2 hover:ring-primary/30 transition-all cursor-pointer"
+                >
                   {user.imageUrl ? (
                     <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
                   ) : (
                     user.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U'
                   )}
-                </div>
-                <span className="text-sm font-medium text-gray-700">{user.fullName || 'Profile'}</span>
-              </Link>
+                </button>
+                {showDropdown && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl border border-outline-variant shadow-xl z-50 py-1 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-outline-variant/30">
+                      <p className="text-sm font-bold text-primary">{user.fullName}</p>
+                      <p className="text-xs text-on-surface-variant">{user.primaryEmailAddress?.emailAddress}</p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        setShowDropdown(false);
+                        try {
+                          const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+                          const data = await res.json();
+                          router.push(data.isAdmin ? '/admin' : '/portal');
+                        } catch {
+                          router.push('/portal');
+                        }
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-secondary">dashboard</span>
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={() => { setShowDropdown(false); signOut({ redirectUrl: '/' }); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-error">logout</span>
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <>
@@ -96,19 +151,33 @@ export default function Header() {
       {open && (
         <div className="md:hidden border-t border-outline-variant bg-white px-margin-mobile py-4 space-y-4">
           {isSignedIn && user && (
-            <div className="flex items-center gap-3 pb-3 border-b border-outline-variant">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold overflow-hidden">
+            <button
+              onClick={async () => {
+                setOpen(false);
+                try {
+                  const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+                  const data = await res.json();
+                  router.push(data.isAdmin ? '/admin' : '/portal');
+                } catch {
+                  router.push('/portal');
+                }
+              }}
+              className="flex items-center gap-3 pb-3 border-b border-outline-variant w-full"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-sm font-bold overflow-hidden shrink-0 border-2 border-white shadow-sm">
                 {user.imageUrl ? (
                   <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
                 ) : (
                   user.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U'
                 )}
               </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900">{user.fullName}</p>
-                <p className="text-xs text-gray-500">{user.primaryEmailAddress?.emailAddress}</p>
+              <div className="text-left">
+                <p className="text-sm font-bold text-primary">{user.fullName}</p>
+                <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">
+                  {adminChecked ? (isAdmin ? 'Admin' : 'Instructor') : '...'}
+                </p>
               </div>
-            </div>
+            </button>
           )}
           {navLinks.map((link) => {
             const active = isActive(link.href, pathname);

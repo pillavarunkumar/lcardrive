@@ -1,139 +1,334 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import { Star, Eye, Pencil, DollarSign, Calendar, Sparkles, ChevronRight, MessageSquare, TrendingUp } from 'lucide-react';
 import type { Instructor } from '@/types';
 
+const appearanceData = [32, 46, 58, 52, 74, 67, 61];
+const appearanceLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+function getNextProfileStep(instructor: Instructor | null) {
+  if (!instructor) {
+    return {
+      href: '/portal/profile',
+      icon: 'person_add',
+      label: 'Create your profile',
+      helper: 'A complete profile increases trust and bookings.',
+    };
+  }
+
+  if (!instructor.bio) {
+    return {
+      href: '/portal/profile',
+      icon: 'edit_note',
+      label: 'Add your bio',
+      helper: 'Describe your teaching style and experience.',
+    };
+  }
+
+  if (!instructor.vehicle_make || !instructor.vehicle_model || !instructor.vehicle_year) {
+    return {
+      href: '/portal/vehicle',
+      icon: 'directions_car',
+      label: 'Add vehicle details',
+      helper: 'Show students what they will be learning in.',
+    };
+  }
+
+  if (!instructor.hourly_rate) {
+    return {
+      href: '/portal/rates',
+      icon: 'payments',
+      label: 'Set your pricing',
+      helper: 'Publish your hourly rate and lesson packages.',
+    };
+  }
+
+  if (!instructor.availability_days?.length) {
+    return {
+      href: '/portal/availability',
+      icon: 'event_available',
+      label: 'Set availability',
+      helper: 'Let students know when you usually teach.',
+    };
+  }
+
+  if (!instructor.service_suburbs?.length) {
+    return {
+      href: '/portal/service-areas',
+      icon: 'map',
+      label: 'Add service areas',
+      helper: 'Choose the suburbs where students can find you.',
+    };
+  }
+
+  return {
+    href: '/portal/profile',
+    icon: 'verified',
+    label: 'Review your profile',
+    helper: 'Keep your public listing accurate and up to date.',
+  };
+}
+
+function getVerificationCopy(instructor: Instructor | null, hasPendingReview: boolean) {
+  if (instructor?.is_verified) {
+    return { label: 'Verified', body: 'Your profile is approved and visible to students.' };
+  }
+  if (hasPendingReview) {
+    return { label: 'Under Review', body: 'Admin is reviewing your submitted profile.' };
+  }
+  return { label: 'Pending', body: 'Complete your profile and submit it for approval.' };
+}
+
 export default function PortalDashboard() {
-  const { user } = useUser();
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [hasPendingReview, setHasPendingReview] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     fetch('/api/portal/profile')
-      .then((r) => r.json())
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Failed to load dashboard');
+        return data;
+      })
       .then((d) => {
         if (d.instructor) setInstructor(d.instructor);
         if (d.hasPendingReview) setHasPendingReview(true);
       })
-      .catch(() => {});
+      .catch((err) => setLoadError(err.message || 'Failed to load dashboard'))
+      .finally(() => setLoading(false));
   }, []);
 
   const comp = instructor?.profile_completeness ?? 0;
   const totalReviews = instructor?.review_count ?? 0;
   const avgRating = instructor?.average_rating ?? 0;
+  const nextStep = getNextProfileStep(instructor);
+  const verification = getVerificationCopy(instructor, hasPendingReview);
 
   return (
-    <>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
-            Welcome back, {user?.firstName || instructor?.first_name || 'Instructor'}
-          </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">Here is how your instructor profile is performing today.</p>
-        </div>
-      </div>
+    <div className="grid lg:grid-cols-3 gap-gutter">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
-        <div className="bento-card bg-surface-container-lowest rounded-xl p-6 lg:col-span-2 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 w-40 h-40 bg-secondary-container rounded-full opacity-20 blur-2xl"></div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-end mb-4">
-              <div>
-                <h3 className="font-headline-sm text-headline-sm text-on-surface">Profile Completeness</h3>
-                <p className="font-body-sm text-on-surface-variant mt-1">A complete profile attracts 3x more students.</p>
+      {/* Left Content */}
+      <div className="lg:col-span-2 space-y-gutter">
+
+        {loadError && (
+          <div className="bg-error-container/30 border border-error/20 rounded-2xl p-4 text-body-md font-body-md text-error">
+            {loadError}
+          </div>
+        )}
+
+        {/* Profile Completion */}
+        <section className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-8">
+          <div className="grid md:grid-cols-[180px_1fr] gap-8 items-center">
+            <div className="relative flex justify-center">
+              <div className="w-36 h-36 rounded-full border-[10px] border-surface-dim flex items-center justify-center">
+                <div className="text-center">
+                  <h2 className="text-headline-md font-headline-md font-bold text-primary">
+                    {loading ? '--' : `${comp}%`}
+                  </h2>
+                  <p className="text-label-sm font-label-sm text-secondary uppercase tracking-wider">Complete</p>
+                </div>
               </div>
-              <span className="font-headline-md text-headline-md font-bold text-primary">{comp}%</span>
             </div>
-            <div className="w-full bg-surface-container-highest rounded-full h-3 mb-2 overflow-hidden">
-              <div className="bg-primary h-3 rounded-full transition-all duration-1000 ease-out" style={{ width: `${comp}%` }}></div>
+            <div>
+              <h2 className="text-headline-md font-headline-md text-primary mb-3">
+                {comp >= 100 ? 'Your Profile Is Complete' : 'Complete Your Profile'}
+              </h2>
+              <p className="text-body-md font-body-md text-secondary mb-6">
+                Keep your profile accurate so students can understand your services, pricing, vehicle, and availability.
+              </p>
+              <Link
+                href={nextStep.href}
+                className="inline-block bg-primary text-on-primary px-6 py-3 rounded-xl font-bold text-label-md hover:brightness-110 transition"
+              >
+                {nextStep.label}
+              </Link>
+              <p className="mt-4 text-label-sm font-label-sm text-on-surface-variant">{nextStep.helper}</p>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="bento-card bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-center items-center text-center">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-            <span className="material-symbols-outlined text-tertiary-fixed-dim" style={{ fontVariationSettings: "'FILL' 1", fontSize: '28px' }}>star</span>
-          </div>
-          <h3 className="font-headline-sm text-headline-sm text-on-surface">{avgRating > 0 ? avgRating.toFixed(1) : '—'}</h3>
-          <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-1">Average Rating</p>
-          <div className="mt-3 inline-block bg-primary/10 text-primary px-2 py-1 rounded font-label-sm text-label-sm">
-            Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
-          </div>
-        </div>
-
-        <div className="bento-card bg-surface-container-lowest rounded-xl p-6 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined">visibility</span>
-          </div>
-          <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Profile Views</p>
-            <div className="flex items-end gap-2">
-              <h3 className="font-headline-md text-headline-md text-on-surface">—</h3>
+        {/* Stats */}
+        <section className="grid md:grid-cols-3 gap-gutter">
+          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-6">
+            <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary mb-4">
+              <MessageSquare className="w-5 h-5" />
             </div>
-            <p className="font-label-sm text-label-sm text-outline mt-1">Coming soon</p>
+            <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Total Reviews</p>
+            <h3 className="text-[32px] font-bold text-primary leading-tight mt-1">
+              {loading ? '--' : totalReviews}
+            </h3>
+            <p className="text-label-sm font-label-sm text-on-surface-variant mt-2">
+              {totalReviews === 0 ? 'No reviews yet' : `${totalReviews} review${totalReviews !== 1 ? 's' : ''}`}
+            </p>
           </div>
-        </div>
 
-        <div className="bento-card bg-surface-container-lowest rounded-xl p-6 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-surface-container-high text-on-surface-variant flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined">travel_explore</span>
-          </div>
-          <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Search Impressions</p>
-            <div className="flex items-end gap-2">
-              <h3 className="font-headline-md text-headline-md text-on-surface">—</h3>
+          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-6">
+            <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary mb-4">
+              <Star className="w-5 h-5" />
             </div>
-            <p className="font-label-sm text-label-sm text-outline mt-1">Coming soon</p>
+            <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Average Rating</p>
+            <h3 className="text-[32px] font-bold text-primary leading-tight mt-1">
+              {loading ? '--' : avgRating > 0 ? avgRating.toFixed(1) : '-'}
+            </h3>
+            <p className="text-label-sm font-label-sm text-on-surface-variant mt-2">
+              {avgRating > 0 ? `${avgRating.toFixed(1)} / 5.0` : 'No rating yet'}
+            </p>
           </div>
-        </div>
 
-        <div className="bento-card bg-surface-container-lowest rounded-xl p-6 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined">event_available</span>
-          </div>
-          <div>
-            <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">New Leads</p>
-            <div className="flex items-end gap-2">
-              <h3 className="font-headline-md text-headline-md text-on-surface">—</h3>
+          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-6">
+            <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary mb-4">
+              <Eye className="w-5 h-5" />
             </div>
-            <p className="font-label-sm text-label-sm text-outline mt-1">Coming soon</p>
+            <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Profile Status</p>
+            <h3 className="text-[32px] font-bold text-primary leading-tight mt-1">
+              {loading ? '--' : verification.label}
+            </h3>
+            <p className="text-label-sm font-label-sm text-on-surface-variant mt-2">{verification.body}</p>
           </div>
-        </div>
+        </section>
 
-        <div className="bento-card bg-surface-container-lowest rounded-xl p-6 lg:col-span-2">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="material-symbols-outlined text-primary">checklist</span>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface">Next Steps to Boost Visibility</h3>
+        {/* Analytics */}
+        <section className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-headline-md font-headline-md text-primary">Search Appearances</h3>
+              <p className="text-body-md font-body-md text-secondary mt-1">Visibility in marketplace over the last 30 days</p>
+            </div>
+            <select className="bg-surface-container text-body-md border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+              <option>Last 30 days</option>
+              <option>Last 90 days</option>
+            </select>
           </div>
-          <ul className="space-y-3">
-            {[
-              { icon: 'directions_car', label: 'Add your vehicle details', href: '/portal/profile#vehicle-details', boost: '+15%', done: !!(instructor?.vehicle_make && instructor?.vehicle_model) },
-              { icon: 'add_a_photo', label: 'Upload a gallery photo', href: '/portal/profile#vehicle-details', boost: '+20%', done: !!(instructor?.vehicle_image_url || instructor?.profile_photo_url) },
-              { icon: 'description', label: 'Upload your documents for verification', href: '/portal/profile#licences-documents', boost: '+25%', done: !!instructor?.is_verified },
-              { icon: 'payments', label: 'Set your rates & packages', href: '/portal/rates', boost: '+30%', done: !!(instructor?.hourly_rate && instructor?.hourly_rate > 0) },
-              { icon: 'map', label: 'Define your service areas', href: '/portal/service-areas', boost: '+15%', done: (instructor?.service_suburbs?.length ?? 0) > 0 },
-              { icon: 'rate_review', label: 'Submit your profile for review', href: '/portal/profile', boost: 'Go Live', done: !!instructor?.is_verified || hasPendingReview },
-            ].filter((step) => !step.done).map((step) => (
-              <li key={step.label}>
-                <Link href={step.href} className="flex items-center justify-between p-3 rounded-lg border border-outline-variant bg-surface-bright hover:bg-surface-container-low transition-colors group cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container text-on-surface-variant">
-                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{step.icon}</span>
-                    </div>
-                    <span className="font-label-md text-label-md text-on-surface group-hover:text-secondary transition-colors">{step.label}</span>
+
+          {!instructor || (instructor && appearanceData.length === 0) ? (
+            <div className="h-64 rounded-2xl border border-dashed border-outline-variant bg-surface flex items-center justify-center">
+              <div className="text-center">
+                <TrendingUp className="w-10 h-10 text-outline mx-auto mb-3" />
+                <h4 className="font-bold text-headline-sm text-on-surface">No data available yet</h4>
+                <p className="text-body-md font-body-md text-secondary">Analytics will appear once your profile is live.</p>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-end gap-2 h-48">
+                {appearanceData.map((h, i) => (
+                  <div key={i} className="flex-1 bg-primary/5 rounded-t-lg relative group transition-all hover:bg-primary/10" style={{ height: '100%', minHeight: '4rem' }}>
+                    <div className="absolute bottom-0 w-full bg-primary/60 rounded-t-lg transition-all group-hover:bg-primary/80" style={{ height: `${h}%` }}></div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-label-sm text-label-sm font-bold text-on-tertiary-container bg-tertiary-fixed px-2 py-1 rounded">{step.boost}</span>
-                    <span className="material-symbols-outlined text-outline-variant group-hover:text-secondary transition-colors">chevron_right</span>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+                ))}
+              </div>
+              <div className="flex justify-between mt-3 text-label-sm font-label-sm text-secondary px-2">
+                {appearanceData.map((_, i) => (
+                  <span key={i}>{appearanceLabels[i] || `Week ${i + 1}`}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
       </div>
-    </>
+
+      {/* Sidebar */}
+      <div className="space-y-gutter">
+
+        {/* Quick Actions */}
+        <section className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-8">
+          <h3 className="text-headline-md font-headline-md text-primary mb-6">Quick Actions</h3>
+          <div className="space-y-3">
+            <Link href="/portal/profile" className="w-full flex items-center justify-between p-4 bg-surface hover:bg-surface-container transition-all rounded-xl border border-outline-variant group">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+                  <Pencil className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-body-md font-body-md text-on-surface font-semibold">Edit Profile</p>
+                  <p className="text-label-sm font-label-sm text-on-surface-variant">Update your information</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-outline group-hover:text-primary" />
+            </Link>
+
+            <Link href="/portal/rates" className="w-full flex items-center justify-between p-4 bg-surface hover:bg-surface-container transition-all rounded-xl border border-outline-variant group">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-body-md font-body-md text-on-surface font-semibold">Update Pricing</p>
+                  <p className="text-label-sm font-label-sm text-on-surface-variant">Manage your rates</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-outline group-hover:text-primary" />
+            </Link>
+
+            <Link href="/portal/availability" className="w-full flex items-center justify-between p-4 bg-surface hover:bg-surface-container transition-all rounded-xl border border-outline-variant group">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-body-md font-body-md text-on-surface font-semibold">Update Availability</p>
+                  <p className="text-label-sm font-label-sm text-on-surface-variant">Set your schedule</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-outline group-hover:text-primary" />
+            </Link>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-outline-variant">
+            <Link
+              href="/portal/profile"
+              className="w-full flex items-center justify-center gap-3 p-4 bg-primary text-on-primary rounded-xl font-bold text-label-md hover:opacity-90 transition-all"
+            >
+              <Sparkles size={18} />
+              Generate AI Bio
+            </Link>
+            <p className="text-center text-label-sm font-label-sm text-secondary mt-3">Open Profile to generate and apply your bio.</p>
+          </div>
+        </section>
+
+        {/* Upcoming */}
+        <section className="bg-primary rounded-2xl p-8 text-on-primary relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-20 pointer-events-none">
+            <Calendar className="w-16 h-16" />
+          </div>
+          <div className="relative z-10">
+            <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-label-sm font-label-sm mb-6">Upcoming</span>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 bg-white/10 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h4 className="text-headline-md font-headline-md leading-none">No upcoming sessions</h4>
+                <p className="text-body-md font-body-md opacity-80 mt-1">Your future bookings will appear here.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 bg-white/10 p-3 rounded-lg backdrop-blur-md">
+              <Calendar className="w-5 h-5" />
+              <span className="text-body-md font-body-md font-bold">Availability managed in your schedule</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Verification Status */}
+        {!loading && (
+          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-6 flex items-center gap-6">
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 ${
+              verification.label === 'Verified' ? 'bg-primary/10 text-primary' : 'bg-surface-container text-on-surface-variant'
+            }`}>
+              <Eye className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-label-sm font-label-sm text-secondary uppercase tracking-widest font-bold">Status</p>
+              <h4 className="text-headline-md font-headline-md font-bold text-primary">{verification.label}</h4>
+              <p className="text-label-sm font-label-sm text-on-surface-variant">{verification.body}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

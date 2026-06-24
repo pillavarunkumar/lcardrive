@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { auth } from '@clerk/nextjs/server';
+import { createAdminSession } from '@/lib/admin-session';
 
 export async function POST() {
   const { userId } = await auth();
@@ -28,11 +29,12 @@ export async function POST() {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set('admin_session', 'true', {
+  const adminSession = await createAdminSession(userId);
+  cookieStore.set('admin_session', adminSession.value, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24,
+    maxAge: adminSession.maxAge,
     path: '/',
   });
 

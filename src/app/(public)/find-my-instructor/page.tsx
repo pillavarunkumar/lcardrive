@@ -190,59 +190,104 @@ export default function FindMyInstructorPage() {
                   <span className="font-label-sm text-label-sm font-bold">Analysis Complete</span>
                 </div>
                 <h2 className="font-display-lg text-display-lg text-on-surface mb-2">Our AI matches for you</h2>
-                <p className="font-body-lg text-body-lg text-on-surface-variant">
+                <p className="font-body-lg text-body-lg text-on-surface-variant mb-4">
                   {totalInstructors} instructor{totalInstructors !== 1 ? 's' : ''} found in your area
                 </p>
+                <button
+                  onClick={reset}
+                  className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-label-md hover:brightness-110 transition-all shadow-md shadow-primary/20"
+                >
+                  <span className="material-symbols-outlined text-[18px]">search</span>
+                  Submit New Search
+                </button>
               </div>
 
-              {/* AI Top Picks */}
-              {aiMatches && aiMatches.length > 0 && (
-                <div className="mb-stack-xl">
+              {/* Verified / Admin profiles at the top */}
+              {allInstructors.filter((i) => i.is_verified).length > 0 && (
+                <div className="mb-stack-lg">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface">Top AI Picks</h3>
+                    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface">Verified Instructors</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+                    {allInstructors.filter((i) => i.is_verified).map((inst) => (
+                      <Link
+                        key={inst.id}
+                        href={`/instructors/${inst.suburb.toLowerCase().replace(/\s+/g, '-')}/${inst.slug}`}
+                        className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_10px_25px_rgba(15,23,42,0.12)] transition-all duration-300 border border-primary flex flex-col group"
+                      >
+                        <div className="relative h-40 w-full bg-surface-container">
+                          {inst.profile_photo_url ? (
+                            <img src={inst.profile_photo_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-outline">
+                              <span className="material-symbols-outlined text-[40px]">person</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-4 flex-grow flex flex-col">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <h3 className="font-headline-sm text-headline-sm text-on-surface">{inst.first_name} {inst.last_name}</h3>
+                            <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                          </div>
+                          <p className="font-body-sm text-body-sm text-on-surface-variant mb-2">
+                            <span className="material-symbols-outlined text-[14px] align-text-bottom">location_on</span> {inst.suburb}, {inst.state}
+                          </p>
+                          {inst.hourly_rate && (
+                            <p className="font-label-md text-label-md font-bold text-primary mb-3">${inst.hourly_rate}/hr</p>
+                          )}
+                          <div className="mt-auto">
+                            <span className="w-full font-label-sm text-label-sm text-primary border border-primary px-3 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-center block">
+                              View Profile
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* AI Top Picks in small rectangles */}
+              {aiMatches && aiMatches.length > 0 && (
+                <div className="mb-stack-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface">AI Match Suggestions</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {aiMatches.map((r) => (
-                      <div key={r.name} className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_10px_25px_rgba(15,23,42,0.12)] transition-all duration-300 border border-primary flex flex-col group">
-                        <div className="relative h-48 w-full bg-surface-container">
+                      <Link
+                        key={r.name}
+                        href={`/instructors/${r.suburb.toLowerCase().replace(/\s+/g, '-')}/${r.slug}`}
+                        className="bg-surface-container-lowest rounded-lg border border-outline-variant hover:border-primary transition-all duration-200 p-3 flex items-start gap-3 group"
+                      >
+                        <div className="w-12 h-12 rounded-lg bg-surface-container flex-shrink-0 overflow-hidden">
                           {r.image ? (
                             <img src={r.image} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-outline">
-                              <span className="material-symbols-outlined text-[48px]">person</span>
-                            </div>
-                          )}
-                          {r.verified && (
-                            <div className="absolute top-4 left-4 bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold flex items-center gap-1 shadow-sm">
-                              <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
+                              <span className="material-symbols-outlined text-[20px]">person</span>
                             </div>
                           )}
                         </div>
-                        <div className="p-6 flex-grow flex flex-col">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">{r.name}</h3>
-                            <div className="flex items-center gap-1 bg-surface-container px-2 py-1 rounded text-sm">
-                              <span className="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                              <span className="font-label-sm font-bold text-on-surface">{r.rating}</span>
-                            </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1">
+                            <span className="font-label-md text-label-md font-bold text-on-surface truncate">{r.name}</span>
+                            {r.verified && (
+                              <span className="material-symbols-outlined text-primary text-[14px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                            )}
                           </div>
-                          <p className="font-body-md text-body-md text-on-surface-variant mb-4">{r.bio}</p>
-                          <div className="mt-auto ai-gradient-bg border-l-4 border-primary rounded-r-lg p-4 mb-4">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="material-symbols-outlined text-primary text-[16px]">psychology</span>
-                              <span className="font-label-sm text-label-sm font-bold text-on-surface">Why this match?</span>
-                            </div>
-                            <p className="font-label-sm text-label-sm text-on-surface-variant">{r.reason}</p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <span className="material-symbols-outlined text-[12px] text-tertiary-fixed-dim" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                            <span className="text-xs font-bold text-on-surface">{r.rating}</span>
+                            <span className="text-[10px] text-on-surface-variant">({r.reviews})</span>
                           </div>
-                          <Link
-                            href={`/instructors/${r.suburb.toLowerCase().replace(/\s+/g, '-')}/${r.slug}`}
-                            className="w-full font-label-md text-label-md text-primary border border-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-center block"
-                          >
-                            View Profile
-                          </Link>
+                          <div className="mt-1 text-[11px] text-primary/80 bg-primary/5 rounded px-1.5 py-1 leading-snug">
+                            <span className="material-symbols-outlined text-[10px] align-text-bottom">psychology</span> {r.reason}
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -273,7 +318,7 @@ export default function FindMyInstructorPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-                    {allInstructors.map((inst) => (
+                    {allInstructors.filter((i) => !i.is_verified).map((inst) => (
                       <div key={inst.id} className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_10px_25px_rgba(15,23,42,0.12)] transition-all duration-300 border border-transparent hover:border-outline-variant flex flex-col group">
                         <div className="relative h-40 w-full bg-surface-container">
                           {inst.profile_photo_url ? (
@@ -283,19 +328,13 @@ export default function FindMyInstructorPage() {
                               <span className="material-symbols-outlined text-[40px]">person</span>
                             </div>
                           )}
-                          {inst.is_verified && (
-                            <div className="absolute top-3 left-3 bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 shadow-sm">
-                              <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verified
-                            </div>
-                          )}
                         </div>
                         <div className="p-4 flex-grow flex flex-col">
-                          <div className="flex justify-between items-start mb-1">
+                          <div className="flex items-center gap-1.5 mb-1">
                             <h3 className="font-headline-sm text-headline-sm text-on-surface">{inst.first_name} {inst.last_name}</h3>
-                            <div className="flex items-center gap-1 bg-surface-container px-1.5 py-0.5 rounded text-xs">
-                              <span className="material-symbols-outlined text-tertiary-fixed-dim text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                              <span className="font-label-sm font-bold text-on-surface">{inst.average_rating}</span>
-                            </div>
+                            {inst.is_verified && (
+                              <span className="material-symbols-outlined text-primary text-[16px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                            )}
                           </div>
                           <p className="font-body-sm text-body-sm text-on-surface-variant mb-1">
                             <span className="material-symbols-outlined text-[14px] align-text-bottom">location_on</span> {inst.suburb}, {inst.state}

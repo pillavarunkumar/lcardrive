@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-const ALL_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs'] as const;
+const ALL_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs', 'leads'] as const;
 
 export async function GET() {
   if (!supabase) {

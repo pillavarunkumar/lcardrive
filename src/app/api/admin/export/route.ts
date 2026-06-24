@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-const EXPORTABLE_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs'] as const;
+const EXPORTABLE_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs', 'leads'] as const;
 
 function toCSV(rows: Record<string, unknown>[]): string {
   if (rows.length === 0) return '';

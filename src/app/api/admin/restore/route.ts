@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-const ALL_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs'] as const;
+const ALL_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs', 'leads'] as const;
 
-const DELETE_ORDER: readonly (typeof ALL_TABLES[number])[] = ['listing_flags', 'reviews', 'instructors', 'search_logs'];
-const INSERT_ORDER: readonly (typeof ALL_TABLES[number])[] = ['search_logs', 'instructors', 'reviews', 'listing_flags'];
+const DELETE_ORDER: readonly (typeof ALL_TABLES[number])[] = ['listing_flags', 'reviews', 'leads', 'instructors', 'search_logs'];
+const INSERT_ORDER: readonly (typeof ALL_TABLES[number])[] = ['search_logs', 'instructors', 'leads', 'reviews', 'listing_flags'];
 
 export async function POST(request: Request) {
   if (!supabase) {

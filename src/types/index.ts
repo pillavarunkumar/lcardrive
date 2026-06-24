@@ -113,6 +113,29 @@ export interface ListingFlag {
   created_at: string;
 }
 
+export interface Lead {
+  id: string;
+  instructor_id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  suburb?: string;
+  service?: string;
+  message?: string;
+  status: 'new' | 'contacted' | 'booked' | 'archived';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SearchLog {
+  id: string;
+  suburb?: string;
+  postcode?: string;
+  filters_applied?: Record<string, unknown>;
+  results_count?: number;
+  created_at: string;
+}
+
 export interface SearchFilters {
   suburb?: string;
   postcode?: string;

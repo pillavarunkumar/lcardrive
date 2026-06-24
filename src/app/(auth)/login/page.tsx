@@ -5,13 +5,17 @@ import { useState, useEffect } from 'react';
 import { useSignIn, useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
-const redirectAfterLogin = async (router: any, defaultPath: string) => {
+const redirectAfterLogin = async (defaultPath: string) => {
   try {
     const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
     const data = await res.json();
-    router.push(data.isAdmin ? '/admin' : defaultPath);
+    if (data.isAdmin) {
+      window.location.href = '/admin';
+    } else {
+      window.location.href = defaultPath;
+    }
   } catch {
-    router.push(defaultPath);
+    window.location.href = defaultPath;
   }
 };
 
@@ -22,7 +26,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isSignedIn) {
-      redirectAfterLogin(router, '/portal');
+      redirectAfterLogin('/portal');
     }
   }, [isSignedIn, router]);
   const [email, setEmail] = useState('');
@@ -41,7 +45,7 @@ export default function LoginPage() {
       const result = await signIn.create({ identifier: email, password });
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        await redirectAfterLogin(router, '/portal');
+        await redirectAfterLogin('/portal');
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -56,16 +60,16 @@ export default function LoginPage() {
     if (!isLoaded) return;
     setError('');
     if (isSignedIn) {
-      redirectAfterLogin(router, '/portal');
+      redirectAfterLogin('/portal');
       return;
     }
     signIn.authenticateWithRedirect({
       strategy: `oauth_${provider}`,
       redirectUrl: '/sso-callback',
-      redirectUrlComplete: '/portal',
+      redirectUrlComplete: '/login',
     }).catch((err: any) => {
       if (err.errors?.[0]?.code === 'session_exists') {
-        redirectAfterLogin(router, '/portal');
+        redirectAfterLogin('/portal');
       } else {
         setError(err.errors?.[0]?.message || 'OAuth sign in failed');
       }

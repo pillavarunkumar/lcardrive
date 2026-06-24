@@ -172,19 +172,16 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
             Limited Spots
           </div>
         )}
-        {instructor.is_verified && !limitedSpots && (
-          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-primary px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-            <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-            Verified
-          </div>
-        )}
       </div>
       <div className="p-5">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <h3 className="text-lg font-display font-bold text-on-surface truncate">{fullName}</h3>
-              {nameVerified && (
+              {instructor.is_verified && (
+                <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+              )}
+              {nameVerified && !instructor.is_verified && (
                 <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               )}
             </div>

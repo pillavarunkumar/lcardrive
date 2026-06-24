@@ -73,6 +73,7 @@ export async function PUT(req: NextRequest) {
     'service_suburbs', 'service_radius_km', 'familiar_test_centres',
     'availability_days', 'availability_slots',
     'teaching_style', 'primary_learner_types', 'vehicle_transmission',
+    'years_experience', 'gender', 'social_website', 'social_instagram',
   ];
 
   const sanitized: Record<string, unknown> = {};

@@ -2,51 +2,70 @@
 
 import { useState, useEffect } from 'react';
 
-const SLOTS = [
-  { key: 'morning', label: 'Morning', time: '6am – 12pm', icon: 'wb_sunny' },
-  { key: 'afternoon', label: 'Afternoon', time: '12pm – 5pm', icon: 'light_mode' },
-  { key: 'evening', label: 'Evening', time: '5pm – 9pm', icon: 'nightlight' },
-];
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-type Availability = Record<string, string[]>;
+const DEFAULT_TIMES: Record<string, string> = {
+  Monday: '08:00 AM — 06:00 PM',
+  Tuesday: '08:00 AM — 06:00 PM',
+  Wednesday: '08:00 AM — 08:00 PM',
+  Thursday: '08:00 AM — 06:00 PM',
+  Friday: '08:00 AM — 05:00 PM',
+  Saturday: 'Unavailable',
+  Sunday: 'Unavailable',
+};
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-}
+const DAY_CODES: Record<string, string> = {
+  Monday: 'Mon',
+  Tuesday: 'Tue',
+  Wednesday: 'Wed',
+  Thursday: 'Thu',
+  Friday: 'Fri',
+  Saturday: 'Sat',
+  Sunday: 'Sun',
+};
 
-function dayName(dateStr: string) {
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' });
-}
-
-function isPastDate(dateStr: string) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return new Date(dateStr + 'T00:00:00') < today;
-}
-
-function todayStr() {
-  return new Date().toISOString().split('T')[0];
-}
+const DEFAULT_SCHEDULE = () => {
+  const initial: Record<string, { enabled: boolean; timeRange: string }> = {};
+  WEEKDAYS.forEach((day) => {
+    initial[day] = {
+      enabled: day !== 'Saturday' && day !== 'Sunday',
+      timeRange: DEFAULT_TIMES[day],
+    };
+  });
+  return initial;
+};
 
 export default function PortalAvailability() {
-  const [availability, setAvailability] = useState<Availability>({});
-  const [loading, setLoading] = useState(true);
+  const [schedule, setSchedule] = useState<Record<string, { enabled: boolean; timeRange: string }>>({});
+  const [savedSchedule, setSavedSchedule] = useState<Record<string, { enabled: boolean; timeRange: string }>>({});
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [dateInput, setDateInput] = useState('');
+  const [editingDay, setEditingDay] = useState<string | null>(null);
+  const [editTimeRange, setEditTimeRange] = useState('');
+  const [timeError, setTimeError] = useState('');
 
   useEffect(() => {
     fetch('/api/portal/profile')
-      .then((r) => r.json())
-      .then((d) => {
+      .then(r => r.json())
+      .then(d => {
         const inst = d.instructor;
-        if (inst?.availability_slots && Object.keys(inst.availability_slots).length > 0) {
-          setAvailability(inst.availability_slots);
-        }
+        const loaded = DEFAULT_SCHEDULE();
+        WEEKDAYS.forEach((day) => {
+          const code = DAY_CODES[day];
+          const slot = inst?.availability_slots?.[day]?.[0] || inst?.availability_slots?.[code]?.[0];
+          loaded[day] = {
+            enabled: inst?.availability_days?.includes(code) || inst?.availability_days?.includes(day) || Boolean(slot),
+            timeRange: slot || DEFAULT_TIMES[day],
+          };
+        });
+        setSchedule(loaded);
+        setSavedSchedule(loaded);
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch(() => {
+        const initial = DEFAULT_SCHEDULE();
+        setSchedule(initial);
+        setSavedSchedule(initial);
+      });
   }, []);
 
   const showToast = (msg: string) => {
@@ -54,53 +73,78 @@ export default function PortalAvailability() {
     setTimeout(() => setToast(null), 2000);
   };
 
-  const addDate = () => {
-    if (!dateInput) return;
-    if (availability[dateInput]) {
-      showToast('Date already added.');
+  const toggleDay = (day: string) => {
+    setSchedule((prev) => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        enabled: !prev[day]?.enabled,
+      },
+    }));
+  };
+
+  const startEdit = (day: string) => {
+    setEditingDay(day);
+    setEditTimeRange(schedule[day]?.timeRange || '');
+  };
+
+  const saveEdit = () => {
+    const normalized = editTimeRange.trim();
+    if (!isValidTimeRange(normalized)) {
+      setTimeError('Use a format like 08:00 AM - 06:00 PM.');
       return;
     }
-    setAvailability((prev) => ({ ...prev, [dateInput]: [] }));
-    setDateInput('');
+    if (editingDay && editTimeRange.trim()) {
+      setSchedule((prev) => ({
+        ...prev,
+        [editingDay]: { ...prev[editingDay], timeRange: normalized },
+      }));
+    }
+    setTimeError('');
+    setEditingDay(null);
+    setEditTimeRange('');
   };
 
-  const removeDate = (date: string) => {
-    setAvailability((prev) => {
-      const next = { ...prev };
-      delete next[date];
-      return next;
+  const activeDays = Object.values(schedule).filter((d) => d.enabled).length;
+
+  const calcTotalHours = () => {
+    let total = 0;
+    Object.entries(schedule).forEach(([day, data]) => {
+      if (!data.enabled) return;
+      const match = parseTimeRange(data.timeRange);
+      if (match) {
+        let startH = parseInt(match[1]) + (match[3] === 'PM' && parseInt(match[1]) !== 12 ? 12 : 0);
+        if (match[3] === 'AM' && parseInt(match[1]) === 12) startH = 0;
+        let endH = parseInt(match[4]) + (match[6] === 'PM' && parseInt(match[4]) !== 12 ? 12 : 0);
+        if (match[6] === 'AM' && parseInt(match[4]) === 12) endH = 0;
+      if (endH <= startH) endH += 24;
+        total += endH - startH;
+      }
     });
+    return total;
   };
-
-  const toggleSlot = (date: string, slot: string) => {
-    setAvailability((prev) => {
-      const current = prev[date] || [];
-      const next = current.includes(slot)
-        ? current.filter((s) => s !== slot)
-        : [...current, slot];
-      return { ...prev, [date]: next };
-    });
-  };
-
-  const totalSlots = Object.values(availability).reduce((acc, slots) => acc + slots.length, 0);
-  const datesActive = Object.keys(availability).length;
-
-  const sortedDates = Object.keys(availability).sort();
 
   const handleSave = async () => {
     setSaving(true);
+    const availabilityDays = WEEKDAYS
+      .filter((day) => schedule[day]?.enabled)
+      .map((day) => DAY_CODES[day]);
+    const availabilitySlots = WEEKDAYS.reduce<Record<string, string[]>>((acc, day) => {
+      if (schedule[day]?.enabled) acc[DAY_CODES[day]] = [schedule[day].timeRange];
+      return acc;
+    }, {});
+
     try {
       const res = await fetch('/api/portal/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ availability_slots: availability }),
+        body: JSON.stringify({ availability_days: availabilityDays, availability_slots: availabilitySlots }),
       });
       if (res.ok) {
+        setSavedSchedule(schedule);
         showToast('Availability saved successfully!');
-      } else {
-        const err = await res.json();
-        showToast(err.error || 'Failed to save.');
       }
+      else showToast('Failed to save.');
     } catch {
       showToast('Failed to save.');
     } finally {
@@ -108,193 +152,163 @@ export default function PortalAvailability() {
     }
   };
 
+  const densityChart = WEEKDAYS.map((day) => {
+    const data = schedule[day];
+    if (!data?.enabled) return 0;
+    const match = parseTimeRange(data.timeRange);
+    if (match) {
+      let startH = parseInt(match[1]) + (match[3] === 'PM' && parseInt(match[1]) !== 12 ? 12 : 0);
+      if (match[3] === 'AM' && parseInt(match[1]) === 12) startH = 0;
+      let endH = parseInt(match[4]) + (match[6] === 'PM' && parseInt(match[4]) !== 12 ? 12 : 0);
+      if (match[6] === 'AM' && parseInt(match[4]) === 12) endH = 0;
+      if (endH <= startH) endH += 12;
+      return Math.min(100, ((endH - startH) / 14) * 100);
+    }
+    return 0;
+  });
+
+  function parseTimeRange(value: string) {
+    return value.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*(?:—|-|to)\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  }
+
+  function isValidTimeRange(value: string) {
+    return Boolean(parseTimeRange(value));
+  }
+
   return (
     <>
       {toast && (
-        <div className="fixed top-6 right-6 z-[60] bg-primary text-white px-5 py-3 rounded-xl shadow-lg font-label-md text-label-md animate-in fade-in">
-          {toast}
+        <div className="fixed bottom-8 right-8 z-[60] bg-primary text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+          <span className="material-symbols-outlined text-green-400">check_circle</span>
+          <p className="font-bold">{toast}</p>
         </div>
       )}
-      <div>
-        <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-1">Availability</h1>
-        <p className="font-body-md text-body-md text-on-surface-variant mb-6">Add specific dates and set your available time slots.</p>
 
-        {loading ? (
-          <div className="border border-outline-variant rounded-2xl p-6 md:p-8 card-shadow max-w-3xl animate-pulse">
-            <div className="h-10 bg-surface-container-highest rounded-xl mb-6" />
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 bg-surface-container-highest rounded-xl" />
+      <div className="mb-8 p-4 bg-surface-container-low border border-outline-variant rounded-xl flex items-start gap-4">
+        <span className="material-symbols-outlined text-primary mt-1">info</span>
+        <div>
+          <p className="text-body-md font-body-md text-on-surface font-semibold">General Availability Configuration</p>
+          <p className="text-body-md font-body-md text-on-surface-variant text-sm">This screen manages your default recurring weekly schedule. It determines which hours students can see as potentially available when searching for lessons.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter max-w-5xl">
+        <div className="lg:col-span-2 space-y-4">
+          <h3 className="text-headline-md font-headline-md text-primary mb-2">Weekly Schedule</h3>
+          <div className="space-y-3">
+            {WEEKDAYS.map((day) => {
+              const data = schedule[day];
+              if (!data) return null;
+              const isEditing = editingDay === day;
+              return (
+                <div
+                  key={day}
+                  className={`p-6 rounded-xl flex items-center justify-between transition-shadow hover:shadow-sm ${
+                    data.enabled
+                      ? 'bg-surface-container-lowest border border-outline-variant'
+                      : 'bg-surface-container-low/30 border border-outline-variant/50 opacity-70 grayscale'
+                  }`}
+                >
+                  <div className="flex items-center gap-6">
+                    <span className={`text-body-lg font-bold w-24 ${data.enabled ? 'text-primary' : 'text-secondary'}`}>{day}</span>
+                    {isEditing ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editTimeRange}
+                          onChange={(e) => {
+                            setEditTimeRange(e.target.value);
+                            setTimeError('');
+                          }}
+                          className="px-3 py-1 bg-white border border-outline-variant rounded text-sm outline-none focus:ring-1 focus:ring-primary"
+                          placeholder="e.g. 08:00 AM - 06:00 PM"
+                        />
+                        <button onClick={saveEdit} className="text-primary text-sm font-bold hover:underline">Save</button>
+                        <button onClick={() => setEditingDay(null)} className="text-secondary text-sm hover:underline">Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="hidden md:flex items-center gap-2 text-on-surface-variant bg-surface-container px-3 py-1 rounded-full text-sm">
+                        <span className="material-symbols-outlined text-sm">schedule</span>
+                        <span>{data.enabled ? data.timeRange : 'Unavailable'}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={data.enabled}
+                        onChange={() => toggleDay(day)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-12 h-6 bg-secondary-container rounded-full peer peer-checked:bg-primary transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
+                    </label>
+                    <button
+                      onClick={() => startEdit(day)}
+                      className={`p-2 transition-colors ${data.enabled ? 'text-secondary hover:text-primary' : 'text-secondary/30 pointer-events-none'}`}
+                    >
+                      <span className="material-symbols-outlined">edit</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {timeError && <p className="text-sm text-error mt-3">{timeError}</p>}
+        </div>
+
+        <div className="space-y-6">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 sticky top-28">
+            <h3 className="text-headline-md font-headline-md text-primary mb-6">Overview</h3>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center pb-4 border-b border-outline-variant">
+                <span className="text-secondary text-body-md font-body-md">Working Days</span>
+                <span className="font-bold text-primary">{activeDays} / 7 Days</span>
+              </div>
+              <div className="flex justify-between items-center pb-4 border-b border-outline-variant">
+                <span className="text-secondary text-body-md font-body-md">Total Hours / Week</span>
+                <span className="font-bold text-primary">{calcTotalHours()} Hours</span>
+              </div>
+            </div>
+            <div className="mt-8 p-4 bg-primary-container/5 rounded-xl border border-primary-container/10">
+              <p className="text-label-sm font-label-sm text-primary uppercase mb-2 tracking-wider">Instructor Tip</p>
+              <p className="text-body-md font-body-md text-sm text-on-surface-variant italic">&ldquo;Instructors with late-evening availability (after 5 PM) on weekdays see a 35% higher booking rate from working students.&rdquo;</p>
+            </div>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full mt-8 bg-primary text-white py-4 rounded-xl font-bold hover:opacity-90 transition-all disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button
+              onClick={() => {
+                setSchedule(savedSchedule);
+                setEditingDay(null);
+                setEditTimeRange('');
+                setTimeError('');
+                showToast('Unsaved changes discarded.');
+              }}
+              className="w-full mt-3 bg-transparent border border-outline text-secondary py-3 rounded-xl hover:bg-surface-container transition-all"
+            >
+              Discard Edits
+            </button>
+          </div>
+
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+            <p className="text-primary font-bold mb-4">Availability Density</p>
+            <div className="h-32 flex items-end gap-1 px-2">
+              {densityChart.map((h, i) => (
+                <div key={i} className={`flex-1 rounded-t-sm ${h > 0 ? 'bg-primary-container' : 'bg-primary-container/10'}`} style={{ height: `${h || 5}%` }}></div>
+              ))}
+            </div>
+            <div className="flex justify-between mt-2 text-[10px] text-secondary font-bold uppercase tracking-tighter">
+              {WEEKDAYS.map((d) => (
+                <span key={d}>{d.slice(0, 3)}</span>
               ))}
             </div>
           </div>
-        ) : (
-          <div className="border border-outline-variant rounded-2xl p-6 md:p-8 card-shadow max-w-3xl">
-            {/* Date Picker */}
-            <div className="flex items-end gap-3 mb-6">
-              <div className="flex-1">
-                <label className="font-label-sm text-label-sm text-on-surface-variant mb-1 block">Select Date</label>
-                <input
-                  type="date"
-                  value={dateInput}
-                  onChange={(e) => setDateInput(e.target.value)}
-                  min={todayStr()}
-                  className="w-full px-3 py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm text-on-surface transition-all"
-                />
-              </div>
-              <button
-                onClick={addDate}
-                disabled={!dateInput}
-                className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-1.5"
-              >
-                <span className="material-symbols-outlined text-[18px]">add</span>
-                Add Date
-              </button>
-            </div>
-
-            {/* Dates List */}
-            {sortedDates.length === 0 ? (
-              <div className="py-12 text-center">
-                <span className="material-symbols-outlined text-[40px] text-outline">calendar_month</span>
-                <p className="font-body-md text-body-md text-on-surface-variant mt-2">No dates added yet. Pick a date above to get started.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {sortedDates.map((date) => {
-                  const slots = availability[date] || [];
-                  const past = isPastDate(date);
-                  return (
-                    <div
-                      key={date}
-                      className={`rounded-xl border-2 transition-all ${
-                        past
-                          ? 'border-outline-variant/30 bg-surface opacity-60'
-                          : slots.length > 0
-                            ? 'border-primary bg-primary/5'
-                            : 'border-dashed border-warning bg-warning/5'
-                      }`}
-                    >
-                      <div className="p-3">
-                        {/* Date header */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              slots.length > 0 ? 'bg-primary text-white' : 'bg-warning/20 text-warning'
-                            }`}>
-                              <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className={`font-bold text-sm ${slots.length > 0 ? 'text-primary' : 'text-warning'}`}>
-                                  {formatDate(date)}
-                                </span>
-                                <span className="text-[11px] text-outline">{dayName(date)}{past ? ' (past)' : ''}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {slots.length > 0 && (
-                              <span className="text-xs font-medium text-primary">{slots.length}/{SLOTS.length} slots</span>
-                            )}
-                            <button
-                              onClick={() => removeDate(date)}
-                              className="text-on-surface-variant hover:text-error transition-colors p-1 rounded-lg hover:bg-error-container/30"
-                              title="Remove date"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">close</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Slot toggles */}
-                        <div className="flex flex-wrap gap-2">
-                          {SLOTS.map((slot) => {
-                            const selected = slots.includes(slot.key);
-                            return (
-                              <button
-                                key={slot.key}
-                                type="button"
-                                onClick={() => toggleSlot(date, slot.key)}
-                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all border ${
-                                  selected
-                                    ? 'bg-primary text-white border-primary shadow-sm'
-                                    : 'border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary'
-                                }`}
-                              >
-                                <span className="material-symbols-outlined text-[14px]">{slot.icon}</span>
-                                <span>{slot.label}</span>
-                                <span className="opacity-60">({slot.time})</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Prompt when no slots selected */}
-                        {slots.length === 0 && !past && (
-                          <div className="mt-2 flex items-center gap-1.5 text-warning animate-pulse">
-                            <span className="material-symbols-outlined text-[14px]">touch_app</span>
-                            <span className="text-[11px] font-medium">Tap the time slots above to set your availability for this date</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Summary */}
-            {sortedDates.length > 0 && (
-              <div className="mt-6 p-4 bg-surface-container-high rounded-xl border border-outline-variant/30">
-                <h3 className="font-label-md text-label-md text-on-surface mb-2 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-primary">summarize</span>
-                  Availability Summary
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {sortedDates.map((date) => {
-                    const slots = availability[date] || [];
-                    const hasSlots = slots.length > 0;
-                    return (
-                      <div key={date} className={`text-sm p-2 rounded-lg ${hasSlots ? '' : 'bg-warning/10 border border-dashed border-warning/30'}`}>
-                        <span className={`font-bold ${hasSlots ? 'text-primary' : 'text-warning'}`}>{formatDate(date)}</span>
-                        <span className="text-on-surface-variant">
-                          {hasSlots
-                            ? `: ${slots.map((s) => SLOTS.find((sl) => sl.key === s)?.label).join(', ')}`
-                            : ' — no slots selected'}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <p className="text-xs text-outline mt-3 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px]">schedule</span>
-                  {totalSlots} time slots across {datesActive} {datesActive === 1 ? 'date' : 'dates'}
-                  {totalSlots === 0 && datesActive > 0 && (
-                    <span className="text-warning font-medium"> — select time slots to continue</span>
-                  )}
-                </p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between mt-6">
-              <div>
-                {datesActive > 0 && totalSlots === 0 && (
-                  <p className="text-xs text-warning flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">info</span>
-                    Select at least one time slot to save
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={handleSave}
-                disabled={saving || totalSlots === 0}
-                className="bg-primary text-white px-6 py-3 rounded-xl text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </>
   );
