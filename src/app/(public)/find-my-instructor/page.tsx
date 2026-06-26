@@ -179,23 +179,23 @@ export default function FindMyInstructorPage() {
           {initialLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <span className="material-symbols-outlined text-[48px] text-primary animate-spin mb-4">refresh</span>
-              <h2 className="font-headline-md text-headline-md text-on-surface mb-2">Analyzing your preferences...</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant">Our AI is cross-referencing availability, ratings, and teaching styles.</p>
+              <h2 className="text-lg font-bold text-gray-900 mb-2">Analyzing your preferences...</h2>
+              <p className="text-sm text-gray-500">Our AI is cross-referencing availability, ratings, and teaching styles.</p>
             </div>
           ) : (
             <>
               <div className="text-center mb-stack-lg">
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary mb-stack-sm shadow-sm">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-[#064E3B] mb-stack-sm shadow-sm">
                   <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
-                  <span className="font-label-sm text-label-sm font-bold">Analysis Complete</span>
+                  <span className="text-xs font-bold">Analysis Complete</span>
                 </div>
-                <h2 className="font-display-lg text-display-lg text-on-surface mb-2">Our AI matches for you</h2>
-                <p className="font-body-lg text-body-lg text-on-surface-variant mb-4">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Our AI matches for you</h2>
+                <p className="text-sm text-gray-500 mb-4">
                   {totalInstructors} instructor{totalInstructors !== 1 ? 's' : ''} found in your area
                 </p>
                 <button
                   onClick={reset}
-                  className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-label-md hover:brightness-110 transition-all shadow-md shadow-primary/20"
+                  className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-sm font-semibold hover:brightness-110 transition-all shadow-md shadow-primary/20"
                 >
                   <span className="material-symbols-outlined text-[18px]">search</span>
                   Submit New Search
@@ -207,7 +207,7 @@ export default function FindMyInstructorPage() {
                 <div className="mb-stack-lg">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface">Verified Instructors</h3>
+                    <h3 className="text-sm font-bold text-gray-900">Verified Instructors</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
                     {allInstructors.filter((i) => i.is_verified).map((inst) => (
@@ -227,17 +227,17 @@ export default function FindMyInstructorPage() {
                         </div>
                         <div className="p-4 flex-grow flex flex-col">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <h3 className="font-headline-sm text-headline-sm text-on-surface">{inst.first_name} {inst.last_name}</h3>
+                            <h3 className="text-sm font-bold text-gray-900">{inst.first_name} {inst.last_name}</h3>
                             <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                           </div>
-                          <p className="font-body-sm text-body-sm text-on-surface-variant mb-2">
+                          <p className="text-xs text-gray-500 mb-2">
                             <span className="material-symbols-outlined text-[14px] align-text-bottom">location_on</span> {inst.suburb}, {inst.state}
                           </p>
                           {inst.hourly_rate && (
-                            <p className="font-label-md text-label-md font-bold text-primary mb-3">${inst.hourly_rate}/hr</p>
+                            <p className="text-sm font-bold text-[#064E3B] mb-3">${inst.hourly_rate}/hr</p>
                           )}
                           <div className="mt-auto">
-                            <span className="w-full font-label-sm text-label-sm text-primary border border-primary px-3 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-center block">
+                            <span className="w-full text-xs font-semibold text-[#064E3B] border border-primary px-3 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-center block">
                               View Profile
                             </span>
                           </div>
@@ -253,7 +253,7 @@ export default function FindMyInstructorPage() {
                 <div className="mb-stack-lg">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface">AI Match Suggestions</h3>
+                    <h3 className="text-sm font-bold text-gray-900">AI Match Suggestions</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {aiMatches.map((r) => (
@@ -273,17 +273,17 @@ export default function FindMyInstructorPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1">
-                            <span className="font-label-md text-label-md font-bold text-on-surface truncate">{r.name}</span>
+                            <span className="text-sm font-bold text-gray-900 truncate">{r.name}</span>
                             {r.verified && (
                               <span className="material-symbols-outlined text-primary text-[14px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                             )}
                           </div>
                           <div className="flex items-center gap-1 mt-0.5">
-                            <span className="material-symbols-outlined text-[12px] text-tertiary-fixed-dim" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="text-xs font-bold text-on-surface">{r.rating}</span>
-                            <span className="text-[10px] text-on-surface-variant">({r.reviews})</span>
+                            <span className="material-symbols-outlined text-[12px] text-yellow-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                            <span className="text-xs font-bold text-gray-900">{r.rating}</span>
+                            <span className="text-[10px] text-gray-500">({r.reviews})</span>
                           </div>
-                          <div className="mt-1 text-[11px] text-primary/80 bg-primary/5 rounded px-1.5 py-1 leading-snug">
+                          <div className="mt-1 text-[11px] text-[#064E3B]/80 bg-primary/5 rounded px-1.5 py-1 leading-snug">
                             <span className="material-symbols-outlined text-[10px] align-text-bottom">psychology</span> {r.reason}
                           </div>
                         </div>
@@ -295,8 +295,8 @@ export default function FindMyInstructorPage() {
 
               {aiMatches && aiMatches.length === 0 && allInstructors.length === 0 && (
                 <div className="text-center py-20">
-                  <p className="text-outline text-lg font-body">No matching instructors found. Try adjusting your preferences.</p>
-                  <button onClick={reset} className="mt-4 border border-outline-variant px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-surface-container">
+                  <p className="text-gray-400 text-sm">No matching instructors found. Try adjusting your preferences.</p>
+                  <button onClick={reset} className="mt-4 border border-outline-variant px-6 py-2 rounded-lg text-sm font-medium hover:bg-surface-container">
                     Start New Search
                   </button>
                 </div>
@@ -306,13 +306,13 @@ export default function FindMyInstructorPage() {
               {allInstructors.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-4 border-t border-outline-variant pt-stack-lg">
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface">
+                    <h3 className="text-sm font-bold text-gray-900">
                       All Matching Instructors
                       {loading && (
                         <span className="material-symbols-outlined text-primary animate-spin text-[18px] ml-2 inline-block align-middle">refresh</span>
                       )}
                     </h3>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">
+                    <span className="text-xs text-gray-500">
                       Page {currentPage} of {totalPages}
                     </span>
                   </div>
@@ -331,21 +331,21 @@ export default function FindMyInstructorPage() {
                         </div>
                         <div className="p-4 flex-grow flex flex-col">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <h3 className="font-headline-sm text-headline-sm text-on-surface">{inst.first_name} {inst.last_name}</h3>
+                            <h3 className="text-sm font-bold text-gray-900">{inst.first_name} {inst.last_name}</h3>
                             {inst.is_verified && (
                               <span className="material-symbols-outlined text-primary text-[16px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                             )}
                           </div>
-                          <p className="font-body-sm text-body-sm text-on-surface-variant mb-1">
+                          <p className="text-xs text-gray-500 mb-1">
                             <span className="material-symbols-outlined text-[14px] align-text-bottom">location_on</span> {inst.suburb}, {inst.state}
                           </p>
                           {inst.hourly_rate && (
-                            <p className="font-label-md text-label-md font-bold text-primary mb-3">${inst.hourly_rate}/hr</p>
+                            <p className="text-sm font-bold text-[#064E3B] mb-3">${inst.hourly_rate}/hr</p>
                           )}
                           <div className="mt-auto">
                             <Link
                               href={`/instructors/${inst.suburb.toLowerCase().replace(/\s+/g, '-')}/${inst.slug}`}
-                              className="w-full font-label-sm text-label-sm text-on-surface-variant border border-outline-variant px-3 py-2 rounded-lg hover:border-primary hover:text-primary transition-colors text-center block"
+                              className="w-full text-xs font-semibold text-gray-500 border border-outline-variant px-3 py-2 rounded-lg hover:border-primary hover:text-[#064E3B] transition-colors text-center block"
                             >
                               View Profile
                             </Link>
@@ -364,7 +364,7 @@ export default function FindMyInstructorPage() {
               )}
 
               <div className="mt-stack-lg text-center">
-                <button onClick={reset} className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-2 mx-auto">
+                <button onClick={reset} className="text-sm font-medium text-gray-500 hover:text-[#064E3B] transition-colors flex items-center justify-center gap-2 mx-auto">
                   <span className="material-symbols-outlined">restart_alt</span> Start New Search
                 </button>
               </div>
@@ -376,47 +376,47 @@ export default function FindMyInstructorPage() {
   }
 
   return (
-    <div className="flex-grow flex flex-col items-center justify-center px-margin-mobile md:px-margin-desktop py-stack-lg w-full relative overflow-hidden">
-      <section className="w-full max-w-2xl bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 md:p-12 relative z-10 fade-in">
-        <div className="mb-stack-lg">
+    <div className="flex-grow flex flex-col items-center justify-center px-margin-mobile md:px-margin-desktop py-8 w-full relative overflow-hidden">
+      <section className="w-full max-w-lg bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-5 md:p-8 relative z-10 fade-in">
+        <div className="mb-6">
           <div className="flex justify-between items-end mb-2">
-            <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Step {step + 1} of {QUESTIONS.length}</span>
-            <span className="font-label-sm text-label-sm text-primary flex items-center gap-1">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Step {step + 1} of {QUESTIONS.length}</span>
+            <span className="text-xs font-semibold text-[#064E3B] flex items-center gap-1">
               <span className="material-symbols-outlined text-[14px]">psychology</span> AI Assisting
             </span>
           </div>
-          <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
             <div className="h-full bg-primary rounded-full" style={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}></div>
           </div>
         </div>
 
-        <h1 className="font-display-lg text-display-lg text-on-surface mb-stack-md">Help me find the right instructor.</h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant mb-stack-lg">{current.label}</p>
+        <h1 className="text-lg font-bold text-gray-900 mb-3">Help me find the right instructor.</h1>
+        <p className="text-sm text-gray-500 mb-6">{current.label}</p>
 
         {current.type === 'text' && (
-          <div className="relative mb-stack-lg">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">location_on</span>
+          <div className="relative mb-6">
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">location_on</span>
             <input
               type="text"
               placeholder={current.placeholder}
               value={answers[current.id] || ''}
               onChange={(e) => setAnswer(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-outline-variant rounded-lg font-body-lg text-body-lg text-on-surface bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-3 border border-outline-variant rounded-lg text-sm text-gray-900 bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
               autoFocus
             />
           </div>
         )}
 
         {current.type === 'choice' && (
-          <div className="space-y-3 mb-stack-lg">
+          <div className="space-y-2 mb-6">
             {current.options!.map((opt) => (
               <button
                 key={opt}
                 onClick={() => setAnswer(opt)}
-                className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all ${
+                className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all text-sm ${
                   answers[current.id] === opt
-                    ? 'border-primary bg-primary/10 text-primary font-semibold'
-                    : 'border-outline-variant text-on-surface-variant hover:border-primary'
+                    ? 'border-primary bg-primary/10 text-[#064E3B] font-bold'
+                    : 'border-outline-variant text-gray-500 hover:border-primary hover:text-gray-900'
                 }`}
               >
                 {opt}
@@ -425,11 +425,11 @@ export default function FindMyInstructorPage() {
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-stack-sm border-t border-surface-container">
-          <button onClick={handlePrev} disabled={step === 0} className="font-label-md text-label-md text-on-surface-variant hover:text-on-surface px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-30">
-            <span className="material-symbols-outlined">arrow_back</span> Back
+        <div className="flex justify-between items-center pt-4 border-t border-surface-container">
+          <button onClick={handlePrev} disabled={step === 0} className="text-sm font-medium text-gray-500 hover:text-gray-900 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-30">
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back
           </button>
-          <button onClick={handleNext} disabled={!answers[current.id]} className="font-label-md text-label-md bg-primary text-white px-8 py-3 rounded-xl hover:brightness-110 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50">
+          <button onClick={handleNext} disabled={!answers[current.id]} className="text-sm font-semibold bg-primary text-white px-6 py-2.5 rounded-xl hover:brightness-110 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50">
             {step === QUESTIONS.length - 1 ? (
               <>Find My Match <span className="material-symbols-outlined">auto_awesome</span></>
             ) : (

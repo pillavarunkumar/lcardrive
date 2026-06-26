@@ -18,7 +18,7 @@ function StarRating({ rating, size = 'text-[14px]' }: { rating: number; size?: s
       {[1, 2, 3, 4, 5].map((i) => (
         <span
           key={i}
-          className={`material-symbols-outlined ${size} ${i <= Math.round(rating) ? 'text-[#facc15]' : 'text-outline-variant'}`}
+          className={`material-symbols-outlined ${size} ${i <= Math.round(rating) ? 'text-yellow-400' : 'text-gray-200'}`}
           style={{ fontVariationSettings: "'FILL' 1" }}
         >
           star
@@ -48,10 +48,10 @@ function SaveButton({ instructorId }: { instructorId: string }) {
   return (
     <button
       onClick={toggleSave}
-      className="p-1.5 rounded-full bg-white/80 backdrop-blur-sm shadow-md hover:bg-white transition-all"
+      className="text-gray-300 hover:text-[#064E3B] transition-colors"
     >
       <span
-        className={`material-symbols-outlined text-[18px] ${saved ? 'text-primary' : 'text-on-surface-variant/60'}`}
+        className={`material-symbols-outlined text-xl ${saved ? 'text-[#064E3B]' : ''}`}
         style={{ fontVariationSettings: saved ? "'FILL' 1" : "'FILL' 0" }}
       >
         bookmark
@@ -62,88 +62,80 @@ function SaveButton({ instructorId }: { instructorId: string }) {
 
 export default function InstructorCard({ instructor, aiReason, variant = 'stacked', limitedSpots }: Props) {
   const fullName = `${instructor.first_name} ${instructor.last_name}`;
-  const nameVerified = !!instructor.verified_name;
   const avatarUrl = getAvatarUrl(instructor);
 
   if (variant === 'horizontal') {
     return (
       <Link
         href={`/instructors/${instructor.suburb.toLowerCase().replace(/\s+/g, '-')}/${instructor.slug}`}
-        className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_12px_30px_rgba(6,78,59,0.15)] border border-outline-variant hover:border-primary transition-all duration-300 flex flex-col relative group"
+        className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-[#064E3B]/20 transition-all duration-200 flex flex-col relative group overflow-hidden"
       >
-        <div className="relative bg-gradient-to-br from-primary/5 to-primary/10">
-          <div className="flex gap-4 p-5 pb-3">
-            <div className="relative flex-shrink-0">
-              <img
-                src={avatarUrl}
-                alt=""
-                className="w-20 h-20 rounded-xl object-cover border-2 border-white shadow-md flex-shrink-0"
-              />
-              {limitedSpots && (
-                <div className="absolute -top-1.5 -right-1.5 bg-tertiary-container text-on-tertiary-container px-1.5 py-0.5 rounded text-[8px] font-bold uppercase shadow-sm">
-                  <span className="material-symbols-outlined text-[10px]" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
-                </div>
+        <div className="flex gap-4 p-4">
+          <div className="relative flex-shrink-0">
+            <img
+              src={avatarUrl}
+              alt=""
+              className="w-16 h-16 rounded-xl object-cover border border-gray-100 shadow-sm"
+            />
+            {limitedSpots && (
+              <div className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white px-1 py-0.5 rounded text-[8px] font-bold shadow-sm flex items-center gap-0.5">
+                <span className="material-symbols-outlined text-[10px]" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-sm font-bold text-gray-900 truncate">{fullName}</h2>
+              {instructor.is_verified && (
+                <span className="material-symbols-outlined text-[#064E3B] text-[16px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               )}
             </div>
-            <div className="flex flex-col justify-center flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h2 className="font-headline-sm text-headline-sm text-on-surface truncate">{fullName}</h2>
-                {nameVerified && (
-                  <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <StarRating rating={instructor.average_rating} size="text-[14px]" />
-                <span className="font-bold text-on-surface text-sm">{instructor.average_rating.toFixed(1)}</span>
-                <span className="text-outline text-xs">({instructor.review_count})</span>
-              </div>
-              <div className="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm mt-1">
-                <span className="material-symbols-outlined text-[14px]">location_on</span>
-                <span className="truncate">{instructor.suburb} &amp; Inner West</span>
-              </div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <StarRating rating={instructor.average_rating} size="text-[12px]" />
+              <span className="text-xs font-semibold text-gray-900">{instructor.average_rating.toFixed(1)}</span>
+              <span className="text-[11px] text-gray-400">({instructor.review_count})</span>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <SaveButton instructorId={instructor.id} />
-              {instructor.is_verified && !limitedSpots && (
-                <div className="bg-primary/10 text-primary px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider shadow-sm">
-                  <span className="material-symbols-outlined text-[12px] align-text-bottom" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                </div>
-              )}
+            <div className="flex items-center gap-1 text-gray-400 text-xs mt-0.5">
+              <span className="material-symbols-outlined text-[12px]">location_on</span>
+              <span className="truncate">{instructor.suburb}</span>
             </div>
           </div>
+          <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+            <SaveButton instructorId={instructor.id} />
+          </div>
         </div>
-        <div className="px-5 pt-2 pb-3">
-          <div className="flex flex-wrap gap-1.5 mb-2">
+        <div className="px-4 pb-3">
+          <div className="flex flex-wrap gap-1">
             {instructor.transmission && (
-              <span className="px-2 py-0.5 bg-surface-container text-on-surface-variant rounded text-[11px] font-medium">
+              <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-[11px] font-medium">
                 {instructor.transmission === 'auto' ? 'Auto' : instructor.transmission === 'manual' ? 'Manual' : 'Auto & Manual'}
               </span>
             )}
             {instructor.specialises_anxiety && (
-              <span className="px-2 py-0.5 bg-primary/5 text-primary rounded text-[11px] font-medium">Anxiety Friendly</span>
+              <span className="px-2 py-0.5 bg-[#064E3B]/5 text-[#064E3B] rounded text-[11px] font-medium">Anxiety Friendly</span>
             )}
             {instructor.accepts_international && (
-              <span className="px-2 py-0.5 bg-primary/5 text-primary rounded text-[11px] font-medium">Intl. Licence</span>
+              <span className="px-2 py-0.5 bg-[#064E3B]/5 text-[#064E3B] rounded text-[11px] font-medium">Intl. Licence</span>
             )}
           </div>
           {aiReason && (
-            <div className="bg-primary/5 border-l-[3px] border-primary rounded-r-lg p-2.5 mb-2">
+            <div className="bg-[#064E3B]/5 border-l-[3px] border-[#064E3B] rounded-r-lg p-2.5 mt-2">
               <div className="flex items-center gap-1 mb-0.5">
-                <span className="material-symbols-outlined text-primary text-[14px]">psychology</span>
-                <span className="text-[11px] font-bold text-on-surface">Why this match?</span>
+                <span className="material-symbols-outlined text-[#064E3B] text-[14px]">psychology</span>
+                <span className="text-[11px] font-bold text-gray-900">Why this match?</span>
               </div>
-              <p className="text-[11px] text-on-surface-variant leading-snug">{aiReason}</p>
+              <p className="text-[11px] text-gray-500 leading-snug">{aiReason}</p>
             </div>
           )}
         </div>
-        <div className="mt-auto px-5 pb-4 pt-3 border-t border-outline-variant/50 flex justify-between items-center">
+        <div className="mt-auto px-4 pb-4 pt-3 border-t border-gray-100 flex justify-between items-center">
           <div>
-            <span className="text-[11px] text-on-surface-variant block leading-none mb-0.5">Starting from</span>
-            <span className="text-lg font-bold text-on-surface">
-              ${instructor.hourly_rate}<span className="text-xs font-normal text-outline">/hr</span>
+            <span className="text-[10px] text-gray-400 block leading-none mb-0.5">Starting from</span>
+            <span className="text-base font-bold text-gray-900">
+              ${instructor.hourly_rate}<span className="text-xs font-normal text-gray-400">/hr</span>
             </span>
           </div>
-          <span className="bg-primary text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md shadow-primary/20 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all">
+          <span className="bg-[#064E3B] text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-sm group-hover:shadow-md transition-all">
             View Profile
           </span>
         </div>
@@ -154,7 +146,7 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
   return (
     <Link
       href={`/instructors/${instructor.suburb.toLowerCase().replace(/\s+/g, '-')}/${instructor.slug}`}
-      className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_12px_30px_rgba(6,78,59,0.15)] hover:border-primary transition-all duration-300 group block"
+      className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-[#064E3B]/20 transition-all duration-300 group block"
     >
       <div className="relative h-48 overflow-hidden">
         <img
@@ -177,15 +169,12 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="text-lg font-display font-bold text-on-surface truncate">{fullName}</h3>
+              <h3 className="text-lg font-bold text-gray-900 truncate">{fullName}</h3>
               {instructor.is_verified && (
-                <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-              )}
-              {nameVerified && !instructor.is_verified && (
-                <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                <span className="material-symbols-outlined text-[#064E3B] text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               )}
             </div>
-            <p className="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1">
+            <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
               <span className="material-symbols-outlined text-[12px]">location_on</span>
               {instructor.suburb} • {instructor.service_radius_km}km
             </p>
@@ -193,44 +182,44 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
         </div>
         <div className="flex items-center gap-2 mb-3">
           <StarRating rating={instructor.average_rating} size="text-[16px]" />
-          <span className="text-sm font-bold text-on-surface">{instructor.average_rating.toFixed(1)}</span>
-          <span className="text-xs text-outline">({instructor.review_count})</span>
+          <span className="text-sm font-bold text-gray-900">{instructor.average_rating.toFixed(1)}</span>
+          <span className="text-xs text-gray-400">({instructor.review_count})</span>
         </div>
         <div className="flex flex-wrap gap-1.5 mb-3">
           {instructor.transmission && (
-            <span className="text-[11px] font-medium bg-surface-container text-on-surface-variant px-2 py-0.5 rounded capitalize">
+            <span className="text-[11px] font-medium bg-gray-100 text-gray-500 px-2 py-0.5 rounded capitalize">
               {instructor.transmission === 'both' ? 'Auto & Manual' : instructor.transmission}
             </span>
           )}
           {instructor.specialises_anxiety && (
-            <span className="text-[11px] font-medium bg-primary/5 text-primary px-2 py-0.5 rounded">Anxiety-friendly</span>
+            <span className="text-[11px] font-medium bg-[#064E3B]/5 text-[#064E3B] px-2 py-0.5 rounded">Anxiety-friendly</span>
           )}
           {instructor.accepts_international && (
-            <span className="text-[11px] font-medium bg-primary/5 text-primary px-2 py-0.5 rounded">Intl. Licence</span>
+            <span className="text-[11px] font-medium bg-[#064E3B]/5 text-[#064E3B] px-2 py-0.5 rounded">Intl. Licence</span>
           )}
         </div>
-        <p className="text-xs text-on-surface-variant leading-relaxed mb-4 line-clamp-2">
+        <p className="text-xs text-gray-500 leading-relaxed mb-4 line-clamp-2">
           {instructor.bio || `${instructor.first_name} is a driving instructor serving the ${instructor.suburb} area.`}
         </p>
         {aiReason && (
-          <div className="bg-primary/5 border-l-[3px] border-primary rounded-r-lg p-3 mb-4">
-            <span className="flex items-center gap-1 text-xs font-bold text-on-surface mb-1">
+          <div className="bg-[#064E3B]/5 border-l-[3px] border-[#064E3B] rounded-r-lg p-3 mb-4">
+            <span className="flex items-center gap-1 text-xs font-bold text-gray-900 mb-1">
               <span className="material-symbols-outlined text-[14px]">psychology</span>
               Why this match?
             </span>
-            <p className="text-xs text-on-surface-variant leading-snug">{aiReason}</p>
+            <p className="text-xs text-gray-500 leading-snug">{aiReason}</p>
           </div>
         )}
-        <div className="flex items-center justify-between pt-3 border-t border-outline-variant/50">
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div>
             {instructor.hourly_rate && (
               <>
-                <span className="text-lg font-bold text-on-surface">${instructor.hourly_rate}</span>
-                <span className="text-xs text-outline">/hr</span>
+                <span className="text-lg font-bold text-gray-900">${instructor.hourly_rate}</span>
+                <span className="text-xs text-gray-400">/hr</span>
               </>
             )}
           </div>
-          <span className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md shadow-primary/20 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all">
+          <span className="bg-[#064E3B] text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm hover:shadow-md transition-all">
             Book Now
           </span>
         </div>

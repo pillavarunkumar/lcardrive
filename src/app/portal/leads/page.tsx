@@ -15,10 +15,10 @@ interface Lead {
 }
 
 const statusColors: Record<string, string> = {
-  new: 'bg-primary/10 text-primary',
-  contacted: 'bg-surface-container-high text-on-surface-variant',
-  booked: 'bg-primary-container/30 text-primary-container',
-  archived: 'bg-surface-dim text-on-surface-variant',
+  new: 'bg-[#064E3B]/10 text-[#064E3B]',
+  contacted: 'bg-gray-200 text-gray-500',
+  booked: 'bg-green-50 text-green-700',
+  archived: 'bg-gray-100 text-gray-400',
 };
 
 const tabs = ['All', 'New', 'Contacted', 'Booked', 'Archived'];
@@ -53,16 +53,16 @@ export default function PortalLeads() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-primary">Leads</h2>
-          <p className="text-on-surface-variant text-sm mt-1">Students who have contacted you about your services.</p>
+          <h2 className="text-[22px] font-bold text-gray-900">Leads</h2>
+          <p className="text-sm text-gray-500 mt-1">Students who have contacted you about your services.</p>
         </div>
-        <div className="bg-surface-container-lowest rounded-lg border border-outline-variant p-1 flex gap-1">
+        <div className="bg-white rounded-lg border border-[#E5E7EB] shadow-sm p-1 flex gap-1">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${
-                activeTab === tab ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-primary'
+                activeTab === tab ? 'bg-[#064E3B] text-white shadow-sm' : 'text-gray-500 hover:text-[#064E3B]'
               }`}
             >
               {tab}
@@ -72,38 +72,38 @@ export default function PortalLeads() {
       </div>
 
       {loading ? (
-        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm overflow-hidden">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-4 p-4 border-b border-outline-variant/30 animate-pulse">
-              <div className="flex-1 h-4 bg-outline-variant/40 rounded" />
-              <div className="w-24 h-4 bg-outline-variant/40 rounded" />
+            <div key={i} className="flex items-center gap-4 p-4 border-b border-[#E5E7EB]/30 animate-pulse">
+              <div className="flex-1 h-4 bg-gray-200 rounded" />
+              <div className="w-24 h-4 bg-gray-200 rounded" />
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center bg-surface-container-lowest rounded-xl border border-outline-variant">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
+        <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-[#64748B] mb-4">
             <span className="material-symbols-outlined text-[32px]">inbox</span>
           </div>
-          <h3 className="text-headline-md font-headline-md text-primary mb-1">No leads yet</h3>
-          <p className="text-on-surface-variant max-w-sm mx-auto text-sm">
+          <h3 className="text-lg font-bold text-gray-900 mb-1">No leads yet</h3>
+          <p className="text-gray-500 max-w-sm mx-auto text-sm">
             {activeTab === 'All' ? 'Leads will appear here when students contact you.' : `No leads with status "${activeTab.toLowerCase()}".`}
           </p>
         </div>
       ) : (
         <div className="space-y-3">
           {filtered.map((lead) => (
-            <div key={lead.id} className="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 hover:border-primary/20 hover:shadow-sm transition-all">
+            <div key={lead.id} className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-sm font-bold text-primary">{lead.name}</h3>
+                    <h3 className="text-sm font-bold text-gray-900">{lead.name}</h3>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${statusColors[lead.status]}`}>
                       {lead.status}
                     </span>
                   </div>
-                  {lead.message && <p className="text-sm text-on-surface-variant mb-2">&ldquo;{lead.message}&rdquo;</p>}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-outline">
+                  {lead.message && <p className="text-sm text-gray-500 mb-2">&ldquo;{lead.message}&rdquo;</p>}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
                     {lead.suburb && (
                       <span className="flex items-center gap-1">
                         <span className="material-symbols-outlined text-[14px]">location_on</span> {lead.suburb}
@@ -123,9 +123,9 @@ export default function PortalLeads() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  {lead.service && <span className="text-xs font-medium text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-lg whitespace-nowrap">{lead.service}</span>}
+                  {lead.service && <span className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg whitespace-nowrap">{lead.service}</span>}
                   {lead.status === 'new' && (
-                    <button onClick={() => updateLeadStatus(lead.id, 'contacted')} className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-90 transition-all whitespace-nowrap">Mark Contacted</button>
+                    <button onClick={() => updateLeadStatus(lead.id, 'contacted')} className="bg-[#064E3B] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#053A2C] transition-all whitespace-nowrap">Mark Contacted</button>
                   )}
                 </div>
               </div>

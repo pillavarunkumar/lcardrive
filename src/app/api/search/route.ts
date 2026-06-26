@@ -7,8 +7,8 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const suburbRaw = searchParams.get('suburb')?.trim();
-  const suburb = suburbRaw?.split(',')[0]?.trim();
+  const searchRaw = searchParams.get('suburb')?.trim();
+  const searchTerm = searchRaw?.split(',')[0]?.trim();
   const radiusKm = searchParams.get('radius_km');
   const transmission = searchParams.get('transmission');
   const maxPrice = searchParams.get('max_price');
@@ -22,13 +22,25 @@ export async function GET(request: Request) {
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
   const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '12', 10) || 12));
 
+  // Exclude deactivated instructors
+  const { data: deactivated } = await supabase
+    .from('listing_flags')
+    .select('instructor_id')
+    .eq('detail', 'deactivated')
+    .eq('is_resolved', false);
+  const deactivatedIds = deactivated?.map(d => d.instructor_id).filter(Boolean) || [];
+
   let query = supabase.from('instructors').select('*', { count: 'exact' });
 
   query = query.eq('is_verified', true);
 
-  if (suburb) {
-    const q = `%${suburb.toLowerCase()}%`;
-    query = query.or(`suburb.ilike.${q},service_suburbs.cs.{${suburb}}`);
+  if (deactivatedIds.length > 0) {
+    query = query.not('id', 'in', `(${deactivatedIds.join(',')})`);
+  }
+
+  if (searchTerm) {
+    const q = `%${searchTerm}%`;
+    query = query.or(`first_name.ilike.${q},last_name.ilike.${q},suburb.ilike.${q},postcode.ilike.${q},service_suburbs.cs.{${searchTerm}}`);
   }
 
   if (radiusKm) {
@@ -119,7 +131,7 @@ export async function GET(request: Request) {
   try {
     const ids = instructors.map((i: any) => i.id).filter(Boolean);
     await supabase.from('search_logs').insert({
-      suburb,
+      suburb: searchTerm,
       filters_applied: {
         transmission, max_price: maxPrice,
         anxiety_friendly: anxietyFriendly,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 
 interface Stats {
   totalInstructors: number;
@@ -56,13 +57,13 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-16">
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-outline-variant/20 shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
           <div className="flex justify-between items-start mb-5 md:mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Instructors</p>
+            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Instructors</p>
             <Sparkline data={[10, 25, 20, 35, 30, 45, 40, 55]} color="#064e3b" />
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-3xl md:text-4xl font-bold text-primary">
+            <p className="text-3xl md:text-4xl font-bold text-gray-900 leading-none">
               {loading ? '—' : (stats?.totalInstructors ?? 0).toLocaleString()}
             </p>
             {!loading && (
@@ -70,37 +71,37 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-outline-variant/20 shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
           <div className="flex justify-between items-start mb-5 md:mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Active Claims</p>
+            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Active Claims</p>
             <Sparkline data={[5, 12, 8, 15, 25, 20, 30, 47]} color="#ba1a1a" />
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-3xl md:text-4xl font-bold text-primary">{stats?.pendingClaims ?? '—'}</p>
+            <p className="text-3xl md:text-4xl font-bold text-gray-900 leading-none">{stats?.pendingClaims ?? '—'}</p>
             {!loading && stats && (
-              <span className="text-[11px] font-bold text-error mb-1">+{(stats.pendingClaims || 0) > 0 ? stats.pendingClaims : 0}</span>
+              <span className="text-[11px] font-bold text-red-500 mb-1">+{(stats.pendingClaims || 0) > 0 ? stats.pendingClaims : 0}</span>
             )}
           </div>
         </div>
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-outline-variant/20 shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
           <div className="flex justify-between items-start mb-5 md:mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Reviews</p>
+            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Reviews</p>
             <Sparkline data={[5, 12, 8, 15, 25, 20, 30, 47].map(v => 150 - v)} color="#545f73" />
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-3xl md:text-4xl font-bold text-primary">{stats?.newReviews ?? '—'}</p>
+            <p className="text-3xl md:text-4xl font-bold text-gray-900 leading-none">{stats?.newReviews ?? '—'}</p>
             {!loading && (
               <span className="text-[11px] font-bold text-green-600 mb-1">{stats?.unapprovedReviews?.length ? `+${stats.unapprovedReviews.length}` : '0'}</span>
             )}
           </div>
         </div>
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-outline-variant/20 shadow-sm hover:-translate-y-0.5 transition-all duration-300">
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
           <div className="flex justify-between items-start mb-5 md:mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Searches</p>
+            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Searches</p>
             <Sparkline data={[40, 42, 48, 55, 52, 60, 62]} color="#064e3b" />
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-3xl md:text-4xl font-bold text-primary">
+            <p className="text-3xl md:text-4xl font-bold text-gray-900 leading-none">
             {loading ? '—' : (stats?.searches30d ?? 0) >= 1000
               ? ((stats?.searches30d ?? 0) / 1000).toFixed(1) + 'k'
               : (stats?.searches30d ?? 0).toLocaleString()}
@@ -114,73 +115,73 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         <div className="lg:col-span-8">
-          <div className="bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-6 md:p-10">
-            <div className="flex items-center justify-between mb-8 md:mb-10">
-              <h4 className="text-xl md:text-2xl font-bold text-primary tracking-tight">Pending Audits</h4>
-              <Link href="/admin/claims" className="text-sm font-bold text-primary hover:underline">
+          <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-base font-semibold text-gray-900">Pending Audits</h4>
+              <Link href="/admin/claims" className="text-sm font-bold text-[#064E3B] hover:underline">
                 View Queue →
               </Link>
             </div>
-            <div className="space-y-4 md:space-y-6">
+            <div className="space-y-3">
               <Link
                 href="/admin/instructors"
-                className="flex items-center justify-between p-4 md:p-6 bg-surface-dim/20 rounded-xl hover:bg-surface-dim/40 transition-all duration-300 cursor-pointer"
+                className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
               >
-                <div className="flex items-center gap-4 md:gap-5">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
-                    <span className="material-symbols-outlined text-[20px] md:text-[24px]">policy</span>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">policy</span>
                   </div>
                   <div>
-                    <p className="text-sm md:text-base font-bold text-on-surface">Verify New Instructor Profiles</p>
-                    <p className="text-xs md:text-sm text-on-surface-variant">{stats?.pendingReviewRequests?.length || 0} pending verifications</p>
+                    <p className="text-sm font-semibold text-gray-900">Verify New Instructor Profiles</p>
+                    <p className="text-xs text-gray-400">{stats?.pendingReviewRequests?.length || 0} pending verifications</p>
                   </div>
                 </div>
-                <span className="material-symbols-outlined text-outline shrink-0">chevron_right</span>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
               </Link>
               <Link
                 href="/admin/reviews"
-                className="flex items-center justify-between p-4 md:p-6 bg-surface-dim/20 rounded-xl hover:bg-surface-dim/40 transition-all duration-300 cursor-pointer"
+                className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
               >
-                <div className="flex items-center gap-4 md:gap-5">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary shrink-0">
-                    <span className="material-symbols-outlined text-[20px] md:text-[24px]">rate_review</span>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">rate_review</span>
                   </div>
                   <div>
-                    <p className="text-sm md:text-base font-bold text-on-surface">Flagged Review Moderation</p>
-                    <p className="text-xs md:text-sm text-on-surface-variant">{stats?.unapprovedReviews?.length || 0} reviews pending approval</p>
+                    <p className="text-sm font-semibold text-gray-900">Flagged Review Moderation</p>
+                    <p className="text-xs text-gray-400">{stats?.unapprovedReviews?.length || 0} reviews pending approval</p>
                   </div>
                 </div>
-                <span className="material-symbols-outlined text-outline shrink-0">chevron_right</span>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
               </Link>
               <Link
                 href="/admin/claims"
-                className="flex items-center justify-between p-4 md:p-6 bg-surface-dim/20 rounded-xl hover:bg-surface-dim/40 transition-all duration-300 cursor-pointer"
+                className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
               >
-                <div className="flex items-center gap-4 md:gap-5">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-error/10 rounded-xl flex items-center justify-center text-error shrink-0">
-                    <span className="material-symbols-outlined text-[20px] md:text-[24px]">warning</span>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">warning</span>
                   </div>
                   <div>
-                    <p className="text-sm md:text-base font-bold text-on-surface">Conflict Resolution</p>
-                    <p className="text-xs md:text-sm text-on-surface-variant">{stats?.recentClaims?.length || 0} disputed claims require review</p>
+                    <p className="text-sm font-semibold text-gray-900">Conflict Resolution</p>
+                    <p className="text-xs text-gray-400">{stats?.recentClaims?.length || 0} disputed claims require review</p>
                   </div>
                 </div>
-                <span className="material-symbols-outlined text-outline shrink-0">chevron_right</span>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
               </Link>
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-4">
-          <div className="bg-primary text-white rounded-2xl shadow-sm p-8 md:p-10 h-full relative overflow-hidden flex flex-col justify-between">
+          <div className="bg-[#064E3B] text-white rounded-[20px] shadow-sm p-5 h-full relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">System Update</span>
-              <h4 className="text-xl md:text-2xl font-bold mt-4 leading-tight">Next maintenance window: Sunday 2AM</h4>
-              <p className="text-sm opacity-80 mt-4 leading-relaxed">
+              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-60">System Update</span>
+              <h4 className="text-base font-semibold mt-3 leading-tight">Next maintenance window: Sunday 2AM</h4>
+              <p className="text-sm opacity-80 mt-2 leading-relaxed">
                 Platform performance metrics will be aggregated in read-only mode for 15 minutes.
               </p>
             </div>
-            <button className="mt-8 md:mt-12 bg-white text-primary px-6 md:px-8 py-3 md:py-4 rounded-xl font-bold text-sm hover:bg-surface-container transition-all w-fit">
+            <button className="mt-6 bg-white text-[#064E3B] px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all w-fit">
               Read Details
             </button>
             <span

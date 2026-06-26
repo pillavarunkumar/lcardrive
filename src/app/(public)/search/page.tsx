@@ -129,311 +129,274 @@ function SearchContent() {
 
   return (
     <>
-      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-md relative">
-        {/* Search Bar at Top - always visible */}
-        <div className="sticky top-20 z-30 mb-4 bg-surface pt-2 pb-3 border-b border-outline-variant/50">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-            <div className="flex-1 flex items-center bg-surface-container-low rounded-xl px-4 py-2.5 search-container-shadow relative">
-              <span className="material-symbols-outlined text-primary mr-2 text-xl">search</span>
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
+        {/* Search Bar */}
+        <div className="mb-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex items-center gap-2 sticky top-20 z-30">
+          <div className="flex-1 relative">
+            <div className="flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-100">
+              <span className="material-symbols-outlined text-gray-400 mr-2 text-lg">search</span>
               <input
                 type="text"
-                placeholder="Suburb or Postcode"
+                placeholder="Search by instructor, suburb or postcode"
                 value={filters.suburb || ''}
                 onChange={(e) => setFilters((p) => ({ ...p, suburb: e.target.value }))}
                 onFocus={() => setShowSuggestions(true)}
-                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none focus-visible:outline-none text-on-surface placeholder:text-outline p-0 text-body-md"
+                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none focus-visible:outline-none text-sm text-gray-900 placeholder:text-gray-400/60 p-0"
                 autoComplete="chrome-off"
                 data-1p-ignore
                 data-lpignore="true"
               />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-outline-variant rounded-b-xl shadow-lg z-50 text-left mt-1">
-                  {suggestions.map((s) => (
-                    <div
-                      key={s.display}
-                      onClick={() => { setFilters((p) => ({ ...p, suburb: s.suburb })); setShowSuggestions(false); setSuggestions([]); }}
-                      className="p-3 hover:bg-surface-container cursor-pointer font-body text-sm border-b border-outline-variant last:border-b-0"
-                    >
-                      {s.display}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
-            <div className="w-full md:w-44 flex items-center bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-2.5 search-container-shadow">
-              <span className="material-symbols-outlined text-primary mr-2 text-xl">distance</span>
-              {showCustomRadius ? (
-                <input
-                  type="number"
-                  min="1"
-                  max="200"
-                  placeholder="Custom km"
-                  value={filters.radius_km || ''}
-                  onChange={(e) => setFilters((p) => ({ ...p, radius_km: parseInt(e.target.value) || undefined }))}
-                  className="w-full bg-transparent border-none focus:ring-0 text-on-surface p-0 outline-none text-body-md"
-                  autoFocus
-                />
-              ) : (
-                <select
-                  value={filters.radius_km || 5}
-                  onChange={(e) => {
-                    if (e.target.value === 'custom') {
-                      setShowCustomRadius(true);
-                    } else {
-                      setFilters((p) => ({ ...p, radius_km: parseInt(e.target.value) }));
-                    }
-                  }}
-                  className="w-full bg-transparent border-none focus:ring-0 text-on-surface p-0 outline-none text-body-md appearance-none cursor-pointer"
-                >
-                  <option value="5">5 km</option>
-                  <option value="10">10 km</option>
-                  <option value="20">20 km</option>
-                  <option value="30">30 km</option>
-                  <option value="50">50 km</option>
-                  <option value="custom">Custom...</option>
-                </select>
-              )}
-            </div>
-            <div className="relative shrink-0" ref={sortMenuRef}>
-              <button
-                onClick={() => setShowSortMenu(!showSortMenu)}
-                className="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-2.5 text-label-md text-on-surface hover:bg-surface-container transition-all"
-              >
-                <span className="material-symbols-outlined text-primary">swap_vert</span>
-                <span className="hidden sm:inline">{currentSortLabel}</span>
-              </button>
-              {showSortMenu && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-outline-variant rounded-xl shadow-lg z-50 min-w-[200px] py-1 overflow-hidden">
-                  {sortOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => { setFilters((p) => ({ ...p, sort: opt.value })); setShowSortMenu(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                        filters.sort === opt.value
-                          ? 'text-primary font-bold bg-primary/5'
-                          : 'text-on-surface hover:bg-surface-container'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-label-sm text-on-surface-variant whitespace-nowrap shrink-0">
-              <span className="material-symbols-outlined text-[18px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-              <span>{loading ? 'Searching...' : `${total} results`}</span>
-            </div>
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-100 rounded-xl shadow-lg z-50 text-left mt-1 overflow-hidden">
+                {suggestions.map((s) => (
+                  <div
+                    key={s.display}
+                    onClick={() => { setFilters((p) => ({ ...p, suburb: s.suburb })); setShowSuggestions(false); setSuggestions([]); }}
+                    className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-sm text-gray-900 border-b border-gray-100 last:border-b-0"
+                  >
+                    {s.display}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
+          <div className="relative w-32 shrink-0">
+            <select
+              value={showCustomRadius ? 'custom' : String(filters.radius_km || 5)}
+              onChange={(e) => {
+                if (e.target.value === 'custom') {
+                  setShowCustomRadius(true);
+                  setFilters((p) => ({ ...p, radius_km: undefined }));
+                } else {
+                  setShowCustomRadius(false);
+                  setFilters((p) => ({ ...p, radius_km: parseInt(e.target.value) }));
+                }
+              }}
+              className="appearance-none bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 pr-8 text-sm text-gray-900 focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] cursor-pointer w-full outline-none"
+            >
+              <option value="5">5 km</option>
+              <option value="10">10 km</option>
+              <option value="20">20 km</option>
+              <option value="30">30 km</option>
+              <option value="50">50 km</option>
+              <option value="custom">Custom...</option>
+            </select>
+            <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[18px]">expand_more</span>
+          </div>
+
+          {showCustomRadius && (
+            <div className="w-20 shrink-0">
+              <input
+                type="number"
+                min="1"
+                max="200"
+                placeholder="km"
+                value={filters.radius_km || ''}
+                onChange={(e) => setFilters((p) => ({ ...p, radius_km: parseInt(e.target.value) || undefined }))}
+                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] outline-none placeholder:text-gray-400/60"
+                autoFocus
+              />
+            </div>
+          )}
+
+          <div className="relative shrink-0" ref={sortMenuRef}>
+            <button
+              onClick={() => setShowSortMenu(!showSortMenu)}
+              className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-900 hover:bg-gray-100 transition-all"
+            >
+              <span className="material-symbols-outlined text-gray-400 text-lg">swap_vert</span>
+              <span className="hidden sm:inline text-xs font-medium">{currentSortLabel}</span>
+            </button>
+            {showSortMenu && (
+              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 min-w-[180px] py-1 overflow-hidden">
+                {sortOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setFilters((p) => ({ ...p, sort: opt.value })); setShowSortMenu(false); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                      filters.sort === opt.value
+                        ? 'text-[#064E3B] font-bold bg-[#064E3B]/5'
+                        : 'text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs text-gray-500 whitespace-nowrap shrink-0 px-1">
+            <span className="material-symbols-outlined text-[16px] text-[#064E3B]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            <span>{loading ? '...' : total}</span>
+          </div>
+
+          <button
+            onClick={applyFilters}
+            disabled={loading}
+            className="flex items-center gap-1.5 bg-[#064E3B] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50 shadow-sm shrink-0"
+          >
+            <span className="material-symbols-outlined text-lg">search</span>
+            <span className="hidden sm:inline">Search</span>
+          </button>
         </div>
 
-        {/* Main layout: filters sidebar always visible on desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-gutter items-start">
-          <aside className="hidden md:flex w-72 flex-col bg-surface-container-lowest border border-outline-variant rounded-xl px-6 py-6 search-container-shadow">
+        {/* Main layout */}
+        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 items-start">
+          <aside className="hidden md:flex w-64 flex-col bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-28">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-headline-sm text-headline-sm text-on-surface">Filters</h3>
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Filters</h3>
               <button
                 onClick={() => {
                   setFilters((p) => ({ ...p, max_price: 150, transmission: undefined, anxiety_friendly: undefined, international_conversion: undefined, test_centre_familiarity: undefined, languages: undefined, gender: undefined }));
                 }}
-                className="text-label-sm text-primary hover:underline"
+                className="text-[11px] text-[#064E3B] hover:underline font-semibold"
               >
-                Reset
+                Reset All
               </button>
             </div>
             <FilterSidebar filters={filters} onFilterChange={setFilters} />
             <button
               onClick={applyFilters}
               disabled={loading}
-              className="mt-5 w-full bg-primary text-white py-2.5 rounded-xl font-label-md text-label-md font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-md"
+              className="mt-4 w-full bg-[#064E3B] text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
             >
-              <span className="material-symbols-outlined text-[18px]">check</span>
-              Save Changes
+              <span className="material-symbols-outlined text-lg">check</span>
+              Apply Filters
             </button>
           </aside>
 
           <div className="flex flex-col gap-4 min-w-0">
             {/* Mobile filter trigger */}
             <div className="md:hidden flex justify-between items-center">
-              <h1 className="font-headline-sm text-headline-sm">{loading ? 'Searching...' : `${total} Instructors found`}</h1>
+              <h1 className="text-lg font-bold text-gray-900">{loading ? 'Searching...' : `${total} Instructors found`}</h1>
               <button
                 onClick={() => setShowMobileFilters(true)}
-                className="flex items-center gap-2 border border-outline-variant rounded-full px-4 py-2 bg-surface-container-lowest font-label-md text-label-md"
+                className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-900 shadow-sm"
               >
-                <span className="material-symbols-outlined text-[20px]">tune</span> Filters
+                <span className="material-symbols-outlined text-lg text-gray-400">tune</span> Filters
               </button>
             </div>
 
             {/* Mobile drawer */}
             {showMobileFilters && (
-              <div className="fixed inset-0 z-50 bg-black/40 md:hidden" onClick={() => setShowMobileFilters(false)}>
-                <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-white p-6 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-bold text-on-surface">Filters</h3>
-                    <button onClick={() => setShowMobileFilters(false)}><span className="material-symbols-outlined">close</span></button>
+              <div className="fixed inset-0 z-50 bg-black/30 md:hidden" onClick={() => setShowMobileFilters(false)}>
+                <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-white p-5 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-sm font-bold text-gray-900">Filters</h3>
+                    <button onClick={() => setShowMobileFilters(false)} className="text-gray-400 hover:text-gray-900">
+                      <span className="material-symbols-outlined text-xl">close</span>
+                    </button>
                   </div>
                   <FilterSidebar filters={filters} onFilterChange={setFilters} />
                   <button
                     onClick={() => { applyFilters(); setShowMobileFilters(false); }}
                     disabled={loading}
-                    className="mt-5 w-full bg-primary text-white py-2.5 rounded-xl font-label-md text-label-md font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="mt-4 w-full bg-[#064E3B] text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
                   >
-                    <span className="material-symbols-outlined text-[18px]">check</span>
-                    Save Changes
+                    <span className="material-symbols-outlined text-lg">check</span>
+                    Apply Filters
                   </button>
                 </div>
               </div>
             )}
 
             {error && (
-              <div className="bg-error-container text-error p-4 rounded-xl border border-error/30 flex items-center gap-3">
-                <span className="material-symbols-outlined">error</span>
-                <span className="font-body-md text-body-md">{error}</span>
+              <div className="bg-red-50 text-red-700 p-4 rounded-2xl border border-red-100 flex items-center gap-3">
+                <span className="material-symbols-outlined text-red-400">error</span>
+                <span className="text-sm">{error}</span>
                 <button onClick={() => setError(null)} className="ml-auto hover:opacity-70">
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined text-red-400">close</span>
                 </button>
               </div>
             )}
 
-            <section className="flex flex-col gap-stack-sm">
+            <section className="flex flex-col gap-4">
             {loading && results.length === 0 ? (
               <div className="text-center py-20">
-                <span className="material-symbols-outlined text-[48px] text-primary animate-spin inline-block">refresh</span>
-                <p className="text-outline text-lg font-body mt-4">Searching instructors...</p>
+                <span className="material-symbols-outlined text-[48px] text-[#064E3B] animate-spin inline-block">refresh</span>
+                <p className="text-gray-400 text-sm mt-4">Searching instructors...</p>
               </div>
             ) : results.length === 0 ? (
-              <div className="flex flex-col items-center gap-stack-md">
-                {/* Breadcrumbs / Search Controls */}
-                <div className="w-full flex justify-between items-center">
-                  <div className="flex gap-2 items-center text-on-surface-variant font-label-sm text-label-sm">
-                    <span>Search</span>
-                    <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-                    <span>Instructors</span>
-                    <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-                    <span className="text-primary font-bold">Results</span>
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
+                <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="material-symbols-outlined text-[40px] text-gray-300">search_off</span>
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 mb-2">No instructors found</h2>
+                <p className="text-sm text-gray-500 max-w-md mx-auto mb-6">
+                  We couldn&apos;t find any instructors matching your criteria. Try adjusting your filters.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto mb-6 text-left">
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="material-symbols-outlined text-[#064E3B] text-lg mt-0.5">distance</span>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">Expand radius</p>
+                      <p className="text-xs text-gray-500">Try increasing your search radius.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="material-symbols-outlined text-[#064E3B] text-lg mt-0.5">filter_alt_off</span>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">Remove filters</p>
+                      <p className="text-xs text-gray-500">Fewer filters means more results.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="material-symbols-outlined text-[#064E3B] text-lg mt-0.5">auto_awesome</span>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">Try AI Match</p>
+                      <p className="text-xs text-gray-500">Let our AI find you the perfect instructor.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="material-symbols-outlined text-[#064E3B] text-lg mt-0.5">support_agent</span>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">Need help?</p>
+                      <p className="text-xs text-gray-500">Our team can help find the right match.</p>
+                    </div>
                   </div>
                 </div>
-
-                {/* Empty State Card */}
-                <div className="bg-surface-container-lowest w-full rounded-xl border border-outline-variant flex flex-col items-center p-stack-lg text-center shadow-[0_4px_20px_rgba(15,23,42,0.08)]">
-                  {/* Illustration */}
-                  <div className="relative mb-stack-md">
-                    <div className="w-48 h-48 bg-surface-container rounded-full flex items-center justify-center overflow-hidden mb-6 mx-auto">
-                      <img
-                        className="w-full h-full object-cover opacity-80 mix-blend-multiply"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf_EmcyXyIEjNeXa_3jlQev-fPpQkpvsvTE3yjSgyYLuAEz3gOoxoZ9tOYfxpcsioTQionQAu_w31O7sk6NCc_33La6aG8nihboT_MBo9qoXJANKEbtUdXXYTuvElCBKGXCc2sVxy7xnrWcAEpApfQ_M_-nmK6ooKfPo3cag3v6X5Y7rbsnjwCS8xX2JNNffueVaeK0Qlk3lm2DRjmZMEgXaU0cA4gmK5u1Xa0iExGAd-AF1wNyUkdfVoDyQcJUD1a0rKeFRPH"
-                        alt="Car through magnifying glass illustration"
-                      />
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="material-symbols-outlined text-[80px] text-primary/20 select-none" style={{ fontVariationSettings: "'wght' 200" }}>search_off</span>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <h1 className="font-headline-lg text-headline-lg text-on-surface mb-stack-sm">No instructors found</h1>
-                  <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto mb-stack-md">
-                    We couldn&apos;t find any professional instructors matching your current search criteria. Let&apos;s try adjusting your requirements to get you on the road.
-                  </p>
-
-                  {/* Suggestions Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter w-full max-w-2xl mb-stack-lg text-left">
-                    <div className="flex gap-4 p-4 rounded-lg bg-surface-bright border border-outline-variant/50">
-                      <div className="bg-primary/10 p-2 rounded-lg h-fit text-primary">
-                        <span className="material-symbols-outlined">distance</span>
-                      </div>
-                      <div>
-                        <h4 className="font-label-md text-label-md mb-1">Expand Search Radius</h4>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight">Nearby instructors might be just outside your current {filters.radius_km || ''} limit.</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4 p-4 rounded-lg bg-surface-bright border border-outline-variant/50">
-                      <div className="bg-primary/10 p-2 rounded-lg h-fit text-primary">
-                        <span className="material-symbols-outlined">filter_alt_off</span>
-                      </div>
-                      <div>
-                        <h4 className="font-label-md text-label-md mb-1">Remove Specific Filters</h4>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight">Try removing transmission or lesson length preferences to see more results.</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4 p-4 rounded-lg bg-surface-bright border border-outline-variant/50">
-                      <div className="bg-surface-container-highest p-2 rounded-lg h-fit text-on-surface-variant">
-                        <span className="material-symbols-outlined">calendar_today</span>
-                      </div>
-                      <div>
-                        <h4 className="font-label-md text-label-md mb-1">Check Availability</h4>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight">Switching to &apos;Flexible Dates&apos; can reveal instructors with upcoming openings.</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4 p-4 rounded-lg bg-surface-bright border border-outline-variant/50">
-                      <div className="bg-primary/10 p-2 rounded-lg h-fit text-primary">
-                        <span className="material-symbols-outlined">auto_awesome</span>
-                      </div>
-                      <div>
-                        <h4 className="font-label-md text-label-md mb-1">Try AI Match</h4>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant leading-tight">Our algorithm can find a custom instructor based on your personality profile.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CTA */}
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <button
-                      onClick={() => setFilters((p) => ({ suburb: p.suburb, radius_km: p.radius_km, sort: 'rating', max_price: 150 }))}
-                      className="bg-primary text-white px-8 py-3 rounded-xl font-label-md text-label-md font-bold hover:opacity-90 transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-primary/20"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">refresh</span>
-                      Clear All Filters
-                    </button>
-                    <Link
-                      href="/"
-                      className="border border-outline-variant text-on-surface px-8 py-3 rounded-xl font-label-md text-label-md font-bold hover:bg-surface-container transition-all active:scale-95 inline-flex items-center justify-center"
-                    >
-                      Return to Home
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Support Teaser */}
-                <div className="p-stack-md bg-primary/5 rounded-xl border border-primary/10 flex flex-col md:flex-row items-center gap-6 w-full">
-                  <span className="material-symbols-outlined text-[32px] text-primary">support_agent</span>
-                  <div className="flex-1 text-center md:text-left">
-                    <h3 className="font-label-md text-label-md text-primary">Need human help finding the right match?</h3>
-                    <p className="font-label-sm text-label-sm text-on-surface-variant">Our road safety advisors are available to manually source instructors for your area.</p>
-                  </div>
-                  <a className="text-primary font-bold font-label-md text-label-md hover:underline cursor-pointer" href="#">Chat with us</a>
-                </div>
+                <button
+                  onClick={() => {
+                    setFilters({ suburb: '', radius_km: 5, sort: 'rating', max_price: 150 });
+                    setPage(1);
+                    fetchResults({ suburb: '', radius_km: 5, sort: 'rating', max_price: 150 }, 1);
+                  }}
+                  className="bg-[#064E3B] text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all flex items-center gap-2 mx-auto shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-lg">refresh</span>
+                  Clear All Filters
+                </button>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-gutter mt-2">
-                  {results.slice(0, 2).map((instructor) => (
+                {/* AI Match Banner */}
+                <div className="bg-gradient-to-br from-[#064E3B] to-[#047857] rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-white/80 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                    <div>
+                      <span className="text-xs font-bold text-white/80 uppercase tracking-widest">AI Matchmaker</span>
+                      <h3 className="text-base font-bold text-white mt-0.5">Not sure who to choose?</h3>
+                      <p className="text-sm text-white/70">Let our AI find the perfect instructor for you.</p>
+                    </div>
+                  </div>
+                  <a
+                    href="/find-my-instructor"
+                    className="shrink-0 bg-white text-[#064E3B] px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-2"
+                  >
+                    Start AI Match
+                    <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {results.slice(0, 6).map((instructor) => (
                     <InstructorCard key={instructor.id} instructor={instructor} variant="horizontal" />
                   ))}
 
-                  <div className="sm:col-span-2 bg-primary/5 rounded-xl p-6 border border-primary/10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 rounded-full blur-2xl"></div>
-                    <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-primary/5 rounded-full blur-xl"></div>
-                    <div className="relative z-10 flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                        <span className="font-label-md text-label-md text-primary font-bold tracking-wide">AI MATCHMAKER</span>
-                      </div>
-                      <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Not sure who to choose?</h3>
-                      <p className="font-body-md text-body-md text-on-surface-variant max-w-md">Let our AI analyze your learning style, anxiety levels, and schedule to find the perfect instructor for you in under 60 seconds.</p>
-                    </div>
-                    <div className="relative z-10 flex-shrink-0 w-full md:w-auto">
-                      <a
-                        href="/find-my-instructor"
-                        className="w-full md:w-auto bg-primary text-white px-6 py-3 rounded-xl font-label-md text-label-md hover:opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-                      >
-                        Start AI Match
-                        <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                      </a>
-                    </div>
-                  </div>
-
-                  {results.slice(2).map((instructor) => (
+                  {results.slice(6).map((instructor) => (
                     <InstructorCard key={instructor.id} instructor={instructor} variant="horizontal" />
                   ))}
                 </div>
@@ -458,7 +421,7 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="pt-24 pb-16 px-4 text-center text-outline">Loading...</div>}>
+    <Suspense fallback={<div className="pt-24 pb-16 px-4 text-center text-gray-400">Loading...</div>}>
       <SearchContent />
     </Suspense>
   );

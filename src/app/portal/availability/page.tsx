@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -41,7 +41,8 @@ export default function PortalAvailability() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [editingDay, setEditingDay] = useState<string | null>(null);
-  const [editTimeRange, setEditTimeRange] = useState('');
+  const [editStartTime, setEditStartTime] = useState('');
+  const [editEndTime, setEditEndTime] = useState('');
   const [timeError, setTimeError] = useState('');
 
   useEffect(() => {
@@ -83,26 +84,54 @@ export default function PortalAvailability() {
     }));
   };
 
+  function formatTime24To12(val: string) {
+    if (!val) return '';
+    const [h, m] = val.split(':');
+    const hh = parseInt(h);
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    const h12 = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
+    return `${String(h12).padStart(2, '0')}:${m} ${ampm}`;
+  }
+
   const startEdit = (day: string) => {
     setEditingDay(day);
-    setEditTimeRange(schedule[day]?.timeRange || '');
+    const existing = schedule[day]?.timeRange || '';
+    const match = existing.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*(?:—|-|to)\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (match) {
+      const to24 = (h: string, m: string, ap: string) => {
+        let hh = parseInt(h);
+        if (ap === 'PM' && hh !== 12) hh += 12;
+        if (ap === 'AM' && hh === 12) hh = 0;
+        return `${String(hh).padStart(2, '0')}:${m}`;
+      };
+      setEditStartTime(to24(match[1], match[2], match[3]));
+      setEditEndTime(to24(match[4], match[5], match[6]));
+    } else {
+      setEditStartTime('08:00');
+      setEditEndTime('18:00');
+    }
   };
 
   const saveEdit = () => {
-    const normalized = editTimeRange.trim();
-    if (!isValidTimeRange(normalized)) {
-      setTimeError('Use a format like 08:00 AM - 06:00 PM.');
+    if (!editStartTime || !editEndTime) {
+      setTimeError('Select both start and end times.');
       return;
     }
-    if (editingDay && editTimeRange.trim()) {
+    if (editStartTime >= editEndTime) {
+      setTimeError('End time must be after start time.');
+      return;
+    }
+    if (editingDay) {
+      const formatted = `${formatTime24To12(editStartTime)} — ${formatTime24To12(editEndTime)}`;
       setSchedule((prev) => ({
         ...prev,
-        [editingDay]: { ...prev[editingDay], timeRange: normalized },
+        [editingDay]: { ...prev[editingDay], timeRange: formatted },
       }));
     }
     setTimeError('');
     setEditingDay(null);
-    setEditTimeRange('');
+    setEditStartTime('');
+    setEditEndTime('');
   };
 
   const activeDays = Object.values(schedule).filter((d) => d.enabled).length;
@@ -167,6 +196,53 @@ export default function PortalAvailability() {
     return 0;
   });
 
+  function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      const handler = (e: MouseEvent) => {
+        if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      };
+      document.addEventListener('mousedown', handler);
+      return () => document.removeEventListener('mousedown', handler);
+    }, []);
+    const times: string[] = [];
+    for (let h = 0; h < 24; h++) {
+      for (const m of ['00', '30']) {
+        times.push(`${String(h).padStart(2, '0')}:${m}`);
+      }
+    }
+    return (
+      <div className="relative" ref={ref}>
+        <button type="button" onClick={() => setOpen(!open)}
+          className="px-3 py-2 bg-white border border-[#E5E7EB] rounded-xl text-sm font-medium text-gray-900 hover:border-[#064E3B] transition-colors flex items-center gap-2 min-w-[100px]">
+          <span className="material-symbols-outlined text-[18px] text-[#064E3B]">schedule</span>
+          {value || 'Select'}
+        </button>
+        {open && (
+          <div className="absolute top-full mt-1 left-0 z-50 w-44 bg-white border border-[#E5E7EB] rounded-[20px] shadow-lg max-h-60 overflow-y-auto">
+            {times.map(t => {
+              const [h, m] = t.split(':');
+              const hh = parseInt(h);
+              const ampm = hh >= 12 ? 'PM' : 'AM';
+              const h12 = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
+              const label = `${String(h12).padStart(2, '0')}:${m} ${ampm}`;
+              const selected = t === value;
+              return (
+                <button key={t} type="button" onClick={() => { onChange(t); setOpen(false); }}
+                  className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                    selected ? 'bg-[#064E3B] text-white font-semibold' : 'text-gray-700 hover:bg-[#064E3B]/10 hover:text-[#064E3B]'
+                  }`}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   function parseTimeRange(value: string) {
     return value.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*(?:—|-|to)\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
   }
@@ -178,23 +254,23 @@ export default function PortalAvailability() {
   return (
     <>
       {toast && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-primary text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+        <div className="fixed bottom-8 right-8 z-[60] bg-[#064E3B] text-white px-6 py-4 rounded-[20px] shadow-2xl flex items-center gap-3">
           <span className="material-symbols-outlined text-green-400">check_circle</span>
           <p className="font-bold">{toast}</p>
         </div>
       )}
 
-      <div className="mb-8 p-4 bg-surface-container-low border border-outline-variant rounded-xl flex items-start gap-4">
-        <span className="material-symbols-outlined text-primary mt-1">info</span>
+      <div className="mb-8 p-4 bg-white border border-[#E5E7EB] rounded-[20px] shadow-sm flex items-start gap-4">
+        <span className="material-symbols-outlined text-[#064E3B] mt-1">info</span>
         <div>
-          <p className="text-body-md font-body-md text-on-surface font-semibold">General Availability Configuration</p>
-          <p className="text-body-md font-body-md text-on-surface-variant text-sm">This screen manages your default recurring weekly schedule. It determines which hours students can see as potentially available when searching for lessons.</p>
+          <p className="text-sm text-gray-900 font-semibold">General Availability Configuration</p>
+          <p className="text-gray-500 text-sm">This screen manages your default recurring weekly schedule. It determines which hours students can see as potentially available when searching for lessons.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter max-w-5xl">
         <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-headline-md font-headline-md text-primary mb-2">Weekly Schedule</h3>
+          <h3 className="text-base font-semibold text-gray-900 mb-2">Weekly Schedule</h3>
           <div className="space-y-3">
             {WEEKDAYS.map((day) => {
               const data = schedule[day];
@@ -203,31 +279,24 @@ export default function PortalAvailability() {
               return (
                 <div
                   key={day}
-                  className={`p-6 rounded-xl flex items-center justify-between transition-shadow hover:shadow-sm ${
+                  className={`p-6 rounded-[20px] flex items-center justify-between transition-shadow hover:shadow-md ${
                     data.enabled
-                      ? 'bg-surface-container-lowest border border-outline-variant'
-                      : 'bg-surface-container-low/30 border border-outline-variant/50 opacity-70 grayscale'
+                      ? 'bg-white border border-[#E5E7EB] shadow-sm'
+                      : 'bg-white border border-[#E5E7EB]/50 opacity-70 grayscale'
                   }`}
                 >
                   <div className="flex items-center gap-6">
-                    <span className={`text-body-lg font-bold w-24 ${data.enabled ? 'text-primary' : 'text-secondary'}`}>{day}</span>
+                    <span className={`text-sm font-bold w-24 ${data.enabled ? 'text-gray-900' : 'text-gray-500'}`}>{day}</span>
                     {isEditing ? (
                       <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={editTimeRange}
-                          onChange={(e) => {
-                            setEditTimeRange(e.target.value);
-                            setTimeError('');
-                          }}
-                          className="px-3 py-1 bg-white border border-outline-variant rounded text-sm outline-none focus:ring-1 focus:ring-primary"
-                          placeholder="e.g. 08:00 AM - 06:00 PM"
-                        />
-                        <button onClick={saveEdit} className="text-primary text-sm font-bold hover:underline">Save</button>
-                        <button onClick={() => setEditingDay(null)} className="text-secondary text-sm hover:underline">Cancel</button>
+                        <TimePicker value={editStartTime} onChange={(v) => { setEditStartTime(v); setTimeError(''); }} />
+                        <span className="text-gray-400 text-sm font-semibold">—</span>
+                        <TimePicker value={editEndTime} onChange={(v) => { setEditEndTime(v); setTimeError(''); }} />
+                        <button onClick={saveEdit} className="text-[#064E3B] text-sm font-bold hover:underline">Save</button>
+                        <button onClick={() => { setEditingDay(null); setEditStartTime(''); setEditEndTime(''); }} className="text-gray-500 text-sm hover:underline">Cancel</button>
                       </div>
                     ) : (
-                      <div className="hidden md:flex items-center gap-2 text-on-surface-variant bg-surface-container px-3 py-1 rounded-full text-sm">
+                      <div className="hidden md:flex items-center gap-2 text-gray-500 bg-gray-50 px-3 py-1 rounded-full text-sm">
                         <span className="material-symbols-outlined text-sm">schedule</span>
                         <span>{data.enabled ? data.timeRange : 'Unavailable'}</span>
                       </div>
@@ -241,11 +310,11 @@ export default function PortalAvailability() {
                         onChange={() => toggleDay(day)}
                         className="sr-only peer"
                       />
-                      <div className="w-12 h-6 bg-secondary-container rounded-full peer peer-checked:bg-primary transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
+                      <div className="w-12 h-6 bg-gray-200 rounded-full peer peer-checked:bg-[#064E3B] transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
                     </label>
                     <button
                       onClick={() => startEdit(day)}
-                      className={`p-2 transition-colors ${data.enabled ? 'text-secondary hover:text-primary' : 'text-secondary/30 pointer-events-none'}`}
+                      className={`p-2 transition-colors ${data.enabled ? 'text-gray-500 hover:text-[#064E3B]' : 'text-gray-300 pointer-events-none'}`}
                     >
                       <span className="material-symbols-outlined">edit</span>
                     </button>
@@ -254,30 +323,30 @@ export default function PortalAvailability() {
               );
             })}
           </div>
-          {timeError && <p className="text-sm text-error mt-3">{timeError}</p>}
+          {timeError && <p className="text-sm text-red-500 mt-3">{timeError}</p>}
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 sticky top-28">
-            <h3 className="text-headline-md font-headline-md text-primary mb-6">Overview</h3>
+        <div className="space-y-6 sticky top-28">
+          <div className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-8">
+            <h3 className="text-base font-semibold text-gray-900 mb-6">Overview</h3>
             <div className="space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-outline-variant">
-                <span className="text-secondary text-body-md font-body-md">Working Days</span>
-                <span className="font-bold text-primary">{activeDays} / 7 Days</span>
+              <div className="flex justify-between items-center pb-4 border-b border-[#E5E7EB]">
+                <span className="text-sm text-gray-500">Working Days</span>
+                <span className="font-bold text-gray-900">{activeDays} / 7 Days</span>
               </div>
-              <div className="flex justify-between items-center pb-4 border-b border-outline-variant">
-                <span className="text-secondary text-body-md font-body-md">Total Hours / Week</span>
-                <span className="font-bold text-primary">{calcTotalHours()} Hours</span>
+              <div className="flex justify-between items-center pb-4 border-b border-[#E5E7EB]">
+                <span className="text-sm text-gray-500">Total Hours / Week</span>
+                <span className="font-bold text-gray-900">{calcTotalHours()} Hours</span>
               </div>
             </div>
-            <div className="mt-8 p-4 bg-primary-container/5 rounded-xl border border-primary-container/10">
-              <p className="text-label-sm font-label-sm text-primary uppercase mb-2 tracking-wider">Instructor Tip</p>
-              <p className="text-body-md font-body-md text-sm text-on-surface-variant italic">&ldquo;Instructors with late-evening availability (after 5 PM) on weekdays see a 35% higher booking rate from working students.&rdquo;</p>
+            <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-[#E5E7EB]">
+              <p className="text-[10px] text-[#064E3B] font-semibold uppercase mb-2 tracking-wide">Instructor Tip</p>
+              <p className="text-sm text-gray-500 italic">&ldquo;Instructors with late-evening availability (after 5 PM) on weekdays see a 35% higher booking rate from working students.&rdquo;</p>
             </div>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full mt-8 bg-primary text-white py-4 rounded-xl font-bold hover:opacity-90 transition-all disabled:opacity-50"
+              className="w-full mt-8 bg-[#064E3B] text-white py-4 rounded-xl font-bold hover:bg-[#053A2C] transition-all disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -285,24 +354,24 @@ export default function PortalAvailability() {
               onClick={() => {
                 setSchedule(savedSchedule);
                 setEditingDay(null);
-                setEditTimeRange('');
+                setEditStartTime(''); setEditEndTime('');
                 setTimeError('');
                 showToast('Unsaved changes discarded.');
               }}
-              className="w-full mt-3 bg-transparent border border-outline text-secondary py-3 rounded-xl hover:bg-surface-container transition-all"
+              className="w-full mt-3 bg-transparent border border-[#E5E7EB] text-gray-500 py-3 rounded-xl hover:bg-gray-50 transition-all"
             >
               Discard Edits
             </button>
           </div>
 
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
-            <p className="text-primary font-bold mb-4">Availability Density</p>
+          <div className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-6">
+            <p className="text-gray-900 font-semibold mb-4">Availability Density</p>
             <div className="h-32 flex items-end gap-1 px-2">
               {densityChart.map((h, i) => (
-                <div key={i} className={`flex-1 rounded-t-sm ${h > 0 ? 'bg-primary-container' : 'bg-primary-container/10'}`} style={{ height: `${h || 5}%` }}></div>
+                <div key={i} className={`flex-1 rounded-t-sm ${h > 0 ? 'bg-[#064E3B]/30' : 'bg-gray-100'}`} style={{ height: `${h || 5}%` }}></div>
               ))}
             </div>
-            <div className="flex justify-between mt-2 text-[10px] text-secondary font-bold uppercase tracking-tighter">
+            <div className="flex justify-between mt-2 text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
               {WEEKDAYS.map((d) => (
                 <span key={d}>{d.slice(0, 3)}</span>
               ))}

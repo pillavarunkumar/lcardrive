@@ -59,13 +59,13 @@ export default function AdminClaims() {
     <div className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-primary">Claims Queue</h2>
-          <p className="text-on-surface-variant text-sm mt-1">Review and verify pending instructor profiles.</p>
+          <h2 className="text-[22px] font-bold text-gray-900">Claims Queue</h2>
+          <p className="text-sm text-gray-500 mt-1">Review and verify pending instructor profiles.</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary-container text-on-primary-container rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center gap-2"
+            className="px-4 py-2 bg-[#064E3B]/10 text-[#064E3B] rounded-lg text-xs font-bold hover:bg-[#064E3B] hover:text-white transition-all flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-[16px]">refresh</span>
             Refresh Queue
@@ -73,58 +73,58 @@ export default function AdminClaims() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter">
-        <div className="p-6 bg-surface-container-low rounded-xl border border-outline-variant">
-          <p className="text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Pending Verification</p>
-          <p className="text-2xl font-bold text-primary">{allItems}</p>
-          <div className="mt-2 flex items-center gap-1 text-primary text-xs">
-            <span className="material-symbols-outlined text-[14px]">trending_up</span>
-            <span>Awaiting review</span>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+          <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0 mb-3">
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>fact_check</span>
           </div>
+          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Pending Verification</p>
+          <p className="text-2xl font-bold text-gray-900 leading-none mt-1">{allItems}</p>
+          <span className="block text-xs text-gray-400 mt-1.5">Awaiting review</span>
         </div>
-        <div className="p-6 bg-surface-container-low rounded-xl border border-outline-variant">
-          <p className="text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Unverified Instructors</p>
-          <p className="text-2xl font-bold text-primary">{unverified.length}</p>
-          <div className="mt-2 flex items-center gap-1 text-primary text-xs">
-            <span className="material-symbols-outlined text-[14px]">person_remove</span>
-            <span>Need verification</span>
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+          <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0 mb-3">
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>person_remove</span>
           </div>
+          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Unverified Instructors</p>
+          <p className="text-2xl font-bold text-gray-900 leading-none mt-1">{unverified.length}</p>
+          <span className="block text-xs text-gray-400 mt-1.5">Need verification</span>
         </div>
-        <div className="p-6 bg-surface-container-low rounded-xl border border-outline-variant">
-          <p className="text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Submitted Claims</p>
-          <p className="text-2xl font-bold text-primary">{submittedClaims.length}</p>
-          <div className="mt-2 flex items-center gap-1 text-on-surface-variant text-xs">
-            <span className="material-symbols-outlined text-[14px]">flag</span>
-            <span>Self-submitted</span>
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+          <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0 mb-3">
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>flag</span>
           </div>
+          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Submitted Claims</p>
+          <p className="text-2xl font-bold text-gray-900 leading-none mt-1">{submittedClaims.length}</p>
+          <span className="block text-xs text-gray-400 mt-1.5">Self-submitted</span>
         </div>
-        <div className="p-6 bg-surface-container-low rounded-xl border border-outline-variant">
-          <p className="text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Escalations</p>
-          <p className="text-2xl font-bold text-error">0</p>
-          <div className="mt-2 flex items-center gap-1 text-error text-xs">
-            <span className="material-symbols-outlined text-[14px]">warning</span>
-            <span>Requires Manager review</span>
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+          <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0 mb-3">
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
           </div>
+          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Escalations</p>
+          <p className="text-2xl font-bold text-red-500 leading-none mt-1">0</p>
+          <span className="block text-xs text-gray-400 mt-1.5">Requires Manager review</span>
         </div>
       </div>
 
       {loading ? (
-        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm overflow-hidden">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-4 p-4 border-b border-outline-variant/30 animate-pulse">
-              <div className="flex-1 h-4 bg-outline-variant/40 rounded" />
-              <div className="w-24 h-4 bg-outline-variant/40 rounded" />
-              <div className="w-28 h-8 bg-outline-variant/40 rounded" />
+            <div key={i} className="flex items-center gap-4 p-4 border-b border-[#E5E7EB]/30 animate-pulse">
+              <div className="flex-1 h-4 bg-gray-200 rounded" />
+              <div className="w-24 h-4 bg-gray-200 rounded" />
+              <div className="w-28 h-8 bg-gray-200 rounded" />
             </div>
           ))}
         </div>
       ) : allItems === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center bg-surface-container-lowest rounded-xl border border-outline-variant">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
+        <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-[#64748B] mb-4">
             <span className="material-symbols-outlined text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>fact_check</span>
           </div>
-          <h3 className="text-lg font-bold text-primary mb-1">All Clear!</h3>
-          <p className="text-on-surface-variant max-w-sm mx-auto text-sm mb-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-1">All Clear!</h3>
+          <p className="text-gray-500 max-w-sm mx-auto text-sm mb-6">
             All instructors have been verified. No pending claims or unverified profiles.
           </p>
         </div>
@@ -133,15 +133,15 @@ export default function AdminClaims() {
           {/* Unverified instructors */}
           {unverified.length > 0 && (
             <div>
-              <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+              <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[20px]">person_remove</span>
                 Unverified Instructors
-                <span className="text-xs font-normal text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-full">
+                <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                   {unverified.length}
                 </span>
               </h3>
               <div className="space-y-3">
-                <div className="hidden md:grid grid-cols-12 px-6 py-3 bg-surface-container-highest rounded-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                <div className="hidden md:grid grid-cols-12 px-6 py-3 bg-gray-50 rounded-lg text-[10px] font-semibold text-gray-500 uppercase tracking-wide">
                   <div className="col-span-4">Instructor</div>
                   <div className="col-span-2">Suburb</div>
                   <div className="col-span-2">ADI Number</div>
@@ -151,15 +151,15 @@ export default function AdminClaims() {
                 {unverified.map((claim) => (
                   <div
                     key={claim.id}
-                    className="grid grid-cols-1 md:grid-cols-12 px-6 py-6 bg-surface-container-lowest border border-outline-variant rounded-xl items-center hover:shadow-md transition-all gap-3 md:gap-0"
+                    className="grid grid-cols-1 md:grid-cols-12 px-6 py-6 bg-white border border-[#E5E7EB] rounded-[20px] items-center hover:shadow-md transition-all gap-3 md:gap-0"
                   >
                     <div className="col-span-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold overflow-hidden shrink-0 ring-1 ring-outline-variant">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold overflow-hidden shrink-0 ring-1 ring-gray-200">
                         {claim.instructor_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-primary">{claim.instructor_name}</p>
-                        <p className="text-xs text-on-surface-variant">
+                        <p className="text-sm font-bold text-gray-900">{claim.instructor_name}</p>
+                        <p className="text-xs text-gray-500">
                           <span className="inline-flex items-center gap-1">
                             <span className="material-symbols-outlined text-[12px]">schedule</span>
                             {new Date(claim.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -167,27 +167,27 @@ export default function AdminClaims() {
                         </p>
                       </div>
                     </div>
-                    <div className="col-span-2 text-sm text-on-surface-variant">
+                    <div className="col-span-2 text-sm text-gray-500">
                       {claim.suburb || '—'}
                     </div>
                     <div className="col-span-2">
-                      <span className="inline-flex px-3 py-1.5 bg-primary-container/10 text-primary-container rounded-full text-xs font-bold border border-primary/20">
+                      <span className="inline-flex px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
                         {claim.adi_registration || 'Not provided'}
                       </span>
                     </div>
-                    <div className="col-span-1 text-sm text-on-surface-variant">
+                    <div className="col-span-1 text-sm text-gray-500">
                       {new Date(claim.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
                     <div className="col-span-3 flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleVerify(claim.id, 'reject')}
-                        className="px-4 py-2 border border-error text-error rounded-lg text-xs font-bold hover:bg-error/5 transition-colors"
+                        className="px-4 py-2 border border-red-400 text-red-500 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors"
                       >
                         Skip
                       </button>
                       <button
                         onClick={() => handleVerify(claim.id, 'approve')}
-                        className="px-4 py-2 bg-primary-container text-on-primary-container rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center gap-2"
+                        className="px-4 py-2 bg-[#064E3B] text-white rounded-lg text-xs font-bold hover:bg-[#053A2C] transition-all flex items-center gap-2"
                       >
                         <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                         Verify
@@ -202,15 +202,15 @@ export default function AdminClaims() {
           {/* Submitted claims */}
           {submittedClaims.length > 0 && (
             <div>
-              <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+              <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[20px]">flag</span>
                 Self-Submitted Claims
-                <span className="text-xs font-normal text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-full">
+                <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                   {submittedClaims.length}
                 </span>
               </h3>
               <div className="space-y-3">
-                <div className="hidden md:grid grid-cols-12 px-6 py-3 bg-surface-container-highest rounded-lg text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                <div className="hidden md:grid grid-cols-12 px-6 py-3 bg-gray-50 rounded-lg text-[10px] font-semibold text-gray-500 uppercase tracking-wide">
                   <div className="col-span-4">Instructor</div>
                   <div className="col-span-2">Reason</div>
                   <div className="col-span-2">ADI Number</div>
@@ -220,41 +220,41 @@ export default function AdminClaims() {
                 {submittedClaims.map((claim) => (
                   <div
                     key={claim.id}
-                    className="grid grid-cols-1 md:grid-cols-12 px-6 py-6 bg-surface-container-lowest border border-outline-variant rounded-xl items-center hover:shadow-md transition-all gap-3 md:gap-0"
+                    className="grid grid-cols-1 md:grid-cols-12 px-6 py-6 bg-white border border-[#E5E7EB] rounded-[20px] items-center hover:shadow-md transition-all gap-3 md:gap-0"
                   >
                     <div className="col-span-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold overflow-hidden shrink-0 ring-1 ring-outline-variant">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold overflow-hidden shrink-0 ring-1 ring-gray-200">
                         {claim.instructor_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-primary">{claim.instructor_name}</p>
-                        <p className="text-xs text-on-primary-container flex items-center gap-1">
+                        <p className="text-sm font-bold text-gray-900">{claim.instructor_name}</p>
+                        <p className="text-xs text-[#064E3B] flex items-center gap-1">
                           View Marketplace Listing
                           <span className="material-symbols-outlined text-[12px]">open_in_new</span>
                         </p>
                       </div>
                     </div>
-                    <div className="col-span-2 text-sm text-on-surface-variant capitalize">
+                    <div className="col-span-2 text-sm text-gray-500 capitalize">
                       {claim.reason || '—'}
                     </div>
                     <div className="col-span-2">
-                      <span className="inline-flex px-3 py-1.5 bg-primary-container/10 text-primary-container rounded-full text-xs font-bold border border-primary/20">
+                      <span className="inline-flex px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-200">
                         {claim.adi_registration || 'ADI-Not-Provided'}
                       </span>
                     </div>
-                    <div className="col-span-1 text-sm text-on-surface-variant">
+                    <div className="col-span-1 text-sm text-gray-500">
                       {new Date(claim.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
                     <div className="col-span-3 flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleSubmittedAction(claim.id, 'reject')}
-                        className="px-4 py-2 border border-error text-error rounded-lg text-xs font-bold hover:bg-error/5 transition-colors"
+                        className="px-4 py-2 border border-red-400 text-red-500 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => handleSubmittedAction(claim.id, 'approve')}
-                        className="px-4 py-2 bg-primary-container text-on-primary-container rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center gap-2"
+                        className="px-4 py-2 bg-[#064E3B] text-white rounded-lg text-xs font-bold hover:bg-[#053A2C] transition-all flex items-center gap-2"
                       >
                         <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                         Approve Claim

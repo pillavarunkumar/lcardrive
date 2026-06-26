@@ -342,10 +342,10 @@ export default function PortalDashboard() {
         </div>
 
         {/* Right Column */}
-        <div className="lg:col-span-1 self-start">
-          <section className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+        <div className="lg:col-span-1">
+          <section className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
             <h3 className="text-base font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 flex-1">
               <Link href="/portal/profile" className="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 rounded-xl group">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-white border border-[#E5E7EB] flex items-center justify-center text-[#64748B] shrink-0">
@@ -386,7 +386,7 @@ export default function PortalDashboard() {
               </Link>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-[#E5E7EB]">
+            <div className="pt-4 border-t border-[#E5E7EB]">
               <Link
                 href="/portal/profile"
                 className="w-full flex items-center justify-center gap-2 h-10 bg-[#064E3B] text-white text-sm font-medium rounded-xl hover:bg-[#053A2C] transition-colors duration-200"

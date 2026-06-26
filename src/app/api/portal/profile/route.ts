@@ -89,7 +89,20 @@ export async function GET(req: NextRequest) {
     hasPendingReview = !!flag;
   }
 
-  return NextResponse.json({ instructor: data, hasPendingReview });
+  // Check deactivation status via listing_flags
+  let isHidden = false;
+  if (data?.id) {
+    const { data: deactivated } = await supabase
+      .from('listing_flags')
+      .select('id')
+      .eq('instructor_id', data.id)
+      .eq('detail', 'deactivated')
+      .eq('is_resolved', false)
+      .maybeSingle();
+    isHidden = !!deactivated;
+  }
+
+  return NextResponse.json({ instructor: { ...data, is_hidden: isHidden }, hasPendingReview });
 }
 
 export async function PUT(req: NextRequest) {
