@@ -133,7 +133,7 @@ function SearchContent() {
         {/* Search Bar at Top - always visible */}
         <div className="sticky top-20 z-30 mb-4 bg-surface pt-2 pb-3 border-b border-outline-variant/50">
           <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-            <div className="flex-1 flex items-center bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-2.5 search-container-shadow relative">
+            <div className="flex-1 flex items-center bg-surface-container-low rounded-xl px-4 py-2.5 search-container-shadow relative">
               <span className="material-symbols-outlined text-primary mr-2 text-xl">search</span>
               <input
                 type="text"
@@ -141,7 +141,10 @@ function SearchContent() {
                 value={filters.suburb || ''}
                 onChange={(e) => setFilters((p) => ({ ...p, suburb: e.target.value }))}
                 onFocus={() => setShowSuggestions(true)}
-                className="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline p-0 text-body-md outline-none"
+                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none focus-visible:outline-none text-on-surface placeholder:text-outline p-0 text-body-md"
+                autoComplete="chrome-off"
+                data-1p-ignore
+                data-lpignore="true"
               />
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute top-full left-0 right-0 bg-white border border-outline-variant rounded-b-xl shadow-lg z-50 text-left mt-1">

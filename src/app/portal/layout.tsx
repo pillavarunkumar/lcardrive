@@ -61,10 +61,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
   const displayName = `${instructor?.first_name || user?.firstName || ''} ${instructor?.last_name || user?.lastName || ''}`.trim();
   const profileStatus = instructor?.is_verified
-    ? { label: 'Profile verified', color: 'bg-green-500' }
+    ? { label: 'Profile verified', color: 'bg-green-500', pulse: false }
     : hasPendingReview
-      ? { label: 'Under review', color: 'bg-amber-500' }
-      : { label: 'Profile pending', color: 'bg-outline-variant' };
+      ? { label: 'Under review', color: 'bg-amber-500', pulse: false }
+      : { label: 'Profile pending', color: 'bg-error', pulse: true };
 
   return (
     <div className="min-h-screen bg-surface">
@@ -112,7 +112,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           <div className="p-4 bg-surface-dim/30 rounded-xl mb-6">
             <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Status</p>
             <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${profileStatus.color}`} />
+              <span className={`w-2 h-2 rounded-full ${profileStatus.color} ${profileStatus.pulse ? 'animate-pulse' : ''}`} />
               <span className="text-xs font-medium text-on-surface-variant">{profileStatus.label}</span>
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           </div>
         </header>
 
-        <div className="flex-1 p-6 md:p-12 pt-8 md:pt-12 max-w-6xl mx-auto w-full">
+        <div className="flex-1 p-6 md:p-12 pt-8 md:pt-12 max-w-6xl mx-auto w-full bg-[#F8FAFC]">
           {children}
         </div>
       </main>

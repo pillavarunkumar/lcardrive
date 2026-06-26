@@ -140,8 +140,8 @@ export default function AdminInstructors() {
           </select>
           <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">sort</span>
         </div>
-        <div className="ml-auto flex items-center gap-4">
-          <div className="relative">
+        <div className="ml-auto flex items-center gap-4 flex-1 max-w-md">
+          <div className="relative flex-1">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
             <input
               type="text"
@@ -149,12 +149,12 @@ export default function AdminInstructors() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { setPage(1); setSearchQuery(search); } }}
-              className="w-44 pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-xs text-on-surface focus:ring-2 focus:ring-primary focus:border-primary outline-none placeholder:text-outline/60 transition-all"
+              className="w-full pl-10 pr-4 py-2 bg-surface-container-low rounded-lg text-xs text-on-surface focus:outline-none placeholder:text-outline/60 transition-all"
             />
           </div>
           <button
             onClick={() => { setPage(1); setSearchQuery(search); }}
-            className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg text-xs font-bold hover:opacity-90 transition-all"
+            className="flex items-center gap-1.5 bg-primary/10 text-primary px-5 py-2 rounded-full text-xs font-semibold hover:bg-primary hover:text-white transition-all duration-200"
           >
             <span className="material-symbols-outlined text-[16px]">search</span>
             Search

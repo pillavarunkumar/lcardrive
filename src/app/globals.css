@@ -6,6 +6,12 @@
   body {
     @apply bg-surface text-on-surface font-body antialiased;
   }
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px transparent inset;
+    transition: background-color 5000s;
+    -webkit-text-fill-color: inherit;
+  }
 }
 
 @layer components {

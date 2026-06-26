@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { Star, Eye, Pencil, DollarSign, Calendar, Sparkles, ChevronRight, MessageSquare, TrendingUp } from 'lucide-react';
 import type { Instructor } from '@/types';
 
-function getNextProfileStep(instructor: Instructor | null) {
+function getNextProfileStep(instructor: Instructor | null, comp: number = 0, hasPendingReview?: boolean) {
   if (!instructor) {
     return {
       href: '/portal/profile',
       icon: 'person_add',
       label: 'Create your profile',
       helper: 'A complete profile increases trust and bookings.',
+      action: 'link' as const,
     };
   }
 
@@ -21,6 +22,7 @@ function getNextProfileStep(instructor: Instructor | null) {
       icon: 'edit_note',
       label: 'Add your bio',
       helper: 'Describe your teaching style and experience.',
+      action: 'link' as const,
     };
   }
 
@@ -30,6 +32,7 @@ function getNextProfileStep(instructor: Instructor | null) {
       icon: 'directions_car',
       label: 'Add vehicle details',
       helper: 'Show students what they will be learning in.',
+      action: 'link' as const,
     };
   }
 
@@ -39,6 +42,7 @@ function getNextProfileStep(instructor: Instructor | null) {
       icon: 'payments',
       label: 'Set your pricing',
       helper: 'Publish your hourly rate and lesson packages.',
+      action: 'link' as const,
     };
   }
 
@@ -48,6 +52,7 @@ function getNextProfileStep(instructor: Instructor | null) {
       icon: 'event_available',
       label: 'Set availability',
       helper: 'Let students know when you usually teach.',
+      action: 'link' as const,
     };
   }
 
@@ -57,6 +62,27 @@ function getNextProfileStep(instructor: Instructor | null) {
       icon: 'map',
       label: 'Add service areas',
       helper: 'Choose the suburbs where students can find you.',
+      action: 'link' as const,
+    };
+  }
+
+  if (comp < 100) {
+    return {
+      href: '/portal/profile',
+      icon: 'edit_note',
+      label: 'Complete your profile',
+      helper: 'Add optional details like your photo, specialisations, and experience to reach 100%.',
+      action: 'link' as const,
+    };
+  }
+
+  if (!hasPendingReview && !instructor?.is_verified) {
+    return {
+      href: '',
+      icon: 'verified',
+      label: 'Submit for Review',
+      helper: 'Submit your completed profile for admin approval.',
+      action: 'submit' as const,
     };
   }
 
@@ -65,6 +91,7 @@ function getNextProfileStep(instructor: Instructor | null) {
     icon: 'verified',
     label: 'Review your profile',
     helper: 'Keep your public listing accurate and up to date.',
+    action: 'link' as const,
   };
 }
 
@@ -110,298 +137,291 @@ export default function PortalDashboard() {
   const comp = instructor?.profile_completeness ?? 0;
   const totalReviews = instructor?.review_count ?? 0;
   const avgRating = instructor?.average_rating ?? 0;
-  const nextStep = getNextProfileStep(instructor);
+  const nextStep = getNextProfileStep(instructor, comp, hasPendingReview);
   const verification = getVerificationCopy(instructor, hasPendingReview);
 
+  const [submitting, setSubmitting] = useState(false);
+
+  const submitForReview = async () => {
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/portal/submit-review', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setHasPendingReview(true);
+      } else {
+        alert(data.error || 'Failed to submit for review.');
+      }
+    } catch {
+      alert('Failed to submit for review.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const ringRadius = 67;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = !loading ? ringCircumference * (1 - comp / 100) : 0;
+  const progressColor = !loading
+    ? comp <= 24 ? '#EF4444'
+      : comp <= 49 ? '#F59E0B'
+        : comp <= 74 ? '#3B82F6'
+          : '#22C55E'
+    : '#3B82F6';
+
   return (
-    <div className="grid lg:grid-cols-3 gap-gutter">
+    <>
+      {loadError && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-[20px] p-4 text-sm text-red-700">
+          {loadError}
+        </div>
+      )}
 
-      {/* Left Content */}
-      <div className="lg:col-span-2 space-y-gutter">
-
-        {loadError && (
-          <div className="bg-error-container/30 border border-error/20 rounded-2xl p-4 text-body-md font-body-md text-error">
-            {loadError}
-          </div>
-        )}
+      <div className="grid lg:grid-cols-4 gap-6">
 
         {/* Profile Completion */}
-        <section className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-8">
-          <div className="grid md:grid-cols-[180px_1fr] gap-8 items-center">
-            <div className="relative flex justify-center">
-              <div className="w-36 h-36 rounded-full border-[10px] border-surface-dim flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-headline-md font-headline-md font-bold text-primary">
-                    {loading ? '--' : `${comp}%`}
-                  </h2>
-                  <p className="text-label-sm font-label-sm text-secondary uppercase tracking-wider">Complete</p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h2 className="text-headline-md font-headline-md text-primary mb-3">
-                {comp >= 100 ? 'Your Profile Is Complete' : 'Complete Your Profile'}
-              </h2>
-              <p className="text-body-md font-body-md text-secondary mb-6">
-                Keep your profile accurate so students can understand your services, pricing, vehicle, and availability.
-              </p>
-              <Link
-                href={nextStep.href}
-                className="inline-block bg-primary text-on-primary px-6 py-3 rounded-xl font-bold text-label-md hover:brightness-110 transition"
-              >
-                {nextStep.label}
-              </Link>
-              <p className="mt-4 text-label-sm font-label-sm text-on-surface-variant">{nextStep.helper}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats */}
-        <section className="grid md:grid-cols-3 gap-gutter">
-          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
-                <MessageSquare className="w-5 h-5" />
-              </div>
-              <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Total Reviews</p>
-            </div>
-            <h3 className="text-[40px] font-bold text-primary leading-none">
-              {loading ? '--' : totalReviews}
-            </h3>
-            <p className="text-label-sm font-label-sm text-on-surface-variant mt-2">
-              {totalReviews === 0 ? 'No reviews yet' : `${totalReviews} review${totalReviews !== 1 ? 's' : ''}`}
-            </p>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
-                <Star className="w-5 h-5" />
-              </div>
-              <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Average Rating</p>
-            </div>
-            <h3 className="text-[40px] font-bold text-primary leading-none">
-              {loading ? '--' : avgRating > 0 ? avgRating.toFixed(1) : '-'}
-            </h3>
-            <p className="text-label-sm font-label-sm text-on-surface-variant mt-2">
-              {avgRating > 0 ? `${avgRating.toFixed(1)} / 5.0` : 'No rating yet'}
-            </p>
-          </div>
-
-          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                verification.label === 'Verified' ? 'bg-primary/10 text-primary'
-                : verification.label === 'Under Review' ? 'bg-warning-container/30 text-warning'
-                : 'bg-surface-container text-on-surface-variant'
-              }`}>
-                <Eye className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-label-sm font-label-sm text-secondary uppercase font-medium">Profile Status</p>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                  verification.label === 'Verified'
-                    ? 'bg-primary/10 text-primary'
-                    : verification.label === 'Under Review'
-                    ? 'bg-warning-container/30 text-warning'
-                    : 'bg-surface-container-high text-on-surface-variant'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${
-                    verification.label === 'Verified' ? 'bg-primary'
-                    : verification.label === 'Under Review' ? 'bg-warning'
-                    : 'bg-outline'
-                  }`} />
-                  {verification.label}
-                </span>
-              </div>
-            </div>
-            <p className="text-body-md font-body-md text-on-surface-variant">{verification.body}</p>
-          </div>
-        </section>
-
-        {/* Analytics */}
-        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-headline-md font-headline-md text-primary">Search Appearances</h3>
-              <p className="text-body-md font-body-md text-secondary mt-1">Appearances in search results over the last 7 days</p>
-            </div>
-          </div>
-
-          {!instructor || appearanceTotals.length === 0 ? (
-            <div className="h-64 rounded-2xl border border-dashed border-outline-variant bg-surface flex items-center justify-center">
-              <div className="text-center">
-                <TrendingUp className="w-10 h-10 text-outline mx-auto mb-3" />
-                <h4 className="font-bold text-headline-sm text-on-surface">No data available yet</h4>
-                <p className="text-body-md font-body-md text-secondary">Analytics will appear once your profile is live.</p>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <div className="flex items-end gap-2 h-48">
-                {appearanceTotals.map((h, i) => {
-                  const maxVal = Math.max(...appearanceTotals, 1);
-                  const pct = (h / maxVal) * 100;
-                  return (
-                    <div key={i} className="flex-1 bg-primary/5 rounded-t-lg relative group transition-all hover:bg-primary/10" style={{ height: '100%', minHeight: '4rem' }}>
-                      <div className="absolute bottom-0 w-full bg-primary/60 rounded-t-lg transition-all group-hover:bg-primary/80" style={{ height: `${Math.max(pct, 4)}%` }}></div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between mt-3 text-label-sm font-label-sm text-secondary px-2">
-                {appearanceLabels.map((label, i) => (
-                  <span key={i}>{label}</span>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-      </div>
-
-      {/* Sidebar */}
-      <div className="space-y-gutter">
-
-        {/* Quick Actions */}
-        <section className="bg-surface-container-lowest rounded-2xl border border-outline-variant/80 p-8">
-          <h3 className="text-headline-md font-headline-md text-primary mb-6">Quick Actions</h3>
-          <div className="space-y-3">
-            <Link href="/portal/profile" className="w-full flex items-center justify-between p-4 bg-surface hover:bg-surface-container transition-all rounded-xl border border-outline-variant group">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
-                  <Pencil className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <p className="text-body-md font-body-md text-on-surface font-semibold">Edit Profile</p>
-                  <p className="text-label-sm font-label-sm text-on-surface-variant">Update your information</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-outline group-hover:text-primary" />
-            </Link>
-
-            <Link href="/portal/rates" className="w-full flex items-center justify-between p-4 bg-surface hover:bg-surface-container transition-all rounded-xl border border-outline-variant group">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
-                  <DollarSign className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <p className="text-body-md font-body-md text-on-surface font-semibold">Update Pricing</p>
-                  <p className="text-label-sm font-label-sm text-on-surface-variant">Manage your rates</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-outline group-hover:text-primary" />
-            </Link>
-
-            <Link href="/portal/availability" className="w-full flex items-center justify-between p-4 bg-surface hover:bg-surface-container transition-all rounded-xl border border-outline-variant group">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <p className="text-body-md font-body-md text-on-surface font-semibold">Update Availability</p>
-                  <p className="text-label-sm font-label-sm text-on-surface-variant">Set your schedule</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-outline group-hover:text-primary" />
-            </Link>
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-outline-variant">
-            <Link
-              href="/portal/profile"
-              className="w-full flex items-center justify-center gap-3 p-4 bg-primary text-on-primary rounded-xl font-bold text-label-md hover:opacity-90 transition-all"
-            >
-              <Sparkles size={18} />
-              Generate AI Bio
-            </Link>
-            <p className="text-center text-label-sm font-label-sm text-secondary mt-3">Open Profile to generate and apply your bio.</p>
-          </div>
-        </section>
-
-        {/* Upcoming */}
-        <section className="bg-primary rounded-2xl p-8 text-on-primary relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-20 pointer-events-none">
-            <Calendar className="w-16 h-16" />
-          </div>
-          <div className="relative z-10">
-            <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-label-sm font-label-sm mb-6">Upcoming</span>
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 bg-white/10 flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h4 className="text-headline-md font-headline-md leading-none">No upcoming sessions</h4>
-                <p className="text-body-md font-body-md opacity-80 mt-1">Your future bookings will appear here.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 p-3 rounded-lg backdrop-blur-md">
-              <Calendar className="w-5 h-5" />
-              <span className="text-body-md font-body-md font-bold">Availability managed in your schedule</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Verification Status */}
-        {!loading && (
-          <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
-            <div className="flex items-center justify-between mb-5">
-              <span className="text-label-sm font-bold uppercase tracking-widest text-secondary">Profile Status</span>
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+        <section className="lg:col-span-4 bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 relative hover:shadow-md transition-shadow duration-200">
+            {!loading && verification.label && (
+              <div className={`absolute top-5 right-5 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs font-medium ${
                 verification.label === 'Verified'
-                  ? 'bg-primary/10 text-primary border-primary/20'
+                  ? 'bg-green-50 text-green-700'
                   : verification.label === 'Under Review'
-                  ? 'bg-warning-container/30 text-warning border-warning/20'
-                  : 'bg-surface-container-high text-on-surface-variant border-outline-variant'
+                  ? 'bg-amber-50 text-amber-700'
+                  : 'bg-red-50 text-red-700 animate-pulse'
               }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${
-                  verification.label === 'Verified' ? 'bg-primary'
-                  : verification.label === 'Under Review' ? 'bg-warning'
-                  : 'bg-outline'
+                <span className={`w-2 h-2 rounded-full ${
+                  verification.label === 'Verified' ? 'bg-green-500'
+                  : verification.label === 'Under Review' ? 'bg-amber-500'
+                  : 'bg-red-500'
                 }`} />
                 {verification.label}
+              </div>
+            )}
+            <div className="flex items-center gap-6">
+              <div className="relative w-28 h-28 flex-shrink-0">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 144 144">
+                  <circle cx="72" cy="72" r="62" fill="none" stroke="#E5E7EB" strokeWidth="10" />
+                  {!loading && (
+                    <circle
+                      cx="72" cy="72" r="62"
+                      fill="none"
+                      stroke={progressColor}
+                      strokeWidth="10"
+                      strokeDasharray={ringCircumference}
+                      strokeDashoffset={ringOffset}
+                      strokeLinecap="round"
+                      className="transition-all duration-700 ease-out"
+                    />
+                  )}
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-center">
+                    <span className="text-xl font-bold" style={{ color: loading ? '#111827' : progressColor }}>
+                      {loading ? '--' : `${comp}%`}
+                    </span>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Complete</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-[22px] font-bold text-gray-900 mb-1.5">
+                  {comp >= 100 ? 'Your Profile Is Complete' : 'Complete Your Profile'}
+                </h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  Keep your profile accurate so students can understand your services, pricing, vehicle, and availability.
+                </p>
+                {nextStep.action === 'submit' ? (
+                  <button
+                    onClick={submitForReview}
+                    disabled={submitting}
+                    className="inline-flex items-center h-10 px-5 bg-[#064E3B] text-white text-sm font-medium rounded-xl hover:bg-[#053A2C] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? 'Submitting...' : nextStep.label}
+                  </button>
+                ) : (
+                  <Link
+                    href={nextStep.href}
+                    className="inline-flex items-center h-10 px-5 bg-[#064E3B] text-white text-sm font-medium rounded-xl hover:bg-[#053A2C] transition-colors duration-200"
+                  >
+                    {nextStep.label}
+                  </Link>
+                )}
+                <p className="mt-2 text-xs text-gray-400">{nextStep.helper}</p>
+              </div>
+            </div>
+          </section>
+
+        {/* Left Column */}
+        <div className="lg:col-span-3 space-y-6">
+
+          {/* Stats */}
+          <section className="grid grid-cols-3 gap-5">
+            <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                </div>
+                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Profile Checklist</span>
+              </div>
+              <span className="text-2xl font-bold text-gray-900 leading-none">{loading ? '--' : `${comp}%`}</span>
+              <span className="block text-xs text-gray-400 mt-1.5">
+                {comp < 100 ? `${6 - Math.ceil(comp / 20)} steps remaining` : 'All steps completed'}
               </span>
             </div>
 
-            <div className="flex items-center gap-4 mb-5">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                verification.label === 'Verified' ? 'bg-primary/10 text-primary'
-                : verification.label === 'Under Review' ? 'bg-warning-container/30 text-warning'
-                : 'bg-surface-container text-on-surface-variant'
-              }`}>
-                <Eye className="w-5 h-5" />
+            <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                  <Star className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Average Rating</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-body-md font-body-md text-secondary">{verification.body}</h4>
+              <span className="text-2xl font-bold text-gray-900 leading-none">
+                {loading ? '--' : avgRating > 0 ? avgRating.toFixed(1) : '-'}
+              </span>
+              <span className="block text-xs text-gray-400 mt-1.5">
+                {avgRating > 0 ? `${avgRating.toFixed(1)} / 5.0` : 'No rating yet'}
+              </span>
+            </div>
+
+            <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Total Reviews</span>
+              </div>
+              <span className="text-2xl font-bold text-gray-900 leading-none">{loading ? '--' : totalReviews}</span>
+              <span className="block text-xs text-gray-400 mt-1.5">
+                {totalReviews === 0 ? 'No reviews yet' : `${totalReviews} review${totalReviews !== 1 ? 's' : ''}`}
+              </span>
+            </div>
+
+          </section>
+
+          {/* Analytics */}
+          <section className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">Search Appearances</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Appearances in search results over the last 7 days</p>
               </div>
             </div>
 
-            {/* Profile completeness bar */}
-            <div className="mb-5">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-label-sm font-bold uppercase tracking-wider text-secondary">Profile Completeness</span>
-                <span className="text-label-sm font-bold text-primary">{comp}%</span>
+            {!instructor || appearanceTotals.length === 0 ? (
+              <div className="h-48 rounded-2xl border border-dashed border-[#E5E7EB] bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3 text-[#64748B]">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-gray-900">No data available yet</h4>
+                  <p className="text-xs text-gray-400 mt-1">Analytics will appear once your profile is live.</p>
+                </div>
               </div>
-              <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary rounded-full transition-all duration-700"
-                  style={{ width: `${Math.min(comp, 100)}%` }}
-                />
+            ) : (
+              <div>
+                <div className="flex items-end gap-2 h-48">
+                  {appearanceTotals.map((h, i) => {
+                    const maxVal = Math.max(...appearanceTotals, 1);
+                    const pct = (h / maxVal) * 100;
+                    return (
+                      <div key={i} className="flex-1 bg-[#064E3B]/5 rounded-lg relative group transition-all hover:bg-[#064E3B]/10" style={{ height: '100%', minHeight: '3rem' }}>
+                        <div className="absolute bottom-0 w-full bg-[#064E3B]/40 rounded-lg transition-all group-hover:bg-[#064E3B]/60" style={{ height: `${Math.max(pct, 4)}%` }}></div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between mt-3 text-xs text-gray-400 px-1">
+                  {appearanceLabels.map((label, i) => (
+                    <span key={i}>{label}</span>
+                  ))}
+                </div>
               </div>
-            </div>
-
-            {/* Next action */}
-            {verification.label !== 'Verified' && (
-              <Link
-                href={nextStep.href}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-on-primary rounded-lg text-xs font-bold hover:opacity-90 transition-all"
-              >
-                {nextStep.label}
-                <ChevronRight className="w-4 h-4" />
-              </Link>
             )}
+          </section>
+        </div>
+
+        {/* Right Column */}
+        <div className="lg:col-span-1 self-start">
+          <section className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="space-y-2.5">
+              <Link href="/portal/profile" className="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 rounded-xl group">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E5E7EB] flex items-center justify-center text-[#64748B] shrink-0">
+                    <Pencil className="w-4 h-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900">Edit Profile</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Update your information</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+              </Link>
+
+              <Link href="/portal/rates" className="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 rounded-xl group">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E5E7EB] flex items-center justify-center text-[#64748B] shrink-0">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900">Update Pricing</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Manage your rates</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+              </Link>
+
+              <Link href="/portal/availability" className="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 rounded-xl group">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E5E7EB] flex items-center justify-center text-[#64748B] shrink-0">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900">Update Availability</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Set your schedule</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+              </Link>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-[#E5E7EB]">
+              <Link
+                href="/portal/profile"
+                className="w-full flex items-center justify-center gap-2 h-10 bg-[#064E3B] text-white text-sm font-medium rounded-xl hover:bg-[#053A2C] transition-colors duration-200"
+              >
+                <Sparkles size={14} />
+                Generate AI Bio
+              </Link>
+              <p className="text-center text-[11px] text-gray-400 mt-2">Open Profile to generate and apply your bio.</p>
+            </div>
+          </section>
+        </div>
+
+        {/* Upcoming */}
+        <section className="lg:col-span-4 bg-[#064E3B] rounded-[20px] p-5 text-white relative overflow-hidden hover:shadow-md transition-shadow duration-200">
+          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+            <Calendar className="w-16 h-16" />
           </div>
-        )}
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-5">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <Calendar className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">Upcoming</span>
+                <h4 className="text-base font-bold mt-0.5">No upcoming sessions</h4>
+                <p className="text-sm text-white/60 mt-0.5">Your future bookings will appear here.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 bg-white/10 p-3 rounded-xl shrink-0">
+              <Calendar className="w-4 h-4 text-white/70" />
+              <span className="text-xs font-medium">Managed in schedule</span>
+            </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 }

@@ -163,12 +163,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <span className="material-symbols-outlined text-[22px]">menu</span>
             </button>
-            <div className="hidden md:flex items-center bg-white border border-outline-variant/30 rounded-2xl px-5 py-2 w-full max-w-md shadow-sm">
+            <div className="hidden md:flex items-center bg-surface-container-low rounded-2xl px-5 py-2 w-full max-w-md shadow-sm">
               <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
               <input
-                className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 placeholder:text-on-surface-variant/50"
+                className="bg-transparent border-none focus:ring-0 focus:outline-none focus-visible:outline-none text-sm w-full ml-2 placeholder:text-on-surface-variant/50"
                 placeholder="Search anything..."
                 type="text"
+                autoComplete="chrome-off"
+                data-1p-ignore
+                data-lpignore="true"
               />
             </div>
           </div>

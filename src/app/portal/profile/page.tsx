@@ -70,6 +70,12 @@ export default function PortalProfile() {
 
   const [activeTab, setActiveTab] = useState('profile');
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab) setActiveTab(tab);
+  }, []);
+
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiStep, setAiStep] = useState<'input' | 'loading' | 'preview'>('input');
   const [aiBioPreview, setAiBioPreview] = useState('');
