@@ -135,22 +135,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </span>
               </div>
             </div>
-          {user ? (
-            <button
-              onClick={handleLogout}
-              className="w-full bg-primary text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined text-[16px]">logout</span>
-              Sign Out
-            </button>
-          ) : (
-            <Link
-              href="/admin/login"
-              className="block w-full bg-primary text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-lg hover:shadow-primary/20 transition-all text-center"
-            >
-              Login
-            </Link>
-          )}
+
         </div>
       </aside>
 
@@ -214,6 +199,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <span className="material-symbols-outlined text-[18px] text-secondary">photo_camera</span>
                         Change Photo
                       </button>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[18px] text-error">logout</span>
+                        Sign Out
+                      </button>
                     </div>
                   )}
                   <input
@@ -235,9 +227,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
               </div>
             ) : (
-              <Link href="/admin/login" className="text-sm font-bold text-primary hover:underline">
-                Login
-              </Link>
+              <></>
             )}
           </div>
         </header>

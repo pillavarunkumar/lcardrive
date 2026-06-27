@@ -312,7 +312,7 @@ export default function PortalProfile() {
           <div className="flex gap-2 mb-gutter p-1.5 bg-white rounded-2xl border border-outline-variant shadow-sm overflow-x-auto">
           {tabs.map((tab) => (
             <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${
+              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap transition-all flex-1 ${
                 activeTab === tab.id
                   ? 'bg-primary-container text-white shadow-lg shadow-primary-container/20'
                   : 'text-on-surface-variant hover:bg-surface-container hover:text-primary-container'

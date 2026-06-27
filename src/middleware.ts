@@ -12,7 +12,7 @@ export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl;
 
   // Skip auth for login pages/endpoints so they can handle auth flow themselves
-  if (pathname === '/admin/login' || pathname === '/api/admin/login-via-clerk' || pathname === '/login' || pathname === '/signup') {
+  if (pathname === '/admin/login' || pathname === '/api/admin/login-via-clerk' || pathname === '/api/portal/profile/check' || pathname === '/login' || pathname === '/signup') {
     return NextResponse.next();
   }
 

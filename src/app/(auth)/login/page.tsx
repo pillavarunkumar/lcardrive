@@ -113,10 +113,10 @@ export default function LoginPage() {
       {/* Right: Form */}
       <section className="w-full lg:w-1/2 flex items-center justify-center px-4 md:px-12 lg:px-24 bg-white">
         <div className="w-full max-w-[400px]">
-          <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
+          <Link href="/" className="flex items-center justify-center lg:justify-start gap-3 mb-6">
             <span className="material-symbols-outlined text-[28px] text-[#064E3B]" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
             <span className="text-2xl font-semibold text-[#064E3B] tracking-tight">LCarDrive</span>
-          </div>
+          </Link>
           <h2 className="text-[32px] font-bold text-gray-900 mb-1">Welcome back</h2>
           <p className="text-base text-[#64748B] mb-6">Please enter your details to sign in.</p>
 

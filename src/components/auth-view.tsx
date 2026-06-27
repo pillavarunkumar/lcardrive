@@ -27,9 +27,6 @@ export default function AuthView({ initialMode }: { initialMode: 'signin' | 'sig
 
   const toggle = useCallback(() => setMode(m => m === 'signin' ? 'signup' : 'signin'), []);
 
-  const formsX = isSignIn ? '0%' : '-50%';
-  const overlayX = isSignIn ? '100%' : '0%';
-
   return (
     <main className="flex h-dvh w-full bg-white overflow-hidden">
       {/* Left: Hero Image (static) */}
@@ -63,51 +60,15 @@ export default function AuthView({ initialMode }: { initialMode: 'signin' | 'sig
         </div>
       </section>
 
-      {/* Right: Sliding Auth Forms */}
-      <section className="w-full lg:w-1/2 relative overflow-hidden bg-white">
-        {/* Forms wrapper */}
-        <div
-          className="flex h-full transition-transform duration-500 ease-in-out"
-          style={{ width: '200%', transform: `translateX(${formsX})` }}
-        >
-          <SignInPanel />
-          <SignUpPanel />
-        </div>
-
-        {/* Overlay */}
-        <div
-          className="absolute top-0 h-full w-1/2 transition-transform duration-500 ease-in-out z-10"
-          style={{ transform: `translateX(${overlayX})` }}
-        >
-          <div className="h-full bg-gradient-to-br from-primary via-primary to-primary-container/90 text-white flex flex-col items-center justify-center px-12 text-center">
-            <span className="material-symbols-outlined text-[48px] mb-6" style={{ fontVariationSettings: "'FILL' 1" }}>
-              {isSignIn ? 'person_add' : 'login'}
-            </span>
-            <h2 className="text-[28px] font-bold mb-3 leading-tight">
-              {isSignIn ? 'New here?' : 'Welcome back!'}
-            </h2>
-            <p className="text-white/80 text-base mb-8 leading-relaxed max-w-sm">
-              {isSignIn
-                ? 'Create an account to find your perfect instructor and start your driving journey.'
-                : 'Sign in to manage your profile, bookings, and connect with instructors.'}
-            </p>
-            <button
-              onClick={toggle}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-primary font-bold rounded-xl hover:bg-white/90 transition-all active:scale-[0.97] shadow-lg"
-            >
-              {isSignIn ? 'Create Account' : 'Sign In'}
-              <span className="material-symbols-outlined text-[18px]">
-                {isSignIn ? 'arrow_forward' : 'arrow_back'}
-              </span>
-            </button>
-          </div>
-        </div>
+      {/* Right: Auth Forms */}
+      <section className="w-full lg:w-1/2 relative bg-white overflow-y-auto">
+        {isSignIn ? <SignInPanel onToggle={toggle} /> : <SignUpPanel onToggle={toggle} />}
       </section>
     </main>
   );
 }
 
-function SignInPanel() {
+function SignInPanel({ onToggle }: { onToggle: () => void }) {
   const { signIn, isLoaded, setActive } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -155,7 +116,7 @@ function SignInPanel() {
   };
 
   return (
-    <div className="w-1/2 h-full flex items-center justify-center px-6 md:px-12">
+    <div className="w-full h-full flex items-center justify-center px-6 md:px-12">
       <div className="w-full max-w-[380px]">
         <Link href="/" className="flex items-center justify-center lg:justify-start gap-3 mb-6">
           <span className="material-symbols-outlined text-[28px] text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
@@ -235,12 +196,16 @@ function SignInPanel() {
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
           </button>
         </form>
+        <p className="mt-6 text-center text-sm text-on-surface-variant">
+          Don&apos;t have an account?{' '}
+          <button onClick={onToggle} className="font-bold text-primary-container hover:underline">Create Account</button>
+        </p>
       </div>
     </div>
   );
 }
 
-function SignUpPanel() {
+function SignUpPanel({ onToggle }: { onToggle: () => void }) {
   const { signUp, isLoaded, setActive } = useSignUp();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -336,7 +301,7 @@ function SignUpPanel() {
   const router = useRouter();
 
   return (
-    <div className="w-1/2 h-full flex items-center justify-center px-6 md:px-12 overflow-y-auto">
+    <div className="w-full h-full flex items-center justify-center px-6 md:px-12 overflow-y-auto">
       <div className="w-full max-w-[380px] py-8">
         <Link href="/" className="flex items-center justify-center lg:justify-start gap-3 mb-6">
           <span className="material-symbols-outlined text-[28px] text-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
@@ -459,6 +424,10 @@ function SignUpPanel() {
             </button>
           </form>
         )}
+        <p className="mt-6 text-center text-sm text-on-surface-variant">
+          Already have an account?{' '}
+          <button onClick={onToggle} className="font-bold text-primary-container hover:underline">Sign In</button>
+        </p>
       </div>
     </div>
   );

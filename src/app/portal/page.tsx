@@ -400,14 +400,14 @@ export default function PortalDashboard() {
         </div>
 
         {/* Upcoming */}
-        <section className="lg:col-span-4 bg-primary-container rounded-2xl p-5 text-white relative overflow-hidden hover:shadow-md transition-shadow duration-200">
+        <section className="lg:col-span-4 bg-primary-container rounded-2xl shadow-lg shadow-primary-container/20 p-5 text-white relative overflow-hidden hover:shadow-md transition-shadow duration-200">
           <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
             <Calendar className="w-16 h-16" />
           </div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-5">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <Calendar className="w-5 h-5 text-white" />
+                <Calendar className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">Upcoming</span>
