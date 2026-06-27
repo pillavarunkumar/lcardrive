@@ -46,6 +46,26 @@ function buildSearchParams(answers: Record<string, string>): URLSearchParams {
   return params;
 }
 
+function SparkleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z" />
+      <path d="M18 14l.7 2.3L21 17l-2.3.7L18 20l-.7-2.3L15 17l2.3-.7z" />
+      <path d="M6 14l.7 2.3L9 17l-2.3.7L6 20l-.7-2.3L3 17l2.3-.7z" />
+    </svg>
+  );
+}
+
+function AnimatedEllipsis() {
+  return (
+    <span className="inline-flex">
+      <span className="animate-bounce [animation-delay:0ms]">.</span>
+      <span className="animate-bounce [animation-delay:150ms]">.</span>
+      <span className="animate-bounce [animation-delay:300ms]">.</span>
+    </span>
+  );
+}
+
 export default function FindMyInstructorPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -56,11 +76,44 @@ export default function FindMyInstructorPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<{ display: string; suburb: string; state: string }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const fetchedRef = useRef(false);
 
   const current = QUESTIONS[step];
 
+  const fetchSuggestions = useCallback(async (query: string) => {
+    if (query.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/location/autocomplete?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setSuggestions(data.suggestions || []);
+    } catch {
+      setSuggestions([]);
+    }
+  }, []);
+
   const setAnswer = (value: string) => setAnswers((prev) => ({ ...prev, [current.id]: value }));
+
+  const handleSuburbChange = (value: string) => {
+    setAnswer(value);
+    if (current.id === 'suburb') setShowSuggestions(true);
+  };
+
+  const selectSuggestion = (s: { display: string; suburb: string; state: string }) => {
+    setAnswers((prev) => ({ ...prev, suburb: s.suburb }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  useEffect(() => {
+    if (current.id !== 'suburb') return;
+    const timer = setTimeout(() => fetchSuggestions(answers.suburb || ''), 250);
+    return () => clearTimeout(timer);
+  }, [answers.suburb, fetchSuggestions, current.id]);
 
   const fetchResults = useCallback(async (page: number) => {
     setLoading(true);
@@ -175,38 +228,129 @@ export default function FindMyInstructorPage() {
   if (fetchedRef.current || initialLoading) {
     return (
       <div className="flex-grow flex flex-col px-margin-mobile md:px-margin-desktop py-stack-lg w-full relative overflow-hidden">
+        {initialLoading && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#064E3B]/5 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#064E3B]/5 rounded-full blur-3xl animate-pulse [animation-delay:1s]" />
+          </div>
+        )}
         <section className="w-full max-w-container-max mx-auto z-10 fade-in">
           {initialLoading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <span className="material-symbols-outlined text-[48px] text-primary animate-spin mb-4">refresh</span>
-              <h2 className="text-lg font-bold text-gray-900 mb-2">Analyzing your preferences...</h2>
-              <p className="text-sm text-gray-500">Our AI is cross-referencing availability, ratings, and teaching styles.</p>
+            <div className="flex flex-col items-center justify-center py-24 relative">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 rounded-[20px] bg-[#064E3B] flex items-center justify-center shadow-lg shadow-[#064E3B]/20 animate-pulse">
+                  <SparkleIcon className="w-10 h-10 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#064E3B] flex items-center justify-center shadow-sm animate-bounce">
+                  <span className="text-white text-[10px] font-bold">AI</span>
+                </div>
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Analyzing your preferences</h2>
+              <p className="text-sm text-[#64748B] max-w-xs text-center leading-relaxed">
+                Our AI is cross-referencing availability, ratings, and teaching styles<AnimatedEllipsis />
+              </p>
+              <div className="mt-8 flex gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-[#064E3B] animate-bounce [animation-delay:0ms]" />
+                <div className="w-2 h-2 rounded-full bg-[#064E3B] animate-bounce [animation-delay:150ms]" />
+                <div className="w-2 h-2 rounded-full bg-[#064E3B] animate-bounce [animation-delay:300ms]" />
+                <div className="w-2 h-2 rounded-full bg-[#064E3B] animate-bounce [animation-delay:450ms]" />
+              </div>
             </div>
           ) : (
             <>
+              {/* Header */}
               <div className="text-center mb-stack-lg">
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-[#064E3B] mb-stack-sm shadow-sm">
-                  <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#064E3B]/10 text-[#064E3B] mb-stack-sm shadow-sm">
+                  <SparkleIcon className="w-4 h-4" />
                   <span className="text-xs font-bold">Analysis Complete</span>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Our AI matches for you</h2>
-                <p className="text-sm text-gray-500 mb-4">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Your AI matches</h2>
+                <p className="text-sm text-[#64748B] mb-5">
                   {totalInstructors} instructor{totalInstructors !== 1 ? 's' : ''} found in your area
                 </p>
                 <button
                   onClick={reset}
-                  className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl text-sm font-semibold hover:brightness-110 transition-all shadow-md shadow-primary/20"
+                  className="inline-flex items-center gap-2 bg-[#064E3B] text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-[#053A2C] transition-all shadow-md"
                 >
-                  <span className="material-symbols-outlined text-[18px]">search</span>
-                  Submit New Search
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                  </svg>
+                  New Search
                 </button>
               </div>
 
-              {/* Verified / Admin profiles at the top */}
+              {/* AI Top Picks */}
+              {aiMatches && aiMatches.length > 0 && (
+                <div className="mb-stack-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-7 h-7 rounded-lg bg-[#064E3B]/10 flex items-center justify-center">
+                      <SparkleIcon className="w-4 h-4 text-[#064E3B]" />
+                    </div>
+                    <h3 className="text-sm font-bold text-gray-900">AI Top Picks</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {aiMatches.map((r, i) => (
+                      <Link
+                        key={r.name}
+                        href={`/instructors/${r.suburb.toLowerCase().replace(/\s+/g, '-')}/${r.slug}`}
+                        className="group relative bg-white rounded-[20px] border border-[#E5E7EB] hover:border-[#064E3B] transition-all duration-200 p-4 flex flex-col hover:shadow-md"
+                      >
+                        <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-[#064E3B] flex items-center justify-center shadow-sm text-white text-[11px] font-bold">
+                          {i + 1}
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden ring-2 ring-[#E5E7EB] group-hover:ring-[#064E3B]/30 transition-all">
+                            {r.image ? (
+                              <img src={r.image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[#64748B]">
+                                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                  <circle cx="12" cy="7" r="4" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm font-bold text-gray-900 truncate">{r.name}</span>
+                              {r.verified && (
+                                <svg className="w-4 h-4 text-[#064E3B] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+                                </svg>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <svg className="w-3 h-3 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                              <span className="text-xs font-bold text-gray-900">{r.rating}</span>
+                              <span className="text-[10px] text-[#64748B]">({r.reviews})</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-[#E5E7EB]">
+                          <p className="text-[11px] text-[#64748B] leading-relaxed">
+                            <span className="text-[#064E3B] font-semibold">Why them? </span>
+                            {r.reason}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Verified Instructors */}
               {allInstructors.filter((i) => i.is_verified).length > 0 && (
                 <div className="mb-stack-lg">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                    <div className="w-7 h-7 rounded-lg bg-[#064E3B]/10 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-[#064E3B]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+                      </svg>
+                    </div>
                     <h3 className="text-sm font-bold text-gray-900">Verified Instructors</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
@@ -214,30 +358,40 @@ export default function FindMyInstructorPage() {
                       <Link
                         key={inst.id}
                         href={`/instructors/${inst.suburb.toLowerCase().replace(/\s+/g, '-')}/${inst.slug}`}
-                        className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_10px_25px_rgba(15,23,42,0.12)] transition-all duration-300 border border-primary flex flex-col group"
+                        className="bg-white rounded-[20px] overflow-hidden shadow-sm border border-[#E5E7EB] hover:border-[#064E3B] hover:shadow-md transition-all duration-300 flex flex-col group"
                       >
-                        <div className="relative h-40 w-full bg-surface-container">
+                        <div className="relative h-40 w-full bg-gray-50">
                           {inst.profile_photo_url ? (
                             <img src={inst.profile_photo_url} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-outline">
-                              <span className="material-symbols-outlined text-[40px]">person</span>
+                            <div className="w-full h-full flex items-center justify-center text-[#64748B]">
+                              <svg className="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                              </svg>
                             </div>
                           )}
+                          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1 shadow-sm">
+                            <svg className="w-3.5 h-3.5 text-[#064E3B]" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+                            </svg>
+                            <span className="text-[10px] font-semibold text-[#064E3B]">Verified</span>
+                          </div>
                         </div>
                         <div className="p-4 flex-grow flex flex-col">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <h3 className="text-sm font-bold text-gray-900">{inst.first_name} {inst.last_name}</h3>
-                            <span className="material-symbols-outlined text-primary text-[18px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                          </div>
-                          <p className="text-xs text-gray-500 mb-2">
-                            <span className="material-symbols-outlined text-[14px] align-text-bottom">location_on</span> {inst.suburb}, {inst.state}
+                          <h3 className="text-sm font-bold text-gray-900 mb-1">{inst.first_name} {inst.last_name}</h3>
+                          <p className="text-xs text-[#64748B] mb-2 flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                              <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            {inst.suburb}, {inst.state}
                           </p>
                           {inst.hourly_rate && (
                             <p className="text-sm font-bold text-[#064E3B] mb-3">${inst.hourly_rate}/hr</p>
                           )}
                           <div className="mt-auto">
-                            <span className="w-full text-xs font-semibold text-[#064E3B] border border-primary px-3 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-center block">
+                            <span className="w-full text-xs font-semibold text-[#64748B] bg-gray-50 px-3 py-2 rounded-lg hover:bg-[#064E3B]/10 hover:text-[#064E3B] border border-[#E5E7EB] transition-colors text-center block">
                               View Profile
                             </span>
                           </div>
@@ -248,96 +402,61 @@ export default function FindMyInstructorPage() {
                 </div>
               )}
 
-              {/* AI Top Picks in small rectangles */}
-              {aiMatches && aiMatches.length > 0 && (
-                <div className="mb-stack-lg">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                    <h3 className="text-sm font-bold text-gray-900">AI Match Suggestions</h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {aiMatches.map((r) => (
-                      <Link
-                        key={r.name}
-                        href={`/instructors/${r.suburb.toLowerCase().replace(/\s+/g, '-')}/${r.slug}`}
-                        className="bg-surface-container-lowest rounded-lg border border-outline-variant hover:border-primary transition-all duration-200 p-3 flex items-start gap-3 group"
-                      >
-                        <div className="w-12 h-12 rounded-lg bg-surface-container flex-shrink-0 overflow-hidden">
-                          {r.image ? (
-                            <img src={r.image} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-outline">
-                              <span className="material-symbols-outlined text-[20px]">person</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm font-bold text-gray-900 truncate">{r.name}</span>
-                            {r.verified && (
-                              <span className="material-symbols-outlined text-primary text-[14px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <span className="material-symbols-outlined text-[12px] text-yellow-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="text-xs font-bold text-gray-900">{r.rating}</span>
-                            <span className="text-[10px] text-gray-500">({r.reviews})</span>
-                          </div>
-                          <div className="mt-1 text-[11px] text-[#064E3B]/80 bg-primary/5 rounded px-1.5 py-1 leading-snug">
-                            <span className="material-symbols-outlined text-[10px] align-text-bottom">psychology</span> {r.reason}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {aiMatches && aiMatches.length === 0 && allInstructors.length === 0 && (
                 <div className="text-center py-20">
-                  <p className="text-gray-400 text-sm">No matching instructors found. Try adjusting your preferences.</p>
-                  <button onClick={reset} className="mt-4 border border-outline-variant px-6 py-2 rounded-lg text-sm font-medium hover:bg-surface-container">
+                  <div className="w-16 h-16 rounded-[20px] bg-gray-50 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#64748B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                  </div>
+                  <p className="text-[#64748B] text-sm mb-4">No matching instructors found. Try adjusting your preferences.</p>
+                  <button onClick={reset} className="bg-[#064E3B] text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#053A2C] transition-colors shadow-sm">
                     Start New Search
                   </button>
                 </div>
               )}
 
-              {/* All Results with Pagination */}
+              {/* All Results */}
               {allInstructors.length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between mb-4 border-t border-outline-variant pt-stack-lg">
-                    <h3 className="text-sm font-bold text-gray-900">
+                  <div className="flex items-center justify-between mb-4 border-t border-[#E5E7EB] pt-stack-lg">
+                    <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                       All Matching Instructors
                       {loading && (
-                        <span className="material-symbols-outlined text-primary animate-spin text-[18px] ml-2 inline-block align-middle">refresh</span>
+                        <svg className="w-4 h-4 text-[#064E3B] animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
                       )}
                     </h3>
-                    <span className="text-xs text-gray-500">
-                      Page {currentPage} of {totalPages}
-                    </span>
+                    <span className="text-xs text-[#64748B]">Page {currentPage} of {totalPages}</span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
                     {allInstructors.filter((i) => !i.is_verified).map((inst) => (
-                      <div key={inst.id} className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-[0px_10px_25px_rgba(15,23,42,0.12)] transition-all duration-300 border border-transparent hover:border-outline-variant flex flex-col group">
-                        <div className="relative h-40 w-full bg-surface-container">
+                      <div key={inst.id} className="bg-white rounded-[20px] overflow-hidden shadow-sm border border-[#E5E7EB] hover:border-[#064E3B] hover:shadow-md transition-all duration-300 flex flex-col group">
+                        <div className="relative h-40 w-full bg-gray-50">
                           {inst.profile_photo_url ? (
                             <img src={inst.profile_photo_url} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-outline">
-                              <span className="material-symbols-outlined text-[40px]">person</span>
+                            <div className="w-full h-full flex items-center justify-center text-[#64748B]">
+                              <svg className="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                              </svg>
                             </div>
                           )}
                         </div>
                         <div className="p-4 flex-grow flex flex-col">
                           <div className="flex items-center gap-1.5 mb-1">
                             <h3 className="text-sm font-bold text-gray-900">{inst.first_name} {inst.last_name}</h3>
-                            {inst.is_verified && (
-                              <span className="material-symbols-outlined text-primary text-[16px] flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                            )}
                           </div>
-                          <p className="text-xs text-gray-500 mb-1">
-                            <span className="material-symbols-outlined text-[14px] align-text-bottom">location_on</span> {inst.suburb}, {inst.state}
+                          <p className="text-xs text-[#64748B] mb-1 flex items-center gap-1">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                              <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            {inst.suburb}, {inst.state}
                           </p>
                           {inst.hourly_rate && (
                             <p className="text-sm font-bold text-[#064E3B] mb-3">${inst.hourly_rate}/hr</p>
@@ -345,7 +464,7 @@ export default function FindMyInstructorPage() {
                           <div className="mt-auto">
                             <Link
                               href={`/instructors/${inst.suburb.toLowerCase().replace(/\s+/g, '-')}/${inst.slug}`}
-                              className="w-full text-xs font-semibold text-gray-500 border border-outline-variant px-3 py-2 rounded-lg hover:border-primary hover:text-[#064E3B] transition-colors text-center block"
+                              className="w-full text-xs font-semibold text-[#64748B] bg-gray-50 px-3 py-2 rounded-lg hover:bg-[#064E3B]/10 hover:text-[#064E3B] border border-[#E5E7EB] transition-colors text-center block"
                             >
                               View Profile
                             </Link>
@@ -364,8 +483,12 @@ export default function FindMyInstructorPage() {
               )}
 
               <div className="mt-stack-lg text-center">
-                <button onClick={reset} className="text-sm font-medium text-gray-500 hover:text-[#064E3B] transition-colors flex items-center justify-center gap-2 mx-auto">
-                  <span className="material-symbols-outlined">restart_alt</span> Start New Search
+                <button onClick={reset} className="text-sm font-medium text-[#64748B] hover:text-[#064E3B] transition-colors flex items-center justify-center gap-2 mx-auto">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                  </svg>
+                  Start New Search
                 </button>
               </div>
             </>
@@ -377,46 +500,76 @@ export default function FindMyInstructorPage() {
 
   return (
     <div className="flex-grow flex flex-col items-center justify-center px-margin-mobile md:px-margin-desktop py-8 w-full relative overflow-hidden">
-      <section className="w-full max-w-lg bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-5 md:p-8 relative z-10 fade-in">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-[#064E3B]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-[#064E3B]/5 rounded-full blur-3xl" />
+      </div>
+      <section className="w-full max-w-lg bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-6 md:p-8 relative z-10 fade-in">
         <div className="mb-6">
-          <div className="flex justify-between items-end mb-2">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Step {step + 1} of {QUESTIONS.length}</span>
-            <span className="text-xs font-semibold text-[#064E3B] flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">psychology</span> AI Assisting
-            </span>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[#064E3B] flex items-center justify-center shadow-sm">
+                <SparkleIcon className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-sm font-bold text-gray-900">Find Your Match</span>
+            </div>
+            <span className="text-xs font-semibold text-[#64748B]">{step + 1} of {QUESTIONS.length}</span>
           </div>
-          <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full" style={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}></div>
+          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#064E3B] rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}
+            />
           </div>
         </div>
 
-        <h1 className="text-lg font-bold text-gray-900 mb-3">Help me find the right instructor.</h1>
-        <p className="text-sm text-gray-500 mb-6">{current.label}</p>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">{current.label}</h1>
 
         {current.type === 'text' && (
-          <div className="relative mb-6">
-            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">location_on</span>
+          <div className="relative mb-6 mt-4">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
             <input
               type="text"
               placeholder={current.placeholder}
               value={answers[current.id] || ''}
-              onChange={(e) => setAnswer(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-outline-variant rounded-lg text-sm text-gray-900 bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
+              onChange={(e) => handleSuburbChange(e.target.value)}
+              onFocus={() => { if (current.id === 'suburb') setShowSuggestions(true); }}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              className="w-full pl-10 pr-4 py-3 border border-[#E5E7EB] rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#064E3B]/30 focus:border-[#064E3B] transition-all shadow-sm"
+              autoComplete="chrome-off"
+              data-1p-ignore
+              data-lpignore="true"
               autoFocus
             />
+            {current.id === 'suburb' && showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-[#E5E7EB] rounded-xl shadow-lg z-50 text-left mt-1 overflow-hidden">
+                {suggestions.map((s) => (
+                  <div
+                    key={s.display}
+                    onMouseDown={() => selectSuggestion(s)}
+                    className="px-4 py-2.5 hover:bg-[#064E3B]/5 cursor-pointer text-sm text-gray-900 border-b border-[#E5E7EB] last:border-b-0 transition-colors"
+                  >
+                    {s.display}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {current.type === 'choice' && (
-          <div className="space-y-2 mb-6">
+          <div className="space-y-2 mb-6 mt-4">
             {current.options!.map((opt) => (
               <button
                 key={opt}
                 onClick={() => setAnswer(opt)}
-                className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all text-sm ${
+                className={`w-full text-left px-4 py-3.5 rounded-xl border-2 transition-all text-sm ${
                   answers[current.id] === opt
-                    ? 'border-primary bg-primary/10 text-[#064E3B] font-bold'
-                    : 'border-outline-variant text-gray-500 hover:border-primary hover:text-gray-900'
+                    ? 'border-[#064E3B] bg-[#064E3B]/10 text-[#064E3B] font-bold shadow-sm'
+                    : 'border-[#E5E7EB] bg-gray-50 text-[#64748B] hover:border-[#064E3B] hover:text-gray-900 hover:bg-white'
                 }`}
               >
                 {opt}
@@ -425,15 +578,26 @@ export default function FindMyInstructorPage() {
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-4 border-t border-surface-container">
-          <button onClick={handlePrev} disabled={step === 0} className="text-sm font-medium text-gray-500 hover:text-gray-900 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-30">
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back
+        <div className="flex justify-between items-center pt-5 border-t border-[#E5E7EB]">
+          <button onClick={handlePrev} disabled={step === 0} className="text-sm font-medium text-[#64748B] hover:text-gray-900 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-30">
+            <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Back
           </button>
-          <button onClick={handleNext} disabled={!answers[current.id]} className="text-sm font-semibold bg-primary text-white px-6 py-2.5 rounded-xl hover:brightness-110 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50">
+          <button onClick={handleNext} disabled={!answers[current.id]} className="text-sm font-semibold bg-[#064E3B] text-white px-6 py-2.5 rounded-xl hover:bg-[#053A2C] transition-colors shadow-sm flex items-center gap-2 disabled:opacity-40">
             {step === QUESTIONS.length - 1 ? (
-              <>Find My Match <span className="material-symbols-outlined">auto_awesome</span></>
+              <>
+                Find My Match
+                <SparkleIcon className="w-4 h-4" />
+              </>
             ) : (
-              <>Next <span className="material-symbols-outlined">arrow_forward</span></>
+              <>
+                Next
+                <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </>
             )}
           </button>
         </div>

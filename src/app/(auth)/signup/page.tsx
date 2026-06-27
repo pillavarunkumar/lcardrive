@@ -24,6 +24,7 @@ export default function SignUpPage() {
       checkAdmin();
     }
   }, [isSignedIn, router]);
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,9 +59,9 @@ export default function SignUpPage() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
             });
-            if (!putRes.ok) console.warn('Instructor profile creation failed, will be created on first visit');
+            if (!putRes.ok) console.warn('Instructor profile creation failed');
           } catch (e) {
-            console.warn('Instructor profile request failed, will be created on first visit', e);
+            console.warn('Instructor profile request failed', e);
           }
         }
         const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
@@ -96,9 +97,9 @@ export default function SignUpPage() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
             });
-            if (!putRes.ok) console.warn('Instructor profile creation failed, will be created on first visit');
+            if (!putRes.ok) console.warn('Instructor profile creation failed');
           } catch (e) {
-            console.warn('Instructor profile request failed, will be created on first visit', e);
+            console.warn('Instructor profile request failed', e);
           }
         }
         const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
@@ -123,9 +124,7 @@ export default function SignUpPage() {
           const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
           const data = await res.json();
           router.push(data.isAdmin ? '/admin' : '/portal');
-        } catch {
-          router.push('/portal');
-        }
+        } catch { router.push('/portal'); }
       };
       checkAdmin();
       return;
@@ -141,9 +140,7 @@ export default function SignUpPage() {
             const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
             const data = await res.json();
             router.push(data.isAdmin ? '/admin' : '/portal');
-          } catch {
-            router.push('/portal');
-          }
+          } catch { router.push('/portal'); }
         };
         checkAdmin();
       } else {
@@ -153,24 +150,19 @@ export default function SignUpPage() {
   };
 
   return (
-    <main className="h-dvh flex flex-col md:flex-row bg-surface overflow-hidden">
+    <main className="flex flex-col lg:flex-row h-dvh w-full bg-white overflow-hidden">
       {/* Left: Form */}
-      <section className="flex-1 flex flex-col justify-center px-3 md:px-8 lg:px-16 bg-surface-container-lowest">
-        <div className="max-w-md w-full mx-auto py-1 md:py-4">
-          <div className="flex items-center justify-center md:justify-start gap-2 mb-3 md:mb-4">
-            <div className="w-7 h-7 md:w-10 md:h-10 bg-primary flex items-center justify-center rounded-lg">
-              <span className="material-symbols-outlined text-white text-lg md:text-xl">directions_car</span>
-            </div>
-            <span className="text-xl md:text-2xl font-semibold text-primary tracking-tight font-display">LCarDrive</span>
+      <section className="w-full lg:w-1/2 flex items-center justify-center px-4 md:px-8 xl:px-16 bg-white">
+        <div className="w-full max-w-[400px] py-4">
+          <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
+            <span className="material-symbols-outlined text-[28px] text-[#064E3B]" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
+            <span className="text-2xl font-semibold text-[#064E3B] tracking-tight">LCarDrive</span>
           </div>
+          <h2 className="text-[32px] font-bold text-gray-900 mb-1">Create your account</h2>
+          <p className="text-base text-[#64748B] mb-6">Join the community of safe and skilled drivers today.</p>
 
-          <div className="mb-2 md:mb-3">
-            <h1 className="text-2xl md:text-[32px] font-bold text-on-surface font-display">Start your journey</h1>
-            <p className="text-sm md:text-base text-on-surface-variant mb-3 md:mb-4 font-body">Join the community of safe and skilled drivers today.</p>
-          </div>
-
-          <button onClick={() => handleOAuth('google')} className="w-full flex items-center justify-center gap-2 py-2.5 px-3 border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors font-body mb-2 md:mb-3">
-            <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24">
+          <button onClick={() => handleOAuth('google')} className="w-full flex items-center justify-center gap-2 py-2.5 px-3 border border-[#E5E7EB] rounded-xl hover:bg-gray-50 transition-all active:scale-95 text-sm font-semibold mb-3">
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
@@ -179,155 +171,149 @@ export default function SignUpPage() {
             Sign up with Google
           </button>
 
-          <div className="relative flex items-center mb-2 md:mb-3">
-            <div className="flex-grow border-t border-outline-variant" />
-            <span className="flex-shrink mx-3 text-xs font-semibold text-on-surface-variant uppercase tracking-widest font-body">or</span>
-            <div className="flex-grow border-t border-outline-variant" />
+          <div className="relative flex items-center justify-center mb-3">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#E5E7EB]" /></div>
+            <div className="relative bg-white px-3 text-[#64748B] text-xs font-medium">or</div>
           </div>
 
           {error && (
-            <div className="mb-3 p-2.5 bg-error-container text-on-error-container rounded-xl text-xs md:text-sm font-body flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">error</span>
+            <div className="mb-3 p-2.5 bg-red-50 text-red-700 rounded-xl text-sm flex items-center gap-2 border border-red-200">
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
               {error}
             </div>
           )}
 
           {verifying ? (
-            <form onSubmit={handleVerifyCode} className="space-y-2.5 md:space-y-3">
-              <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="material-symbols-outlined text-primary">mail</span>
-                  <p className="font-label-md text-label-md text-on-surface">Check your email</p>
+            <form onSubmit={handleVerifyCode} className="space-y-2.5">
+              <div className="p-2.5 bg-[#064E3B]/5 rounded-xl border border-[#064E3B]/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <svg className="w-3.5 h-3.5 text-[#064E3B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                  <p className="text-sm font-semibold text-gray-900">Check your email</p>
                 </div>
-                <p className="font-body-md text-body-md text-on-surface-variant">
-                  We sent a verification code to <strong>{email}</strong>. Enter it below to activate your account.
-                </p>
+                <p className="text-xs text-[#64748B]">We sent a code to <strong className="text-gray-900">{email}</strong>.</p>
               </div>
               <div>
-                <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="code">Verification Code</label>
+                <label className="text-sm font-semibold text-gray-900" htmlFor="code">Verification Code</label>
                 <input id="code" type="text" value={verificationCode} onChange={(e) => setVerificationCode(e.target.value)} placeholder="Enter your 6-digit code" required
-                  className="w-full px-3 py-2.5 md:py-3 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm md:text-base text-center text-on-surface placeholder:text-outline-variant transition-all font-body mt-1 tracking-[0.5em]" />
+                  className="w-full px-3 py-2 bg-gray-50 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#064E3B]/20 focus:border-[#064E3B] text-sm text-center text-gray-900 placeholder:text-gray-400 transition-all mt-0.5 tracking-[0.5em]" />
               </div>
               <button type="submit" disabled={loading || !verificationCode}
-                className="w-full bg-primary text-white font-bold text-sm md:text-base py-2.5 md:py-3.5 rounded-xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed font-body">
+                className="w-full bg-[#064E3B] text-white font-bold text-sm py-2.5 rounded-xl shadow-lg shadow-[#064E3B]/20 hover:bg-[#053A2C] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {loading ? 'Verifying...' : 'Verify Email'}
               </button>
-              <button type="button" onClick={() => setVerifying(false)}
-                className="w-full text-center text-sm text-on-surface-variant hover:text-primary py-2 font-body">
-                Back to sign up
-              </button>
+              <button type="button" onClick={() => setVerifying(false)} className="w-full text-center text-sm text-[#64748B] hover:text-[#064E3B] py-1">Back to sign up</button>
             </form>
           ) : (
-          <form onSubmit={handleSubmit} className="space-y-2.5 md:space-y-3">
-            <div>
-              <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="fullname">Full Name</label>
-              <input id="fullname" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" required
-                className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body mt-0.5" />
-            </div>
-            <div>
-              <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="email">Email</label>
-              <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required
-                className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body mt-0.5" />
-            </div>
-            <div>
-              <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="password">Password</label>
-              <div className="relative mt-0.5">
-                <input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" required minLength={8}
-                  className="w-full px-3 py-2 md:py-2.5 bg-surface border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm md:text-base text-on-surface placeholder:text-outline-variant transition-all font-body" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary">
-                  <span className="material-symbols-outlined text-[18px] md:text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
-                </button>
+            <form onSubmit={handleSubmit} className="space-y-2.5">
+              <div>
+                <label className="text-sm font-semibold text-gray-900" htmlFor="fullname">Full Name</label>
+                <input id="fullname" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" required
+                  className="w-full px-3 py-2 bg-gray-50 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#064E3B]/20 focus:border-[#064E3B] text-sm text-gray-900 placeholder:text-gray-400 transition-all mt-0.5" />
               </div>
-            </div>
-
-            <div className="p-2.5 md:p-3 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-between group hover:border-primary transition-colors">
-              <div className="flex items-center gap-2 md:gap-3">
-                <div className="w-7 h-7 md:w-9 md:h-9 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container">
-                  <span className="material-symbols-outlined text-sm md:text-base">school</span>
-                </div>
-                <div>
-                  <p className="text-xs md:text-sm font-semibold text-on-surface font-body">I am an instructor</p>
-                  <p className="text-[10px] text-on-surface-variant font-body">Apply to teach and earn</p>
+              <div>
+                <label className="text-sm font-semibold text-gray-900" htmlFor="email">Email</label>
+                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required
+                  className="w-full px-3 py-2 bg-gray-50 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#064E3B]/20 focus:border-[#064E3B] text-sm text-gray-900 placeholder:text-gray-400 transition-all mt-0.5" />
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-gray-900" htmlFor="password">Password</label>
+                <div className="relative mt-0.5">
+                  <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" required minLength={8}
+                    className="w-full pl-9 pr-9 py-2 bg-gray-50 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#064E3B]/20 focus:border-[#064E3B] text-sm text-gray-900 placeholder:text-gray-400 transition-all" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#064E3B] transition-colors">
+                    {showPassword ? (
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" checked={isInstructor} onChange={(e) => setIsInstructor(e.target.checked)} className="sr-only peer" />
-                <div className="w-9 h-5 md:w-11 md:h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 md:after:h-5 md:after:w-5 after:transition-all peer-checked:bg-primary" />
-              </label>
-            </div>
 
-            <div className="flex items-start gap-1.5 md:gap-2">
-              <input id="terms" type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="mt-0.5 w-3.5 h-3.5 md:w-4 md:h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer" />
-              <label htmlFor="terms" className="text-xs md:text-sm font-medium text-on-surface-variant leading-relaxed font-body">
-                I agree to the <Link href="/terms" className="text-primary font-bold hover:underline">Terms</Link> and <Link href="/privacy" className="text-primary font-bold hover:underline">Privacy Policy</Link>.
-              </label>
-            </div>
+              <div className="p-2 bg-gray-50 border border-[#E5E7EB] rounded-xl flex items-center justify-between hover:border-[#064E3B] transition-colors">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 bg-[#064E3B]/10 rounded-full flex items-center justify-center">
+                    <svg className="w-3.5 h-3.5 text-[#064E3B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">I am an instructor</p>
+                    <p className="text-xs text-[#64748B]">Apply to teach and earn</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" checked={isInstructor} onChange={(e) => setIsInstructor(e.target.checked)} className="sr-only peer" />
+                  <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#064E3B]" />
+                </label>
+              </div>
 
-            <button type="submit" disabled={loading}
-              className="w-full bg-primary text-white font-bold text-sm md:text-base py-2.5 md:py-3.5 rounded-xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed font-body">
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
-          </form>
+              <div className="flex items-start gap-1.5">
+                <input id="terms" type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)}
+                  className="mt-0.5 w-3.5 h-3.5 rounded border-[#E5E7EB] text-[#064E3B] focus:ring-[#064E3B] cursor-pointer" />
+                <label htmlFor="terms" className="text-xs font-medium text-[#64748B] leading-relaxed">
+                  I agree to the <Link href="/terms" className="text-[#064E3B] font-bold hover:underline">Terms</Link> and <Link href="/privacy" className="text-[#064E3B] font-bold hover:underline">Privacy Policy</Link>.
+                </label>
+              </div>
+
+              <button type="submit" disabled={loading}
+                className="w-full bg-[#064E3B] text-white font-bold text-sm py-2.5 rounded-xl shadow-lg shadow-[#064E3B]/20 hover:bg-[#053A2C] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                {loading ? 'Creating account...' : 'Create Account'}
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+              </button>
+            </form>
           )}
 
-          <p className="text-center text-xs md:text-base text-on-surface-variant mt-3 md:pt-3 font-body">
+          <p className="text-center text-sm text-[#64748B] mt-4">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary font-bold hover:underline transition-all">Login</Link>
+            <Link href="/login" className="text-[#064E3B] font-bold hover:underline transition-all">Sign In</Link>
           </p>
         </div>
       </section>
 
-      {/* Right: Brand Experience */}
-      <section className="hidden md:block md:w-[45%] lg:w-[55%] relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=2070&auto=format&fit=crop" alt="Car driving on scenic coastal road" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-primary-container/90 via-primary-container/40 to-transparent z-10 flex flex-col justify-end p-6 md:p-8 lg:p-12">
-          <div className="max-w-xl">
-            <div className="inline-flex items-center gap-1.5 bg-primary-container/20 backdrop-blur-md px-2.5 py-1 rounded-full text-primary mb-4 border border-primary/30">
-              <span className="material-symbols-outlined text-[10px] md:text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-              <span className="text-[9px] md:text-xs uppercase tracking-wider font-semibold font-body">Trusted by 10k+ Learners</span>
-            </div>
-            <h2 className="text-white text-2xl md:text-3xl lg:text-[48px] font-bold leading-[1.1] tracking-[-0.02em] font-display">Drive with confidence, learn with experts.</h2>
-            <div className="hidden lg:grid grid-cols-2 gap-4 mt-8">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-                  <span className="material-symbols-outlined text-white text-lg">security</span>
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold text-sm font-display">Safety First</h4>
-                  <p className="text-[11px] text-white/70 font-body">Certified instructors with dual-control vehicles.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-                  <span className="material-symbols-outlined text-white text-lg">trending_up</span>
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold text-sm font-display">Fast Progress</h4>
-                  <p className="text-[11px] text-white/70 font-body">Personalized lesson plans for faster licensing.</p>
-                </div>
-              </div>
-            </div>
+      {/* Right: Hero Image */}
+      <section className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#064E3B]/80 via-[#064E3B]/30 to-transparent z-10" />
+        <img
+          alt="Open road journey"
+          className="absolute inset-0 w-full h-full object-cover"
+          src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2068&auto=format&fit=crop"
+        />
+        <div className="absolute bottom-12 left-12 z-20 max-w-md">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#064E3B]/90 text-white rounded-full mb-6 backdrop-blur-md">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+            </svg>
+            <span className="text-xs font-semibold tracking-wide">Start Your Journey Today</span>
           </div>
+          <h1 className="text-white text-[48px] font-bold leading-[1.1] tracking-[-0.02em]">Begin your driving journey.</h1>
+          <p className="text-white/80 text-lg leading-relaxed mt-4">Join thousands of learners who found their perfect instructor and got licensed faster.</p>
         </div>
-        <div className="absolute top-1/4 right-8 z-20 hidden xl:block">
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-4 md:p-5 rounded-2xl shadow-2xl max-w-[220px]">
-            <div className="flex items-center gap-3 mb-3">
-              <img alt="Instructor" className="w-10 h-10 rounded-full border-2 border-primary" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop" />
-              <div>
-                <p className="text-[11px] md:text-sm font-semibold text-white font-body">David Miller</p>
-                <p className="text-[10px] text-primary font-body">Top Rated Instructor</p>
-              </div>
-            </div>
-            <div className="flex gap-0.5 text-[#FFD700]">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className="material-symbols-outlined text-[12px] md:text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-              ))}
-            </div>
-            <p className="text-[11px] md:text-[13px] text-white/80 mt-2 leading-relaxed font-body">&ldquo;Ready to help you master the roads with confidence and care.&rdquo;</p>
+        <div className="absolute top-1/2 right-12 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-xl p-6 rounded-[20px] shadow-2xl flex items-center gap-4 border border-white/20">
+          <div className="w-12 h-12 rounded-xl bg-[#064E3B]/10 flex items-center justify-center">
+            <svg className="w-6 h-6 text-[#064E3B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="6" />
+              <path d="M15.33 22H18a2 2 0 0 0 2-2v-1a6 6 0 0 0-5.36-5.93" />
+              <path d="M9.67 22H6a2 2 0 0 1-2-2v-1a6 6 0 0 1 5.36-5.93" />
+              <path d="M12 2v2" />
+              <path d="M12 14v2" />
+            </svg>
+          </div>
+          <div>
+            <p className="font-semibold text-sm text-[#064E3B]">Expert Instructors</p>
+            <p className="text-xs text-gray-500">Pre-vetted and certified pros</p>
           </div>
         </div>
       </section>

@@ -373,21 +373,21 @@ function SearchContent() {
             ) : (
               <>
                 {/* AI Match Banner */}
-                <div className="bg-gradient-to-br from-[#064E3B] to-[#047857] rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-white/80 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                <div className="bg-gradient-to-br from-[#064E3B] to-[#047857] rounded-xl px-4 py-2.5 flex flex-col md:flex-row items-center justify-between gap-2 shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-white/80 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
                     <div>
-                      <span className="text-xs font-bold text-white/80 uppercase tracking-widest">AI Matchmaker</span>
-                      <h3 className="text-base font-bold text-white mt-0.5">Not sure who to choose?</h3>
-                      <p className="text-sm text-white/70">Let our AI find the perfect instructor for you.</p>
+                      <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">AI Matchmaker</span>
+                      <h3 className="text-sm font-bold text-white mt-0">Not sure who to choose?</h3>
+                      <p className="text-xs text-white/70 leading-tight">Let our AI find the perfect instructor for you.</p>
                     </div>
                   </div>
                   <a
                     href="/find-my-instructor"
-                    className="shrink-0 bg-white text-[#064E3B] px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-2"
+                    className="shrink-0 bg-white text-[#064E3B] px-4 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-1"
                   >
                     Start AI Match
-                    <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                    <span className="material-symbols-outlined text-base">arrow_forward</span>
                   </a>
                 </div>
 

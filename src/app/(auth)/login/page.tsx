@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSignIn, useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
-const redirectAfterLogin = async (defaultPath: string) => {
+const redirectAfterAuth = async (defaultPath: string) => {
   try {
     const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
     const data = await res.json();
@@ -26,9 +26,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isSignedIn) {
-      redirectAfterLogin('/portal');
+      redirectAfterAuth('/portal');
     }
   }, [isSignedIn, router]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -45,7 +46,7 @@ export default function LoginPage() {
       const result = await signIn.create({ identifier: email, password });
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        await redirectAfterLogin('/portal');
+        await redirectAfterAuth('/portal');
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -60,7 +61,7 @@ export default function LoginPage() {
     if (!isLoaded) return;
     setError('');
     if (isSignedIn) {
-      redirectAfterLogin('/portal');
+      redirectAfterAuth('/portal');
       return;
     }
     signIn.authenticateWithRedirect({
@@ -69,7 +70,7 @@ export default function LoginPage() {
       redirectUrlComplete: '/login',
     }).catch((err: any) => {
       if (err.errors?.[0]?.code === 'session_exists') {
-        redirectAfterLogin('/portal');
+        redirectAfterAuth('/portal');
       } else {
         setError(err.errors?.[0]?.message || 'OAuth sign in failed');
       }
@@ -77,48 +78,50 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex flex-col lg:flex-row h-dvh w-full bg-surface overflow-hidden">
-      {/* Left: Hero */}
-      <section className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary-container">
-        <div className="absolute inset-0 bg-primary-container/20 z-10" />
+    <main className="flex flex-col lg:flex-row h-dvh w-full bg-white overflow-hidden">
+      {/* Left: Hero Image */}
+      <section className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#064E3B]/80 via-[#064E3B]/30 to-transparent z-10" />
         <img
           alt="Driving Instruction"
           className="absolute inset-0 w-full h-full object-cover"
           src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop"
         />
         <div className="absolute bottom-12 left-12 z-20 max-w-md">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/90 text-white rounded-full mb-6 backdrop-blur-md">
-            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#064E3B]/90 text-white rounded-full mb-6 backdrop-blur-md">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+            </svg>
             <span className="text-xs font-semibold tracking-wide">Trusted by 50,000+ Students</span>
           </div>
-          <h1 className="text-white text-[48px] font-bold leading-[1.1] tracking-[-0.02em] font-display">Master the road with confidence.</h1>
-          <p className="text-white/80 text-lg leading-relaxed mt-4 font-body">Connect with the best certified instructors and accelerate your journey to getting your license.</p>
+          <h1 className="text-white text-[48px] font-bold leading-[1.1] tracking-[-0.02em]">Master the road with confidence.</h1>
+          <p className="text-white/80 text-lg leading-relaxed mt-4">Connect with the best certified instructors and accelerate your journey to getting your license.</p>
         </div>
-        <div className="absolute top-1/2 right-12 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-xl p-6 rounded-2xl shadow-2xl flex items-center gap-4 border border-white/20">
-          <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
-            <span className="material-symbols-outlined">safety_check</span>
+        <div className="absolute top-1/2 right-12 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-xl p-6 rounded-[20px] shadow-2xl flex items-center gap-4 border border-white/20">
+          <div className="w-12 h-12 rounded-xl bg-[#064E3B]/10 flex items-center justify-center">
+            <svg className="w-6 h-6 text-[#064E3B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
           </div>
           <div>
-            <p className="font-semibold text-sm text-primary">Safety First Always</p>
-            <p className="text-xs text-on-surface-variant">Dual-control certified vehicles</p>
+            <p className="font-semibold text-sm text-[#064E3B]">Safety First Always</p>
+            <p className="text-xs text-gray-500">Dual-control certified vehicles</p>
           </div>
         </div>
       </section>
 
       {/* Right: Form */}
-      <section className="w-full lg:w-1/2 flex flex-col items-center justify-center px-4 md:px-12 lg:px-24 bg-surface">
+      <section className="w-full lg:w-1/2 flex items-center justify-center px-4 md:px-12 lg:px-24 bg-white">
         <div className="w-full max-w-[400px]">
-          <div className="flex items-center justify-center lg:justify-start gap-2 mb-4 md:mb-6">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary flex items-center justify-center rounded-lg">
-              <span className="material-symbols-outlined text-white text-lg md:text-xl">directions_car</span>
-            </div>
-            <span className="text-xl md:text-2xl font-semibold text-primary tracking-tight font-display">LCarDrive</span>
+          <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
+            <span className="material-symbols-outlined text-[28px] text-[#064E3B]" style={{ fontVariationSettings: "'FILL' 1" }}>directions_car</span>
+            <span className="text-2xl font-semibold text-[#064E3B] tracking-tight">LCarDrive</span>
           </div>
-          <h2 className="text-2xl md:text-[32px] font-bold text-on-surface mb-1 font-display">Welcome back</h2>
-          <p className="text-sm md:text-base text-on-surface-variant mb-4 md:mb-6 font-body">Please enter your details to sign in.</p>
+          <h2 className="text-[32px] font-bold text-gray-900 mb-1">Welcome back</h2>
+          <p className="text-base text-[#64748B] mb-6">Please enter your details to sign in.</p>
 
-          <button onClick={() => handleOAuth('google')} className="w-full flex items-center justify-center gap-2 py-2.5 px-3 border border-outline-variant rounded-xl hover:bg-surface-container transition-all active:scale-95 text-sm font-semibold font-body mb-3 md:mb-4">
-            <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24">
+          <button onClick={() => handleOAuth('google')} className="w-full flex items-center justify-center gap-2 py-3 px-3 border border-[#E5E7EB] rounded-xl hover:bg-gray-50 transition-all active:scale-95 text-sm font-semibold mb-4">
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
@@ -127,66 +130,72 @@ export default function LoginPage() {
             Sign in with Google
           </button>
 
-          <div className="relative flex items-center justify-center mb-3 md:mb-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-outline-variant" />
-            </div>
-            <div className="relative bg-surface px-3 text-on-surface-variant text-xs font-medium">or</div>
+          <div className="relative flex items-center justify-center mb-4">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[#E5E7EB]" /></div>
+            <div className="relative bg-white px-3 text-[#64748B] text-xs font-medium">or</div>
           </div>
 
           {error && (
-            <div className="mb-3 p-2.5 bg-error-container text-on-error-container rounded-xl text-xs md:text-sm font-body flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">error</span>
+            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-xl text-sm flex items-center gap-2 border border-red-200">
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="email">Email Address</label>
-              <div className="relative mt-1">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">mail</span>
+              <label className="text-sm font-semibold text-gray-900" htmlFor="email">Email Address</label>
+              <div className="relative mt-1.5">
+                <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
                 <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" required
-                  className="w-full pl-9 pr-3 py-2.5 md:py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm md:text-base font-body" />
+                  className="w-full pl-10 pr-3 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#064E3B]/20 focus:border-[#064E3B] transition-all text-sm text-gray-900 placeholder:text-gray-400" />
               </div>
             </div>
             <div>
               <div className="flex justify-between items-center">
-                <label className="text-xs md:text-sm font-semibold text-on-surface font-body" htmlFor="password">Password</label>
-                <Link href="/forgot-password" className="text-[10px] md:text-xs font-medium text-primary hover:text-primary transition-colors font-body">Forgot password?</Link>
+                <label className="text-sm font-semibold text-gray-900" htmlFor="password">Password</label>
+                <Link href="/forgot-password" className="text-xs font-medium text-[#064E3B] hover:text-[#053A2C] transition-colors">Forgot password?</Link>
               </div>
-              <div className="relative mt-1">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">lock</span>
+              <div className="relative mt-1.5">
+                <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
                 <input id="password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required
-                  className="w-full pl-9 pr-9 py-2.5 md:py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm md:text-base font-body" />
+                  className="w-full pl-10 pr-10 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#064E3B]/20 focus:border-[#064E3B] transition-all text-sm text-gray-900 placeholder:text-gray-400" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors">
-                  <span className="material-symbols-outlined text-[18px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#064E3B] transition-colors">
+                  {showPassword ? (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <input id="remember" type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)}
-                className="w-3.5 h-3.5 md:w-4 md:h-4 rounded border-outline-variant text-primary focus:ring-primary" />
-              <label htmlFor="remember" className="text-[10px] md:text-xs font-medium text-on-surface-variant select-none cursor-pointer font-body">Remember me for 30 days</label>
+                className="w-4 h-4 rounded border-[#E5E7EB] text-[#064E3B] focus:ring-[#064E3B]" />
+              <label htmlFor="remember" className="text-xs font-medium text-[#64748B] select-none cursor-pointer">Remember me for 30 days</label>
             </div>
             <button type="submit" disabled={loading}
-              className="w-full py-3 md:py-4 bg-primary text-white font-bold text-sm md:text-base rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-body">
+              className="w-full py-3.5 bg-[#064E3B] text-white font-bold text-sm rounded-xl shadow-lg shadow-[#064E3B]/20 hover:bg-[#053A2C] transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? 'Signing in...' : 'Sign In'}
-              <span className="material-symbols-outlined text-lg">arrow_forward</span>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
             </button>
           </form>
 
-          <p className="text-center text-xs md:text-base text-on-surface-variant mt-4 md:pt-4 font-body">
+          <p className="text-center text-base text-[#64748B] mt-6 pt-4">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-primary font-bold hover:underline transition-all">Sign Up</Link>
+            <Link href="/signup" className="text-[#064E3B] font-bold hover:underline transition-all">Sign Up</Link>
           </p>
-
-          <div className="hidden md:flex pt-8 text-center lg:text-left gap-x-6 justify-center lg:justify-start">
-            <span className="text-[10px] font-medium text-on-surface-variant/60 font-body">&copy; 2024 LCarDrive</span>
-            <Link href="/privacy" className="text-[10px] font-medium text-on-surface-variant/60 hover:text-primary transition-colors font-body">Privacy Policy</Link>
-            <Link href="/terms" className="text-[10px] font-medium text-on-surface-variant/60 hover:text-primary transition-colors font-body">Terms of Service</Link>
-          </div>
         </div>
       </section>
     </main>
