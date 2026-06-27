@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/admin-guard';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,6 +11,8 @@ export async function POST(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const guard = await requireAdmin();
+  if (guard) return guard;
   const { id } = params;
 
   const { data: existing } = await supabase

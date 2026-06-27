@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/admin-guard';
 
 const ALL_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs', 'leads'] as const;
 
@@ -7,6 +8,8 @@ const DELETE_ORDER: readonly (typeof ALL_TABLES[number])[] = ['listing_flags', '
 const INSERT_ORDER: readonly (typeof ALL_TABLES[number])[] = ['search_logs', 'instructors', 'leads', 'reviews', 'listing_flags'];
 
 export async function POST(request: Request) {
+  const guard = await requireAdmin();
+  if (guard) return guard;
   if (!supabase) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   }

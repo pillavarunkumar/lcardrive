@@ -172,7 +172,7 @@ export default function PortalDashboard() {
   return (
     <>
       {loadError && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-[20px] p-4 text-sm text-red-700">
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-700">
           {loadError}
         </div>
       )}
@@ -180,7 +180,7 @@ export default function PortalDashboard() {
       <div className="grid lg:grid-cols-4 gap-6">
 
         {/* Profile Completion */}
-        <section className="lg:col-span-4 bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 relative hover:shadow-md transition-shadow duration-200">
+        <section className="lg:col-span-4 bg-white rounded-2xl border border-outline-variant shadow-sm p-5 relative hover:shadow-md transition-shadow duration-200">
             {!loading && verification.label && (
               <div className={`absolute top-5 right-5 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs font-medium ${
                 verification.label === 'Verified'
@@ -199,8 +199,8 @@ export default function PortalDashboard() {
             )}
             <div className="flex items-center gap-6">
               <div className="relative w-28 h-28 flex-shrink-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 144 144">
-                  <circle cx="72" cy="72" r="62" fill="none" stroke="#E5E7EB" strokeWidth="10" />
+                <svg className="w-full h-full -rotate-90 text-outline-variant" viewBox="0 0 144 144">
+                  <circle cx="72" cy="72" r="62" fill="none" stroke="currentColor" strokeWidth="10" />
                   {!loading && (
                     <circle
                       cx="72" cy="72" r="62"
@@ -216,37 +216,37 @@ export default function PortalDashboard() {
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center">
-                    <span className="text-xl font-bold" style={{ color: loading ? '#111827' : progressColor }}>
+                    <span className="text-xl font-bold text-on-surface" style={{ color: loading ? undefined : progressColor }}>
                       {loading ? '--' : `${comp}%`}
                     </span>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">Complete</p>
+                    <p className="text-[10px] text-on-surface-variant/60 uppercase tracking-wider mt-0.5">Complete</p>
                   </div>
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-[22px] font-bold text-gray-900 mb-1.5">
+                <h2 className="text-[22px] font-bold text-on-surface mb-1.5">
                   {comp >= 100 ? 'Your Profile Is Complete' : 'Complete Your Profile'}
                 </h2>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-on-surface-variant mb-4">
                   Keep your profile accurate so students can understand your services, pricing, vehicle, and availability.
                 </p>
                 {nextStep.action === 'submit' ? (
                   <button
                     onClick={submitForReview}
                     disabled={submitting}
-                    className="inline-flex items-center h-10 px-5 bg-[#064E3B] text-white text-sm font-medium rounded-xl hover:bg-[#053A2C] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center h-10 px-5 bg-primary-container text-white text-sm font-medium rounded-xl hover:bg-primary-container/90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? 'Submitting...' : nextStep.label}
                   </button>
                 ) : (
                   <Link
                     href={nextStep.href}
-                    className="inline-flex items-center h-10 px-5 bg-[#064E3B] text-white text-sm font-medium rounded-xl hover:bg-[#053A2C] transition-colors duration-200"
+                    className="inline-flex items-center h-10 px-5 bg-primary-container text-white text-sm font-medium rounded-xl hover:bg-primary-container/90 transition-colors duration-200"
                   >
                     {nextStep.label}
                   </Link>
                 )}
-                <p className="mt-2 text-xs text-gray-400">{nextStep.helper}</p>
+                <p className="mt-2 text-xs text-on-surface-variant/60">{nextStep.helper}</p>
               </div>
             </div>
           </section>
@@ -256,43 +256,43 @@ export default function PortalDashboard() {
 
           {/* Stats */}
           <section className="grid grid-cols-3 gap-5">
-            <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="bg-white rounded-2xl border border-outline-variant shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
                 </div>
-                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Profile Checklist</span>
+                <span className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Profile Checklist</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900 leading-none">{loading ? '--' : `${comp}%`}</span>
-              <span className="block text-xs text-gray-400 mt-1.5">
+              <span className="text-2xl font-bold text-on-surface leading-none">{loading ? '--' : `${comp}%`}</span>
+              <span className="block text-xs text-on-surface-variant/60 mt-1.5">
                 {comp < 100 ? `${6 - Math.ceil(comp / 20)} steps remaining` : 'All steps completed'}
               </span>
             </div>
 
-            <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="bg-white rounded-2xl border border-outline-variant shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
                   <Star className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Average Rating</span>
+                <span className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Average Rating</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900 leading-none">
+              <span className="text-2xl font-bold text-on-surface leading-none">
                 {loading ? '--' : avgRating > 0 ? avgRating.toFixed(1) : '-'}
               </span>
-              <span className="block text-xs text-gray-400 mt-1.5">
+              <span className="block text-xs text-on-surface-variant/60 mt-1.5">
                 {avgRating > 0 ? `${avgRating.toFixed(1)} / 5.0` : 'No rating yet'}
               </span>
             </div>
 
-            <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="bg-white rounded-2xl border border-outline-variant shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
                   <MessageSquare className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Total Reviews</span>
+                <span className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Total Reviews</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900 leading-none">{loading ? '--' : totalReviews}</span>
-              <span className="block text-xs text-gray-400 mt-1.5">
+              <span className="text-2xl font-bold text-on-surface leading-none">{loading ? '--' : totalReviews}</span>
+              <span className="block text-xs text-on-surface-variant/60 mt-1.5">
                 {totalReviews === 0 ? 'No reviews yet' : `${totalReviews} review${totalReviews !== 1 ? 's' : ''}`}
               </span>
             </div>
@@ -300,22 +300,22 @@ export default function PortalDashboard() {
           </section>
 
           {/* Analytics */}
-          <section className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+          <section className="bg-white rounded-2xl border border-outline-variant shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Search Appearances</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Appearances in search results over the last 7 days</p>
+                <h3 className="text-base font-semibold text-on-surface">Search Appearances</h3>
+                <p className="text-xs text-on-surface-variant mt-0.5">Appearances in search results over the last 7 days</p>
               </div>
             </div>
 
             {!instructor || appearanceTotals.length === 0 ? (
-              <div className="h-48 rounded-2xl border border-dashed border-[#E5E7EB] bg-gray-50 flex items-center justify-center">
+              <div className="h-48 rounded-2xl border border-dashed border-outline-variant bg-surface-container-low flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3 text-[#64748B]">
+                  <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center mx-auto mb-3 text-on-surface-variant">
                     <TrendingUp className="w-5 h-5" />
                   </div>
-                  <h4 className="text-sm font-semibold text-gray-900">No data available yet</h4>
-                  <p className="text-xs text-gray-400 mt-1">Analytics will appear once your profile is live.</p>
+                  <h4 className="text-sm font-semibold text-on-surface">No data available yet</h4>
+                  <p className="text-xs text-on-surface-variant/60 mt-1">Analytics will appear once your profile is live.</p>
                 </div>
               </div>
             ) : (
@@ -325,13 +325,13 @@ export default function PortalDashboard() {
                     const maxVal = Math.max(...appearanceTotals, 1);
                     const pct = (h / maxVal) * 100;
                     return (
-                      <div key={i} className="flex-1 bg-[#064E3B]/5 rounded-lg relative group transition-all hover:bg-[#064E3B]/10" style={{ height: '100%', minHeight: '3rem' }}>
-                        <div className="absolute bottom-0 w-full bg-[#064E3B]/40 rounded-lg transition-all group-hover:bg-[#064E3B]/60" style={{ height: `${Math.max(pct, 4)}%` }}></div>
+                      <div key={i} className="flex-1 bg-primary-container/5 rounded-lg relative group transition-all hover:bg-primary-container/10" style={{ height: '100%', minHeight: '3rem' }}>
+                        <div className="absolute bottom-0 w-full bg-primary-container/40 rounded-lg transition-all group-hover:bg-primary-container/60" style={{ height: `${Math.max(pct, 4)}%` }}></div>
                       </div>
                     );
                   })}
                 </div>
-                <div className="flex justify-between mt-3 text-xs text-gray-400 px-1">
+                <div className="flex justify-between mt-3 text-xs text-on-surface-variant/60 px-1">
                   {appearanceLabels.map((label, i) => (
                     <span key={i}>{label}</span>
                   ))}
@@ -343,64 +343,64 @@ export default function PortalDashboard() {
 
         {/* Right Column */}
         <div className="lg:col-span-1">
-          <section className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <section className="bg-white rounded-2xl border border-outline-variant shadow-sm p-5 hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
+            <h3 className="text-base font-semibold text-on-surface mb-4">Quick Actions</h3>
             <div className="space-y-2.5 flex-1">
-              <Link href="/portal/profile" className="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 rounded-xl group">
+              <Link href="/portal/profile" className="w-full flex items-center justify-between p-3.5 bg-surface-container-low hover:bg-surface-container transition-colors duration-200 rounded-xl group">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E5E7EB] flex items-center justify-center text-[#64748B] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-outline-variant flex items-center justify-center text-on-surface-variant shrink-0">
                     <Pencil className="w-4 h-4" />
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">Edit Profile</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">Update your information</p>
+                    <p className="text-sm font-semibold text-on-surface">Edit Profile</p>
+                    <p className="text-[11px] text-on-surface-variant/60 mt-0.5">Update your information</p>
                   </div>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-on-surface-variant/40 group-hover:text-primary-container transition-colors duration-200 shrink-0" />
               </Link>
 
-              <Link href="/portal/rates" className="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 rounded-xl group">
+              <Link href="/portal/rates" className="w-full flex items-center justify-between p-3.5 bg-surface-container-low hover:bg-surface-container transition-colors duration-200 rounded-xl group">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E5E7EB] flex items-center justify-center text-[#64748B] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-outline-variant flex items-center justify-center text-on-surface-variant shrink-0">
                     <DollarSign className="w-4 h-4" />
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">Update Pricing</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">Manage your rates</p>
+                    <p className="text-sm font-semibold text-on-surface">Update Pricing</p>
+                    <p className="text-[11px] text-on-surface-variant/60 mt-0.5">Manage your rates</p>
                   </div>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-on-surface-variant/40 group-hover:text-primary-container transition-colors duration-200 shrink-0" />
               </Link>
 
-              <Link href="/portal/availability" className="w-full flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 rounded-xl group">
+              <Link href="/portal/availability" className="w-full flex items-center justify-between p-3.5 bg-surface-container-low hover:bg-surface-container transition-colors duration-200 rounded-xl group">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E5E7EB] flex items-center justify-center text-[#64748B] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-outline-variant flex items-center justify-center text-on-surface-variant shrink-0">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">Update Availability</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">Set your schedule</p>
+                    <p className="text-sm font-semibold text-on-surface">Update Availability</p>
+                    <p className="text-[11px] text-on-surface-variant/60 mt-0.5">Set your schedule</p>
                   </div>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-on-surface-variant/40 group-hover:text-primary-container transition-colors duration-200 shrink-0" />
               </Link>
             </div>
 
-            <div className="pt-4 border-t border-[#E5E7EB]">
+            <div className="pt-4 border-t border-outline-variant">
               <Link
                 href="/portal/profile"
-                className="w-full flex items-center justify-center gap-2 h-10 bg-[#064E3B] text-white text-sm font-medium rounded-xl hover:bg-[#053A2C] transition-colors duration-200"
+                className="w-full flex items-center justify-center gap-2 h-10 bg-primary-container text-white text-sm font-medium rounded-xl hover:bg-primary-container/90 transition-colors duration-200"
               >
                 <Sparkles size={14} />
                 Generate AI Bio
               </Link>
-              <p className="text-center text-[11px] text-gray-400 mt-2">Open Profile to generate and apply your bio.</p>
+              <p className="text-center text-[11px] text-on-surface-variant/60 mt-2">Open Profile to generate and apply your bio.</p>
             </div>
           </section>
         </div>
 
         {/* Upcoming */}
-        <section className="lg:col-span-4 bg-[#064E3B] rounded-[20px] p-5 text-white relative overflow-hidden hover:shadow-md transition-shadow duration-200">
+        <section className="lg:col-span-4 bg-primary-container rounded-2xl p-5 text-white relative overflow-hidden hover:shadow-md transition-shadow duration-200">
           <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
             <Calendar className="w-16 h-16" />
           </div>

@@ -57,13 +57,13 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-16">
-        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+        <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
           <div className="flex justify-between items-start mb-5 md:mb-6">
-            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Instructors</p>
+            <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Instructors</p>
             <Sparkline data={[10, 25, 20, 35, 30, 45, 40, 55]} color="#064e3b" />
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-3xl md:text-4xl font-bold text-gray-900 leading-none">
+            <p className="text-3xl md:text-4xl font-bold text-on-surface leading-none">
               {loading ? '—' : (stats?.totalInstructors ?? 0).toLocaleString()}
             </p>
             {!loading && (
@@ -71,37 +71,37 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+        <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
           <div className="flex justify-between items-start mb-5 md:mb-6">
-            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Active Claims</p>
+            <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Active Claims</p>
             <Sparkline data={[5, 12, 8, 15, 25, 20, 30, 47]} color="#ba1a1a" />
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-3xl md:text-4xl font-bold text-gray-900 leading-none">{stats?.pendingClaims ?? '—'}</p>
+            <p className="text-3xl md:text-4xl font-bold text-on-surface leading-none">{stats?.pendingClaims ?? '—'}</p>
             {!loading && stats && (
               <span className="text-[11px] font-bold text-red-500 mb-1">+{(stats.pendingClaims || 0) > 0 ? stats.pendingClaims : 0}</span>
             )}
           </div>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+        <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
           <div className="flex justify-between items-start mb-5 md:mb-6">
-            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Reviews</p>
+            <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Reviews</p>
             <Sparkline data={[5, 12, 8, 15, 25, 20, 30, 47].map(v => 150 - v)} color="#545f73" />
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-3xl md:text-4xl font-bold text-gray-900 leading-none">{stats?.newReviews ?? '—'}</p>
+            <p className="text-3xl md:text-4xl font-bold text-on-surface leading-none">{stats?.newReviews ?? '—'}</p>
             {!loading && (
               <span className="text-[11px] font-bold text-green-600 mb-1">{stats?.unapprovedReviews?.length ? `+${stats.unapprovedReviews.length}` : '0'}</span>
             )}
           </div>
         </div>
-        <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+        <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
           <div className="flex justify-between items-start mb-5 md:mb-6">
-            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Searches</p>
+            <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Searches</p>
             <Sparkline data={[40, 42, 48, 55, 52, 60, 62]} color="#064e3b" />
           </div>
           <div className="flex items-end gap-2">
-            <p className="text-3xl md:text-4xl font-bold text-gray-900 leading-none">
+            <p className="text-3xl md:text-4xl font-bold text-on-surface leading-none">
             {loading ? '—' : (stats?.searches30d ?? 0) >= 1000
               ? ((stats?.searches30d ?? 0) / 1000).toFixed(1) + 'k'
               : (stats?.searches30d ?? 0).toLocaleString()}
@@ -115,65 +115,65 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         <div className="lg:col-span-8">
-          <div className="bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+          <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
             <div className="flex items-center justify-between mb-6">
-              <h4 className="text-base font-semibold text-gray-900">Pending Audits</h4>
-              <Link href="/admin/claims" className="text-sm font-bold text-[#064E3B] hover:underline">
+              <h4 className="text-base font-semibold text-on-surface">Pending Audits</h4>
+              <Link href="/admin/claims" className="text-sm font-bold text-primary hover:underline">
                 View Queue →
               </Link>
             </div>
             <div className="space-y-3">
               <Link
                 href="/admin/instructors"
-                className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
+                className="flex items-center justify-between p-4 bg-surface-container-low hover:bg-surface-container rounded-xl transition-all duration-200 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
                     <span className="material-symbols-outlined text-[20px]">policy</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Verify New Instructor Profiles</p>
-                    <p className="text-xs text-gray-400">{stats?.pendingReviewRequests?.length || 0} pending verifications</p>
+                    <p className="text-sm font-semibold text-on-surface">Verify New Instructor Profiles</p>
+                    <p className="text-xs text-on-surface-variant/60">{stats?.pendingReviewRequests?.length || 0} pending verifications</p>
                   </div>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-on-surface-variant/30 group-hover:text-primary transition-colors duration-200 shrink-0" />
               </Link>
               <Link
                 href="/admin/reviews"
-                className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
+                className="flex items-center justify-between p-4 bg-surface-container-low hover:bg-surface-container rounded-xl transition-all duration-200 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
                     <span className="material-symbols-outlined text-[20px]">rate_review</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Flagged Review Moderation</p>
-                    <p className="text-xs text-gray-400">{stats?.unapprovedReviews?.length || 0} reviews pending approval</p>
+                    <p className="text-sm font-semibold text-on-surface">Flagged Review Moderation</p>
+                    <p className="text-xs text-on-surface-variant/60">{stats?.unapprovedReviews?.length || 0} reviews pending approval</p>
                   </div>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-on-surface-variant/30 group-hover:text-primary transition-colors duration-200 shrink-0" />
               </Link>
               <Link
                 href="/admin/claims"
-                className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
+                className="flex items-center justify-between p-4 bg-surface-container-low hover:bg-surface-container rounded-xl transition-all duration-200 group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B] shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
                     <span className="material-symbols-outlined text-[20px]">warning</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Conflict Resolution</p>
-                    <p className="text-xs text-gray-400">{stats?.recentClaims?.length || 0} disputed claims require review</p>
+                    <p className="text-sm font-semibold text-on-surface">Conflict Resolution</p>
+                    <p className="text-xs text-on-surface-variant/60">{stats?.recentClaims?.length || 0} disputed claims require review</p>
                   </div>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#064E3B] transition-colors duration-200 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-on-surface-variant/30 group-hover:text-primary transition-colors duration-200 shrink-0" />
               </Link>
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-4">
-          <div className="bg-[#064E3B] text-white rounded-[20px] shadow-sm p-5 h-full relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
+          <div className="bg-primary-container text-white rounded-2xl shadow-sm p-5 h-full relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow duration-200">
             <div>
               <span className="text-[10px] font-semibold uppercase tracking-wide opacity-60">System Update</span>
               <h4 className="text-base font-semibold mt-3 leading-tight">Next maintenance window: Sunday 2AM</h4>
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
                 Platform performance metrics will be aggregated in read-only mode for 15 minutes.
               </p>
             </div>
-            <button className="mt-6 bg-white text-[#064E3B] px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all w-fit">
+            <button className="mt-6 bg-white text-primary px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all w-fit">
               Read Details
             </button>
             <span

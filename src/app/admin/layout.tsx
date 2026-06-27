@@ -1,6 +1,6 @@
-import { cookies, headers } from 'next/headers';
+import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { verifyAdminSession } from '@/lib/admin-session';
+import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,17 +12,21 @@ export default async function AdminServerLayout({
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') || '';
 
-  // Don't check session for login page (allows OAuth callback to flow through)
+  // Allow login page to render so it can handle auth flow
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  const cookieStore = await cookies();
-  const adminSession = cookieStore.get('admin_session')?.value;
-  const isValid = await verifyAdminSession(adminSession);
+  const user = await currentUser();
 
-  if (!isValid) {
+  if (!user) {
     redirect('/admin/login');
+  }
+
+  const isAdmin = user.publicMetadata?.role === 'admin';
+
+  if (!isAdmin) {
+    redirect('/portal');
   }
 
   return <>{children}</>;

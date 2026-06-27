@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/admin-guard';
 
 const ALLOWED_BUCKETS = ['documents', 'profile-photos', 'vehicle-photos'] as const;
 
 export async function POST(request: Request) {
+  const guard = await requireAdmin();
+  if (guard) return guard;
   if (!supabase) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   }
@@ -40,6 +43,8 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const guard = await requireAdmin();
+  if (guard) return guard;
   if (!supabase) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   }

@@ -386,7 +386,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 md:py-20 px-margin-mobile md:px-margin-desktop bg-white">
+      <section id="how-it-works" className="py-16 md:py-20 px-margin-mobile md:px-margin-desktop bg-white">
         <div className="max-w-container-max mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">How It Works</h2>
@@ -469,7 +469,7 @@ export default function HomePage() {
       </section>
 
       {/* Success Stories */}
-      <section className="py-16 md:py-20 px-margin-mobile md:px-margin-desktop bg-white">
+      <section id="success-stories" className="py-16 md:py-20 px-margin-mobile md:px-margin-desktop bg-white">
         <div className="max-w-container-max mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Success Stories</h2>

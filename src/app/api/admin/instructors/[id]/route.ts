@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/admin-guard';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,6 +11,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const guard = await requireAdmin();
+  if (guard) return guard;
   const { id } = params;
   const body = await request.json();
 
@@ -41,6 +44,8 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const guard = await requireAdmin();
+  if (guard) return guard;
   const { id } = params;
 
   const { error: listError } = await supabase

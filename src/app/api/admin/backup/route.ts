@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/admin-guard';
 
 const ALL_TABLES = ['instructors', 'reviews', 'listing_flags', 'search_logs', 'leads'] as const;
 
 export async function GET() {
+  const guard = await requireAdmin();
+  if (guard) return guard;
   if (!supabase) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
   }

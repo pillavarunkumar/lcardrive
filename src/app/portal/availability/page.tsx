@@ -215,12 +215,12 @@ export default function PortalAvailability() {
     return (
       <div className="relative" ref={ref}>
         <button type="button" onClick={() => setOpen(!open)}
-          className="px-3 py-2 bg-white border border-[#E5E7EB] rounded-xl text-sm font-medium text-gray-900 hover:border-[#064E3B] transition-colors flex items-center gap-2 min-w-[100px]">
-          <span className="material-symbols-outlined text-[18px] text-[#064E3B]">schedule</span>
+          className="px-3 py-2 bg-white border border-outline-variant rounded-xl text-sm font-medium text-on-surface hover:border-primary-container transition-colors flex items-center gap-2 min-w-[100px]">
+          <span className="material-symbols-outlined text-[18px] text-primary-container">schedule</span>
           {value || 'Select'}
         </button>
         {open && (
-          <div className="absolute top-full mt-1 left-0 z-50 w-44 bg-white border border-[#E5E7EB] rounded-[20px] shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute top-full mt-1 left-0 z-50 w-44 bg-white border border-outline-variant rounded-2xl shadow-lg max-h-60 overflow-y-auto">
             {times.map(t => {
               const [h, m] = t.split(':');
               const hh = parseInt(h);
@@ -231,7 +231,7 @@ export default function PortalAvailability() {
               return (
                 <button key={t} type="button" onClick={() => { onChange(t); setOpen(false); }}
                   className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                    selected ? 'bg-[#064E3B] text-white font-semibold' : 'text-gray-700 hover:bg-[#064E3B]/10 hover:text-[#064E3B]'
+                    selected ? 'bg-primary-container text-white font-semibold' : 'text-on-surface-variant hover:bg-primary-container/10 hover:text-primary-container'
                   }`}>
                   {label}
                 </button>
@@ -254,23 +254,23 @@ export default function PortalAvailability() {
   return (
     <>
       {toast && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-[#064E3B] text-white px-6 py-4 rounded-[20px] shadow-2xl flex items-center gap-3">
+        <div className="fixed bottom-8 right-8 z-[60] bg-primary-container text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
           <span className="material-symbols-outlined text-green-400">check_circle</span>
           <p className="font-bold">{toast}</p>
         </div>
       )}
 
-      <div className="mb-8 p-4 bg-white border border-[#E5E7EB] rounded-[20px] shadow-sm flex items-start gap-4">
-        <span className="material-symbols-outlined text-[#064E3B] mt-1">info</span>
+      <div className="mb-8 p-4 bg-white border border-outline-variant rounded-2xl shadow-sm flex items-start gap-4">
+        <span className="material-symbols-outlined text-primary-container mt-1">info</span>
         <div>
-          <p className="text-sm text-gray-900 font-semibold">General Availability Configuration</p>
-          <p className="text-gray-500 text-sm">This screen manages your default recurring weekly schedule. It determines which hours students can see as potentially available when searching for lessons.</p>
+          <p className="text-sm text-on-surface font-semibold">General Availability Configuration</p>
+          <p className="text-on-surface-variant text-sm">This screen manages your default recurring weekly schedule. It determines which hours students can see as potentially available when searching for lessons.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter max-w-5xl">
         <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-base font-semibold text-gray-900 mb-2">Weekly Schedule</h3>
+          <h3 className="text-base font-semibold text-on-surface mb-2">Weekly Schedule</h3>
           <div className="space-y-3">
             {WEEKDAYS.map((day) => {
               const data = schedule[day];
@@ -279,24 +279,24 @@ export default function PortalAvailability() {
               return (
                 <div
                   key={day}
-                  className={`p-6 rounded-[20px] flex items-center justify-between transition-shadow hover:shadow-md ${
+                  className={`p-6 rounded-2xl flex items-center justify-between transition-shadow hover:shadow-md ${
                     data.enabled
-                      ? 'bg-white border border-[#E5E7EB] shadow-sm'
-                      : 'bg-white border border-[#E5E7EB]/50 opacity-70 grayscale'
+                      ? 'bg-white border border-outline-variant shadow-sm'
+                      : 'bg-white border border-outline-variant/50 opacity-70 grayscale'
                   }`}
                 >
                   <div className="flex items-center gap-6">
-                    <span className={`text-sm font-bold w-24 ${data.enabled ? 'text-gray-900' : 'text-gray-500'}`}>{day}</span>
+                    <span className={`text-sm font-bold w-24 ${data.enabled ? 'text-on-surface' : 'text-on-surface-variant'}`}>{day}</span>
                     {isEditing ? (
                       <div className="flex items-center gap-2">
                         <TimePicker value={editStartTime} onChange={(v) => { setEditStartTime(v); setTimeError(''); }} />
-                        <span className="text-gray-400 text-sm font-semibold">—</span>
+                        <span className="text-on-surface-variant/60 text-sm font-semibold">—</span>
                         <TimePicker value={editEndTime} onChange={(v) => { setEditEndTime(v); setTimeError(''); }} />
-                        <button onClick={saveEdit} className="text-[#064E3B] text-sm font-bold hover:underline">Save</button>
-                        <button onClick={() => { setEditingDay(null); setEditStartTime(''); setEditEndTime(''); }} className="text-gray-500 text-sm hover:underline">Cancel</button>
+                        <button onClick={saveEdit} className="text-primary-container text-sm font-bold hover:underline">Save</button>
+                        <button onClick={() => { setEditingDay(null); setEditStartTime(''); setEditEndTime(''); }} className="text-on-surface-variant text-sm hover:underline">Cancel</button>
                       </div>
                     ) : (
-                      <div className="hidden md:flex items-center gap-2 text-gray-500 bg-gray-50 px-3 py-1 rounded-full text-sm">
+                      <div className="hidden md:flex items-center gap-2 text-on-surface-variant bg-surface-container-low px-3 py-1 rounded-full text-sm">
                         <span className="material-symbols-outlined text-sm">schedule</span>
                         <span>{data.enabled ? data.timeRange : 'Unavailable'}</span>
                       </div>
@@ -310,11 +310,11 @@ export default function PortalAvailability() {
                         onChange={() => toggleDay(day)}
                         className="sr-only peer"
                       />
-                      <div className="w-12 h-6 bg-gray-200 rounded-full peer peer-checked:bg-[#064E3B] transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
+                      <div className="w-12 h-6 bg-surface-container-high rounded-full peer peer-checked:bg-primary-container transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
                     </label>
                     <button
                       onClick={() => startEdit(day)}
-                      className={`p-2 transition-colors ${data.enabled ? 'text-gray-500 hover:text-[#064E3B]' : 'text-gray-300 pointer-events-none'}`}
+                      className={`p-2 transition-colors ${data.enabled ? 'text-on-surface-variant hover:text-primary-container' : 'text-on-surface-variant/40 pointer-events-none'}`}
                     >
                       <span className="material-symbols-outlined">edit</span>
                     </button>
@@ -327,26 +327,26 @@ export default function PortalAvailability() {
         </div>
 
         <div className="space-y-6 sticky top-28">
-          <div className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-8">
-            <h3 className="text-base font-semibold text-gray-900 mb-6">Overview</h3>
+          <div className="bg-white border border-outline-variant shadow-sm rounded-2xl p-8">
+            <h3 className="text-base font-semibold text-on-surface mb-6">Overview</h3>
             <div className="space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-[#E5E7EB]">
-                <span className="text-sm text-gray-500">Working Days</span>
-                <span className="font-bold text-gray-900">{activeDays} / 7 Days</span>
+              <div className="flex justify-between items-center pb-4 border-b border-outline-variant">
+                <span className="text-sm text-on-surface-variant">Working Days</span>
+                <span className="font-bold text-on-surface">{activeDays} / 7 Days</span>
               </div>
-              <div className="flex justify-between items-center pb-4 border-b border-[#E5E7EB]">
-                <span className="text-sm text-gray-500">Total Hours / Week</span>
-                <span className="font-bold text-gray-900">{calcTotalHours()} Hours</span>
+              <div className="flex justify-between items-center pb-4 border-b border-outline-variant">
+                <span className="text-sm text-on-surface-variant">Total Hours / Week</span>
+                <span className="font-bold text-on-surface">{calcTotalHours()} Hours</span>
               </div>
             </div>
-            <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-[#E5E7EB]">
-              <p className="text-[10px] text-[#064E3B] font-semibold uppercase mb-2 tracking-wide">Instructor Tip</p>
-              <p className="text-sm text-gray-500 italic">&ldquo;Instructors with late-evening availability (after 5 PM) on weekdays see a 35% higher booking rate from working students.&rdquo;</p>
+            <div className="mt-8 p-4 bg-surface-container-low rounded-lg border border-outline-variant">
+              <p className="text-[10px] text-primary-container font-semibold uppercase mb-2 tracking-wide">Instructor Tip</p>
+              <p className="text-sm text-on-surface-variant italic">&ldquo;Instructors with late-evening availability (after 5 PM) on weekdays see a 35% higher booking rate from working students.&rdquo;</p>
             </div>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full mt-8 bg-[#064E3B] text-white py-4 rounded-xl font-bold hover:bg-[#053A2C] transition-all disabled:opacity-50"
+              className="w-full mt-8 bg-primary-container text-white py-4 rounded-xl font-bold hover:bg-primary-container/90 transition-all disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -358,20 +358,20 @@ export default function PortalAvailability() {
                 setTimeError('');
                 showToast('Unsaved changes discarded.');
               }}
-              className="w-full mt-3 bg-transparent border border-[#E5E7EB] text-gray-500 py-3 rounded-xl hover:bg-gray-50 transition-all"
+              className="w-full mt-3 bg-transparent border border-outline-variant text-on-surface-variant py-3 rounded-xl hover:bg-surface-container-low transition-all"
             >
               Discard Edits
             </button>
           </div>
 
-          <div className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-6">
-            <p className="text-gray-900 font-semibold mb-4">Availability Density</p>
+          <div className="bg-white border border-outline-variant shadow-sm rounded-2xl p-6">
+            <p className="text-on-surface font-semibold mb-4">Availability Density</p>
             <div className="h-32 flex items-end gap-1 px-2">
               {densityChart.map((h, i) => (
-                <div key={i} className={`flex-1 rounded-t-sm ${h > 0 ? 'bg-[#064E3B]/30' : 'bg-gray-100'}`} style={{ height: `${h || 5}%` }}></div>
+                <div key={i} className={`flex-1 rounded-t-sm ${h > 0 ? 'bg-primary-container/30' : 'bg-surface-container'}`} style={{ height: `${h || 5}%` }}></div>
               ))}
             </div>
-            <div className="flex justify-between mt-2 text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
+            <div className="flex justify-between mt-2 text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">
               {WEEKDAYS.map((d) => (
                 <span key={d}>{d.slice(0, 3)}</span>
               ))}

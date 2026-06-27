@@ -74,7 +74,7 @@ export default function PortalSettings() {
   return (
     <>
       {toast && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-[#064E3B] text-white px-6 py-4 rounded-[20px] shadow-2xl flex items-center gap-3">
+        <div className="fixed bottom-8 right-8 z-[60] bg-primary-container text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
           <span className="material-symbols-outlined text-green-400">check_circle</span>
           <p className="font-bold">{toast}</p>
         </div>
@@ -84,27 +84,27 @@ export default function PortalSettings() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
           {/* Left Sidebar */}
           <div className="md:col-span-4 space-y-6">
-            <div className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Settings Overview</h3>
-              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+            <div className="bg-white border border-outline-variant shadow-sm rounded-2xl p-6">
+              <h3 className="text-base font-semibold text-on-surface mb-4">Settings Overview</h3>
+              <p className="text-sm text-on-surface-variant mb-6 leading-relaxed">
                 Manage your account information, security credentials, and communication preferences from this central dashboard.
               </p>
               <ul className="space-y-4">
-                <li className="flex items-center gap-3 text-[#064E3B] font-medium">
-                  <span className="w-2 h-2 bg-[#064E3B] rounded-full"></span>
+                <li className="flex items-center gap-3 text-primary-container font-medium">
+                  <span className="w-2 h-2 bg-primary-container rounded-full"></span>
                   <span className="text-xs font-semibold uppercase tracking-wide">Account Information</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-500">
-                  <span className="w-2 h-2 bg-gray-300 rounded-full"></span>
+                <li className="flex items-center gap-3 text-on-surface-variant">
+                  <span className="w-2 h-2 bg-outline-variant rounded-full"></span>
                   <span className="text-xs font-semibold uppercase tracking-wide">Security &amp; Privacy</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-500">
-                  <span className="w-2 h-2 bg-gray-300 rounded-full"></span>
+                <li className="flex items-center gap-3 text-on-surface-variant">
+                  <span className="w-2 h-2 bg-outline-variant rounded-full"></span>
                   <span className="text-xs font-semibold uppercase tracking-wide">Notification Settings</span>
                 </li>
               </ul>
             </div>
-            <div className="bg-green-50 p-6 rounded-[20px] border border-[#E5E7EB]">
+            <div className="bg-green-50 p-6 rounded-2xl border border-outline-variant">
               <div className="flex items-center gap-3 text-green-700 mb-3">
                 <span className="material-symbols-outlined">verified_user</span>
                 <span className="text-xs font-semibold uppercase tracking-wide">Identity Verified</span>
@@ -118,78 +118,78 @@ export default function PortalSettings() {
           {/* Main Content */}
           <div className="md:col-span-8 space-y-8">
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-[20px] text-sm text-red-500 flex items-center gap-2">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-500 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px]">error</span>
                 {error}
               </div>
             )}
 
             {loading ? (
-              <div className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-gutter animate-pulse">
-                <div className="h-6 bg-gray-100 rounded w-1/3 mb-8" />
+              <div className="bg-white border border-outline-variant shadow-sm rounded-2xl p-gutter animate-pulse">
+                <div className="h-6 bg-surface-container rounded w-1/3 mb-8" />
                 <div className="space-y-4">
-                  <div className="h-12 bg-gray-100 rounded" />
-                  <div className="h-12 bg-gray-100 rounded" />
-                  <div className="h-12 bg-gray-100 rounded" />
+                  <div className="h-12 bg-surface-container rounded" />
+                  <div className="h-12 bg-surface-container rounded" />
+                  <div className="h-12 bg-surface-container rounded" />
                 </div>
               </div>
             ) : (
               <>
                 {/* Account Info */}
-                <section className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-8">
+                <section className="bg-white border border-outline-variant shadow-sm rounded-2xl p-8">
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B]">
+                    <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant">
                       <span className="material-symbols-outlined">person_outline</span>
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-gray-900">Account Information</h3>
-                      <p className="text-sm text-gray-500">Your basic profile details</p>
+                      <h3 className="text-base font-semibold text-on-surface">Account Information</h3>
+                      <p className="text-sm text-on-surface-variant">Your basic profile details</p>
                     </div>
                   </div>
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide px-1">First Name</label>
+                        <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide px-1">First Name</label>
                         <input
                           type="text"
                           value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-[#E5E7EB] focus:ring-2 focus:ring-[#064E3B] focus:border-transparent outline-none transition-all text-sm bg-gray-50"
+                          className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all text-sm bg-surface-container-low"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide px-1">Last Name</label>
+                        <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide px-1">Last Name</label>
                         <input
                           type="text"
                           value={lastName}
                           onChange={(e) => setLastName(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-[#E5E7EB] focus:ring-2 focus:ring-[#064E3B] focus:border-transparent outline-none transition-all text-sm bg-gray-50"
+                          className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all text-sm bg-surface-container-low"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide px-1">Phone Number</label>
+                      <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide px-1">Phone Number</label>
                       <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-[#E5E7EB] focus:ring-2 focus:ring-[#064E3B] focus:border-transparent outline-none transition-all text-sm bg-gray-50"
+                        className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all text-sm bg-surface-container-low"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide px-1">Email Address</label>
+                      <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide px-1">Email Address</label>
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-[#E5E7EB] focus:ring-2 focus:ring-[#064E3B] focus:border-transparent outline-none transition-all text-sm bg-gray-50"
+                        className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none transition-all text-sm bg-surface-container-low"
                       />
                     </div>
                     <div className="pt-4 flex justify-end">
                       <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="bg-[#064E3B] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#053A2C] transition-all disabled:opacity-50"
+                        className="bg-primary-container text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-container/90 transition-all disabled:opacity-50"
                       >
                         {saving ? 'Saving...' : 'Save Changes'}
                       </button>
@@ -198,54 +198,54 @@ export default function PortalSettings() {
                 </section>
 
                 {/* Security */}
-                <section className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-8">
+                <section className="bg-white border border-outline-variant shadow-sm rounded-2xl p-8">
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B]">
+                    <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant">
                       <span className="material-symbols-outlined">lock</span>
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-gray-900">Security</h3>
-                      <p className="text-sm text-gray-500">Manage password and access</p>
+                      <h3 className="text-base font-semibold text-on-surface">Security</h3>
+                      <p className="text-sm text-on-surface-variant">Manage password and access</p>
                     </div>
                   </div>
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-[#E5E7EB]">
+                    <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant">
                       <div className="flex items-center gap-4">
-                        <span className="material-symbols-outlined text-gray-500">password</span>
+                        <span className="material-symbols-outlined text-on-surface-variant">password</span>
                         <div>
-                          <p className="text-sm font-bold text-gray-900">Password</p>
-                          <p className="text-xs text-gray-500">Last changed via Clerk</p>
+                          <p className="text-sm font-bold text-on-surface">Password</p>
+                          <p className="text-xs text-on-surface-variant">Last changed via Clerk</p>
                         </div>
                       </div>
-                      <span className="text-xs font-bold text-gray-500">
+                      <span className="text-xs font-bold text-on-surface-variant">
                         Managed via Clerk
                       </span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-[#E5E7EB]">
+                    <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant">
                       <div className="flex items-center gap-4">
-                        <span className="material-symbols-outlined text-gray-500">phonelink_lock</span>
+                        <span className="material-symbols-outlined text-on-surface-variant">phonelink_lock</span>
                         <div>
-                          <p className="text-sm font-bold text-gray-900">Two-Factor Authentication</p>
-                          <p className="text-xs text-gray-500">Secure your account with SMS codes</p>
+                          <p className="text-sm font-bold text-on-surface">Two-Factor Authentication</p>
+                          <p className="text-xs text-on-surface-variant">Secure your account with SMS codes</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" defaultChecked className="sr-only peer" />
-                        <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#064E3B]" />
+                        <div className="w-12 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container" />
                       </label>
                     </div>
                   </div>
                 </section>
 
                 {/* Notification Preferences */}
-                <section className="bg-white border border-[#E5E7EB] shadow-sm rounded-[20px] p-8">
+                <section className="bg-white border border-outline-variant shadow-sm rounded-2xl p-8">
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#64748B]">
+                    <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant">
                       <span className="material-symbols-outlined">notifications_active</span>
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-gray-900">Notification Preferences</h3>
-                      <p className="text-sm text-gray-500">How we keep you updated</p>
+                      <h3 className="text-base font-semibold text-on-surface">Notification Preferences</h3>
+                      <p className="text-sm text-on-surface-variant">How we keep you updated</p>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -254,15 +254,15 @@ export default function PortalSettings() {
                       { label: 'Review Updates', desc: 'Get notified immediately when a student leaves a new review.' },
                       { label: 'Verification Updates', desc: 'Critical alerts regarding your instructor license or blue card status.' },
                     ].map((item) => (
-                      <div key={item.label} className="flex items-start justify-between py-4 border-b border-[#E5E7EB]/20">
+                      <div key={item.label} className="flex items-start justify-between py-4 border-b border-outline-variant/20">
                         <div>
-                          <p className="text-sm font-bold text-gray-900">{item.label}</p>
-                          <p className="text-xs text-gray-500 max-w-sm">{item.desc}</p>
+                          <p className="text-sm font-bold text-on-surface">{item.label}</p>
+                          <p className="text-xs text-on-surface-variant max-w-sm">{item.desc}</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input type="checkbox" defaultChecked className="sr-only peer" disabled={item.label === 'Verification Updates'} />
-                          <div className={`w-12 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#064E3B] ${
-                            item.label === 'Verification Updates' ? 'bg-[#064E3B]/20 cursor-not-allowed' : 'bg-gray-200'
+                          <div className={`w-12 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container ${
+                            item.label === 'Verification Updates' ? 'bg-primary-container/20 cursor-not-allowed' : 'bg-surface-container-high'
                           }`} />
                         </label>
                       </div>
@@ -271,7 +271,7 @@ export default function PortalSettings() {
                 </section>
 
                 {/* Danger Zone */}
-                <div className={`p-8 border rounded-[20px] flex items-center justify-between ${isHidden ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                <div className={`p-8 border rounded-2xl flex items-center justify-between ${isHidden ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                   <div>
                     <p className={`text-sm font-bold ${isHidden ? 'text-green-600' : 'text-red-500'}`}>
                       {isHidden ? 'Profile Hidden' : 'Deactivate Account'}

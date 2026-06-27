@@ -18,13 +18,13 @@ export default function Footer() {
               Australia&apos;s premium driving instructor marketplace. Connecting the next generation of safe drivers with verified professionals.
             </p>
             <div className="flex gap-3 mt-6">
-              <a className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#34D399] hover:text-white transition-all" href="#">
+              <a className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#34D399] hover:text-white transition-all" href="/" target="_blank" rel="noopener noreferrer" aria-label="Website">
                 <span className="material-symbols-outlined text-lg">public</span>
               </a>
-              <a className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#34D399] hover:text-white transition-all" href="#">
+              <a className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#34D399] hover:text-white transition-all" href="mailto:hello@lcardrive.com.au" aria-label="Email">
                 <span className="material-symbols-outlined text-lg">mail</span>
               </a>
-              <a className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#34D399] hover:text-white transition-all" href="#">
+              <a className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#34D399] hover:text-white transition-all" href="https://linkedin.com/company/lcardrive" target="_blank" rel="noopener noreferrer" aria-label="Share">
                 <span className="material-symbols-outlined text-lg">share</span>
               </a>
             </div>
@@ -37,7 +37,7 @@ export default function Footer() {
               <h5 className="text-xs font-bold text-white/40 uppercase tracking-[0.12em] mb-5">Learners</h5>
               <ul className="space-y-3">
                 <li><Link href="/search" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Find Instructors</Link></li>
-                <li><Link href="/how-it-works" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">How It Works</Link></li>
+                <li><Link href="/#how-it-works" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">How It Works</Link></li>
                 <li><Link href="/search" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Browse Suburbs</Link></li>
                 <li><Link href="/booking-guide" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Booking Guide</Link></li>
               </ul>
@@ -59,7 +59,7 @@ export default function Footer() {
               <h5 className="text-xs font-bold text-white/40 uppercase tracking-[0.12em] mb-5">Company</h5>
               <ul className="space-y-3">
                 <li><Link href="/about" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">About Us</Link></li>
-                <li><Link href="/reviews" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Reviews</Link></li>
+                <li><Link href="/#success-stories" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Reviews</Link></li>
                 <li><Link href="/privacy" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Terms &amp; Conditions</Link></li>
               </ul>

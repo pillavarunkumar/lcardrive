@@ -297,7 +297,7 @@ export default function PortalProfile() {
   return (
     <>
       {toast && (
-        <div className="fixed bottom-8 right-8 z-[60] bg-[#064E3B] text-white px-6 py-4 rounded-[20px] shadow-2xl flex items-center gap-3">
+        <div className="fixed bottom-8 right-8 z-[60] bg-primary-container text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-green-400">check_circle</span>
             {toast}
@@ -309,13 +309,13 @@ export default function PortalProfile() {
       <div className="max-w-6xl mx-auto">
 
         {/* Tab Navigation */}
-          <div className="flex gap-2 mb-gutter p-1.5 bg-white rounded-[20px] border border-[#E5E7EB] shadow-sm overflow-x-auto">
+          <div className="flex gap-2 mb-gutter p-1.5 bg-white rounded-2xl border border-outline-variant shadow-sm overflow-x-auto">
           {tabs.map((tab) => (
             <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${
                 activeTab === tab.id
-                  ? 'bg-[#064E3B] text-white shadow-lg shadow-[#064E3B]/20'
-                  : 'text-gray-500 hover:bg-gray-100 hover:text-[#064E3B]'
+                  ? 'bg-primary-container text-white shadow-lg shadow-primary-container/20'
+                  : 'text-on-surface-variant hover:bg-surface-container hover:text-primary-container'
               }`}>
               <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
               {tab.label}
@@ -328,10 +328,10 @@ export default function PortalProfile() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
             <div className="md:col-span-7 xl:col-span-8">
-              <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm h-full">
+              <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm h-full">
                 <div className="flex items-center justify-between mb-6">
-                  <h4 className="text-base font-semibold text-gray-900 flex items-center">
-                    <span className="material-symbols-outlined mr-2 text-[#64748B]">badge</span>
+                  <h4 className="text-base font-semibold text-on-surface flex items-center">
+                    <span className="material-symbols-outlined mr-2 text-on-surface-variant">badge</span>
                     Personal Information
                   </h4>
                   {verifiedName && (
@@ -343,35 +343,35 @@ export default function PortalProfile() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">First Name</label>
+                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">First Name</label>
                     <input type="text" value={user?.firstName || ''} readOnly
-                      className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                      className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Last Name</label>
+                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Last Name</label>
                     <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Enter your last name"
-                      className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                      className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Mobile Number</label>
+                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Mobile Number</label>
                     <input type="tel" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} placeholder="+61 000 000 000"
-                      className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                      className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Years of Experience</label>
+                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Years of Experience</label>
                     <div className="relative">
                       <input type="number" value={yearsExp} onChange={(e) => setYearsExp(parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Years</span>
+                        className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">Years</span>
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Gender</label>
+                    <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Gender</label>
                     <div className="flex gap-2">
                       {['male', 'female', 'other'].map((g) => (
                         <label key={g} className="flex-1 cursor-pointer">
                           <input type="radio" name="gender" value={g} checked={gender === g} onChange={() => setGender(g)} className="hidden peer" />
-                          <div className="text-center py-3 border border-[#E5E7EB] rounded-lg peer-checked:border-[#064E3B] peer-checked:bg-[#064E3B]/10 peer-checked:text-[#064E3B] transition-all capitalize text-gray-900">{g}</div>
+                          <div className="text-center py-3 border border-outline-variant rounded-lg peer-checked:border-primary-container peer-checked:bg-primary-container/10 peer-checked:text-primary-container transition-all capitalize text-on-surface">{g}</div>
                         </label>
                       ))}
                     </div>
@@ -381,13 +381,13 @@ export default function PortalProfile() {
             </div>
 
             <div className="md:col-span-5 xl:col-span-4">
-              <div className="bg-white p-6 rounded-[20px] border border-[#E5E7EB] shadow-sm text-center space-y-4 h-full flex flex-col justify-center">
+              <div className="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm text-center space-y-4 h-full flex flex-col justify-center">
                 <div className="relative inline-block group">
                   <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-sm mx-auto">
                     <img alt="Profile" className="w-full h-full object-cover"
                       src={user?.imageUrl || 'https://lh3.googleusercontent.com/a/ACg8ocL4e96UEDCIshPGI6UJ-PeexiFbwBk0HTi0ewoY3eOwFw=s360-c'} />
                   </div>
-                  <label className="absolute bottom-0 right-0 p-2 bg-[#064E3B] text-white rounded-full cursor-pointer hover:opacity-90 transition-all shadow-lg" htmlFor="photo-upload">
+                  <label className="absolute bottom-0 right-0 p-2 bg-primary-container text-white rounded-full cursor-pointer hover:opacity-90 transition-all shadow-lg" htmlFor="photo-upload">
                     <span className="material-symbols-outlined text-sm">photo_camera</span>
                   </label>
                   <input id="photo-upload" ref={fileInputRef} type="file" accept="image/*" className="hidden"
@@ -401,16 +401,16 @@ export default function PortalProfile() {
                     }} />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900">{user?.firstName} {user?.lastName}</h3>
-                  <p className="text-xs text-gray-500">Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}</p>
+                  <h3 className="text-base font-semibold text-on-surface">{user?.firstName} {user?.lastName}</h3>
+                  <p className="text-xs text-on-surface-variant">Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}</p>
                 </div>
-                <div className="pt-4 border-t border-[#E5E7EB]">
+                <div className="pt-4 border-t border-outline-variant">
                   <div className="flex justify-between text-xs mb-2">
-                    <span className="text-gray-500">Profile Strength</span>
-                    <span className="text-[#064E3B] font-bold">{profileCompleteness}%</span>
+                    <span className="text-on-surface-variant">Profile Strength</span>
+                    <span className="text-primary-container font-bold">{profileCompleteness}%</span>
                   </div>
-                  <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-[#064E3B] h-full transition-all duration-500" style={{ width: `${profileCompleteness}%` }} />
+                  <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-primary-container h-full transition-all duration-500" style={{ width: `${profileCompleteness}%` }} />
                   </div>
                 </div>
               </div>
@@ -419,35 +419,35 @@ export default function PortalProfile() {
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mt-gutter">
             <div className="md:col-span-7 xl:col-span-8">
-              <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm h-full">
+              <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm h-full">
                 <div className="flex items-center justify-between mb-6">
-                  <h4 className="text-base font-semibold text-gray-900 flex items-center">
-                    <span className="material-symbols-outlined mr-2 text-[#64748B]">description</span>
+                  <h4 className="text-base font-semibold text-on-surface flex items-center">
+                    <span className="material-symbols-outlined mr-2 text-on-surface-variant">description</span>
                     About Me
                   </h4>
                   <button onClick={() => setAiModalOpen(true)}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-[#064E3B]/10 text-[#064E3B] rounded-full text-xs font-bold hover:bg-[#064E3B]/20 transition-all">
+                    className="flex items-center gap-1.5 px-4 py-2 bg-primary-container/10 text-primary-container rounded-full text-xs font-bold hover:bg-primary-container/20 transition-all">
                     <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
                     AI Bio
                   </button>
                 </div>
                 <textarea
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900 resize-none custom-scrollbar"
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface resize-none custom-scrollbar"
                   placeholder="Tell students about your teaching style, philosophy, and background..." rows={6}
                   value={bioText} onChange={(e) => setBioText(e.target.value)} />
-                <p className="mt-2 text-xs text-gray-500 text-right">{bioText.length} / 1000 characters</p>
+                <p className="mt-2 text-xs text-on-surface-variant text-right">{bioText.length} / 1000 characters</p>
               </div>
             </div>
 
             <div className="md:col-span-5 xl:col-span-4 space-y-gutter">
-              <div className="bg-white p-6 rounded-[20px] border border-[#E5E7EB] shadow-sm">
-                <h4 className="text-sm font-bold text-gray-900 flex items-center mb-4">
-                  <span className="material-symbols-outlined mr-2 text-[#64748B]">translate</span>
+              <div className="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm">
+                <h4 className="text-sm font-bold text-on-surface flex items-center mb-4">
+                  <span className="material-symbols-outlined mr-2 text-on-surface-variant">translate</span>
                   Languages
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {languages.map((l) => (
-                    <span key={l} className="px-3 py-1 bg-[#064E3B] text-white rounded-full text-sm flex items-center gap-1">
+                    <span key={l} className="px-3 py-1 bg-primary-container text-white rounded-full text-sm flex items-center gap-1">
                       {l}
                       <span className="material-symbols-outlined text-xs cursor-pointer" onClick={() => removeLanguage(l)}>close</span>
                     </span>
@@ -455,25 +455,25 @@ export default function PortalProfile() {
                   <input type="text" placeholder="+ Add Language" value={langInput}
                     onChange={(e) => setLangInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter' && langInput.trim()) { e.preventDefault(); addLanguage(langInput.trim()); } }}
-                    className="px-3 py-1 border border-dashed border-[#E5E7EB] rounded-full text-sm text-gray-500 hover:border-[#064E3B] hover:text-[#064E3B] transition-all bg-transparent outline-none w-28" />
+                    className="px-3 py-1 border border-dashed border-outline-variant rounded-full text-sm text-on-surface-variant hover:border-primary-container hover:text-primary-container transition-all bg-transparent outline-none w-28" />
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-[20px] border border-[#E5E7EB] shadow-sm">
-                <h4 className="text-sm font-bold text-gray-900 flex items-center mb-4">
-                  <span className="material-symbols-outlined mr-2 text-[#64748B]">verified</span>
+              <div className="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm">
+                <h4 className="text-sm font-bold text-on-surface flex items-center mb-4">
+                  <span className="material-symbols-outlined mr-2 text-on-surface-variant">verified</span>
                   Toggles
                 </h4>
                 <div className="space-y-2">
-                  <label className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-all border border-transparent hover:border-[#E5E7EB]">
-                    <span className="text-sm text-gray-900">Anxiety Friendly</span>
+                  <label className="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low cursor-pointer transition-all border border-transparent hover:border-outline-variant">
+                    <span className="text-sm text-on-surface">Anxiety Friendly</span>
                     <input type="checkbox" checked={specialisesAnxiety} onChange={() => setSpecialisesAnxiety(!specialisesAnxiety)} className="sr-only peer" aria-label="Anxiety friendly toggle" />
-                    <div className="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-[#064E3B] transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
+                    <div className="w-12 h-6 bg-surface-container-high rounded-full peer-checked:bg-primary-container transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
                   </label>
-                  <label className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-all border border-transparent hover:border-[#E5E7EB]">
-                    <span className="text-sm text-gray-900">Intl. Licence Conversion</span>
+                  <label className="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low cursor-pointer transition-all border border-transparent hover:border-outline-variant">
+                    <span className="text-sm text-on-surface">Intl. Licence Conversion</span>
                     <input type="checkbox" checked={acceptsInternational} onChange={() => setAcceptsInternational(!acceptsInternational)} className="sr-only peer" aria-label="International licence conversion toggle" />
-                    <div className="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-[#064E3B] transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
+                    <div className="w-12 h-6 bg-surface-container-high rounded-full peer-checked:bg-primary-container transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
                   </label>
                 </div>
               </div>
@@ -485,28 +485,28 @@ export default function PortalProfile() {
         {/* Tab: Specialisations */}
         {activeTab === 'specialisations' && (
         <>
-          <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
-            <h4 className="text-base font-semibold text-gray-900 flex items-center mb-6">
-              <span className="material-symbols-outlined mr-2 text-[#64748B]">tune</span>
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
+            <h4 className="text-base font-semibold text-on-surface flex items-center mb-6">
+              <span className="material-symbols-outlined mr-2 text-on-surface-variant">tune</span>
               Specialisations
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-3">Licence Types Taught</label>
+                  <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide block mb-3">Licence Types Taught</label>
                   <div className="flex flex-wrap gap-2">
                     {['car', 'motorbike', 'truck', 'bus'].map((t) => (
                       <label key={t} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                        licenceTypes.includes(t) ? 'border-[#064E3B] bg-[#064E3B]/10' : 'border-[#E5E7EB]'
+                        licenceTypes.includes(t) ? 'border-primary-container bg-primary-container/10' : 'border-outline-variant'
                       }`}>
-                        <input type="checkbox" checked={licenceTypes.includes(t)} onChange={() => toggleLicenceType(t)} className="accent-[#064E3B] rounded" />
-                        <span className="text-sm font-medium text-gray-900 capitalize">{t}</span>
+                        <input type="checkbox" checked={licenceTypes.includes(t)} onChange={() => toggleLicenceType(t)} className="accent-primary-container rounded" />
+                        <span className="text-sm font-medium text-on-surface capitalize">{t}</span>
                       </label>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-3">Transmission Taught</label>
+                  <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide block mb-3">Transmission Taught</label>
                   <div className="flex flex-wrap gap-2">
                     {[
                       { value: 'both', label: 'Manual & Automatic' },
@@ -514,10 +514,10 @@ export default function PortalProfile() {
                       { value: 'manual', label: 'Manual Only' },
                     ].map((t) => (
                       <label key={t.value} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                        transmission === t.value ? 'border-[#064E3B] bg-[#064E3B]/10' : 'border-[#E5E7EB]'
+                        transmission === t.value ? 'border-primary-container bg-primary-container/10' : 'border-outline-variant'
                       }`}>
-                        <input type="radio" name="transmission" checked={transmission === t.value} onChange={() => setTransmission(t.value)} className="accent-[#064E3B]" />
-                        <span className="text-sm font-medium text-gray-900">{t.label}</span>
+                        <input type="radio" name="transmission" checked={transmission === t.value} onChange={() => setTransmission(t.value)} className="accent-primary-container" />
+                        <span className="text-sm font-medium text-on-surface">{t.label}</span>
                       </label>
                     ))}
                   </div>
@@ -525,23 +525,23 @@ export default function PortalProfile() {
               </div>
               <div className="space-y-6">
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-3">Teaching Style</label>
+                  <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide block mb-3">Teaching Style</label>
                   <div className="flex flex-wrap gap-2">
                     {['Patient & Calm', 'Structured & Strict', 'Adaptable & Fun'].map((s) => (
                       <label key={s} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                        teachingStyle === s ? 'border-[#064E3B] bg-[#064E3B]/10' : 'border-[#E5E7EB]'
+                        teachingStyle === s ? 'border-primary-container bg-primary-container/10' : 'border-outline-variant'
                       }`}>
-                        <input type="radio" name="teachingStyle" checked={teachingStyle === s} onChange={() => setTeachingStyle(s)} className="accent-[#064E3B]" />
-                        <span className="text-sm font-medium text-gray-900">{s}</span>
+                        <input type="radio" name="teachingStyle" checked={teachingStyle === s} onChange={() => setTeachingStyle(s)} className="accent-primary-container" />
+                        <span className="text-sm font-medium text-on-surface">{s}</span>
                       </label>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-3">Primary Learner Types</label>
+                  <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide block mb-3">Primary Learner Types</label>
                   <input type="text" placeholder="e.g. Anxious beginners, Teens, Seniors" value={learnerTypes}
                     onChange={(e) => setLearnerTypes(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                    className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
                 </div>
               </div>
             </div>
@@ -549,17 +549,17 @@ export default function PortalProfile() {
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mt-gutter">
             <div className="md:col-span-7 xl:col-span-8">
-              <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm h-full">
-                <h4 className="text-base font-semibold text-gray-900 flex items-center mb-6">
-                  <span className="material-symbols-outlined mr-2 text-[#64748B]">location_on</span>
+              <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm h-full">
+                <h4 className="text-base font-semibold text-on-surface flex items-center mb-6">
+                  <span className="material-symbols-outlined mr-2 text-on-surface-variant">location_on</span>
                   Preferred Test Centres
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   {['Bondi Junction', 'Marrickville', 'Chatswood', 'Botany', 'Ryde', 'Hornsby', 'Penrith', 'Liverpool'].map((tc) => (
-                    <label key={tc} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer">
+                    <label key={tc} className="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg cursor-pointer">
                       <input type="checkbox" checked={testCentres.includes(tc)} onChange={() => toggleTestCentre(tc)}
-                        className="rounded border-[#E5E7EB] text-[#064E3B] focus:ring-[#064E3B]" />
-                      <span className="text-sm text-gray-900">{tc}</span>
+                        className="rounded border-outline-variant text-primary-container focus:ring-primary-container" />
+                      <span className="text-sm text-on-surface">{tc}</span>
                     </label>
                   ))}
                 </div>
@@ -567,32 +567,32 @@ export default function PortalProfile() {
             </div>
 
             <div className="md:col-span-5 xl:col-span-4">
-              <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm h-full">
-                <h4 className="text-base font-semibold text-gray-900 flex items-center mb-6">
-                  <span className="material-symbols-outlined mr-2 text-[#64748B]">share</span>
+              <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm h-full">
+                <h4 className="text-base font-semibold text-on-surface flex items-center mb-6">
+                  <span className="material-symbols-outlined mr-2 text-on-surface-variant">share</span>
                   Social Links
                 </h4>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg shrink-0">
+                    <div className="w-10 h-10 flex items-center justify-center bg-surface-container text-on-surface-variant rounded-lg shrink-0">
                       <span className="material-symbols-outlined">language</span>
                     </div>
                     <input type="url" value={socialWebsite} onChange={(e) => setSocialWebsite(e.target.value)}
-                      className="w-full px-4 py-2 bg-gray-50 border border-[#E5E7EB] rounded-lg text-sm text-gray-900" placeholder="Personal Website" />
+                      className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-sm text-on-surface" placeholder="Personal Website" />
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg shrink-0">
+                    <div className="w-10 h-10 flex items-center justify-center bg-surface-container text-on-surface-variant rounded-lg shrink-0">
                       <span className="material-symbols-outlined">camera_alt</span>
                     </div>
                     <input type="url" value={socialInstagram} onChange={(e) => setSocialInstagram(e.target.value)}
-                      className="w-full px-4 py-2 bg-gray-50 border border-[#E5E7EB] rounded-lg text-sm text-gray-900" placeholder="Instagram Profile" />
+                      className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-sm text-on-surface" placeholder="Instagram Profile" />
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg shrink-0">
+                    <div className="w-10 h-10 flex items-center justify-center bg-surface-container text-on-surface-variant rounded-lg shrink-0">
                       <span className="material-symbols-outlined">public</span>
                     </div>
                     <input type="url" value={socialFacebook} onChange={(e) => setSocialFacebook(e.target.value)}
-                      className="w-full px-4 py-2 bg-gray-50 border border-[#E5E7EB] rounded-lg text-sm text-gray-900" placeholder="Facebook Page" />
+                      className="w-full px-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-sm text-on-surface" placeholder="Facebook Page" />
                   </div>
                 </div>
               </div>
@@ -603,10 +603,10 @@ export default function PortalProfile() {
 
         {/* Tab: Vehicle */}
         {activeTab === 'vehicle' && (
-        <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+        <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h4 className="text-base font-semibold text-gray-900 flex items-center">
-              <span className="material-symbols-outlined mr-2 text-[#64748B]">directions_car</span>
+            <h4 className="text-base font-semibold text-on-surface flex items-center">
+              <span className="material-symbols-outlined mr-2 text-on-surface-variant">directions_car</span>
               Vehicle Details
             </h4>
             <DocumentScanner
@@ -626,34 +626,34 @@ export default function PortalProfile() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Make</label>
+              <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Make</label>
               <input type="text" placeholder="e.g. Toyota" value={vehicleMake} onChange={(e) => setVehicleMake(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Model</label>
+              <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Model</label>
               <input type="text" placeholder="e.g. Corolla" value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Year</label>
+              <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Year</label>
               <input type="number" value={vehicleYear} onChange={(e) => setVehicleYear(parseInt(e.target.value) || new Date().getFullYear())}
-                className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Registration</label>
+              <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Registration</label>
               <input type="text" placeholder="ABC-123" value={vehicleRego} onChange={(e) => setVehicleRego(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Colour</label>
+              <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Colour</label>
               <input type="text" placeholder="e.g. White" value={vehicleColor} onChange={(e) => setVehicleColor(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
             </div>
             <div>
-              <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-3">Transmission Type</label>
+              <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide block mb-3">Transmission Type</label>
               <div className="flex gap-2">
                 {[
                   { value: 'auto', label: 'Automatic' },
@@ -661,22 +661,22 @@ export default function PortalProfile() {
                   { value: 'both', label: 'Both' },
                 ].map((t) => (
                   <label key={t.value} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all ${
-                    transmissionType === t.value ? 'border-[#064E3B] bg-[#064E3B]/10' : 'border-[#E5E7EB]'
+                    transmissionType === t.value ? 'border-primary-container bg-primary-container/10' : 'border-outline-variant'
                   }`}>
-                    <input type="radio" name="vehicleTransmission" checked={transmissionType === t.value} onChange={() => setTransmissionType(t.value)} className="accent-[#064E3B]" />
-                    <span className="text-sm font-medium text-gray-900">{t.label}</span>
+                    <input type="radio" name="vehicleTransmission" checked={transmissionType === t.value} onChange={() => setTransmissionType(t.value)} className="accent-primary-container" />
+                    <span className="text-sm font-medium text-on-surface">{t.label}</span>
                   </label>
                 ))}
               </div>
             </div>
           </div>
-          <label className="flex items-center justify-between p-4 rounded-[20px] border border-[#E5E7EB] cursor-pointer hover:bg-gray-50 transition-colors max-w-md mt-6">
+          <label className="flex items-center justify-between p-4 rounded-2xl border border-outline-variant cursor-pointer hover:bg-surface-container-low transition-colors max-w-md mt-6">
             <div>
-              <span className="text-sm font-bold text-gray-900 block">Dual Controls Installed</span>
-              <span className="text-xs text-gray-500">Instructor brake pedals fitted</span>
+              <span className="text-sm font-bold text-on-surface block">Dual Controls Installed</span>
+              <span className="text-xs text-on-surface-variant">Instructor brake pedals fitted</span>
             </div>
             <input type="checkbox" checked={dualControls} onChange={() => setDualControls(!dualControls)} className="sr-only peer" aria-label="Dual controls toggle" />
-            <div className="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-[#064E3B] transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
+            <div className="w-12 h-6 bg-surface-container-high rounded-full peer-checked:bg-primary-container transition-colors relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-6"></div>
           </label>
         </div>
         )}
@@ -685,10 +685,10 @@ export default function PortalProfile() {
         {activeTab === 'documents' && (
         <div className="space-y-gutter">
           {/* Driver's Licence */}
-          <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#64748B]">badge</span>
+              <h5 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-on-surface-variant">badge</span>
                 Driver&apos;s Licence
               </h5>
               <DocumentScanner docType="drivers_licence" label="" existingImageUrl={driversLicenceImageUrl}
@@ -702,23 +702,23 @@ export default function PortalProfile() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Licence Number</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Licence Number</label>
                 <input type="text" placeholder="e.g. 12345678" value={driversLicenceNumber} onChange={(e) => setDriversLicenceNumber(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Expiry Date</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Expiry Date</label>
                 <input type="date" value={driversLicenceExpiry} onChange={(e) => setDriversLicenceExpiry(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
             </div>
           </div>
 
           {/* ADI Registration */}
-          <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#64748B]">assignment</span>
+              <h5 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-on-surface-variant">assignment</span>
                 ADI Registration
               </h5>
               <DocumentScanner docType="adi_registration" label="" existingImageUrl={adiRegImageUrl}
@@ -730,26 +730,26 @@ export default function PortalProfile() {
                   showToast('ADI details extracted from image!');
                 }} />
             </div>
-            <p className="text-sm text-gray-500 mb-4">Authorised Driving Instructor (ADI) registration issued by your state&apos;s regulator.</p>
+            <p className="text-sm text-on-surface-variant mb-4">Authorised Driving Instructor (ADI) registration issued by your state&apos;s regulator.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">ADI Registration Number</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">ADI Registration Number</label>
                 <input type="text" placeholder="e.g. ADI-123456" value={adiRegNumber} onChange={(e) => setAdiRegNumber(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Expiry Date</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Expiry Date</label>
                 <input type="date" value={adiRegExpiry} onChange={(e) => setAdiRegExpiry(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
             </div>
           </div>
 
           {/* Certificate IV */}
-          <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#64748B]">school</span>
+              <h5 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-on-surface-variant">school</span>
                 Certificate IV in Driving Instruction
               </h5>
               <DocumentScanner docType="certificate_iv" label="" existingImageUrl={certIVImageUrl}
@@ -761,26 +761,26 @@ export default function PortalProfile() {
                   showToast('Certificate details extracted from image!');
                 }} />
             </div>
-            <p className="text-sm text-gray-500 mb-4">Nationally recognised TLI41222 (or equivalent) qualification.</p>
+            <p className="text-sm text-on-surface-variant mb-4">Nationally recognised TLI41222 (or equivalent) qualification.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Certificate Reference</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Certificate Reference</label>
                 <input type="text" placeholder="e.g. CERT-98765" value={certIVReference} onChange={(e) => setCertIVReference(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Date Issued</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Date Issued</label>
                 <input type="date" value={certIVDate} onChange={(e) => setCertIVDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
             </div>
           </div>
 
           {/* Working with Children Check */}
-          <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#64748B]">child_care</span>
+              <h5 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-on-surface-variant">child_care</span>
                 Working with Children Check
               </h5>
               <DocumentScanner docType="wwcc" label="" existingImageUrl={wwccImageUrl}
@@ -792,26 +792,26 @@ export default function PortalProfile() {
                   showToast('WWCC details extracted from image!');
                 }} />
             </div>
-            <p className="text-sm text-gray-500 mb-4">Required if instructing learners under 18 years of age.</p>
+            <p className="text-sm text-on-surface-variant mb-4">Required if instructing learners under 18 years of age.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">WWCC Number</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">WWCC Number</label>
                 <input type="text" placeholder="e.g. WWC-1234567" value={wwccNumber} onChange={(e) => setWwccNumber(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Expiry Date</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Expiry Date</label>
                 <input type="date" value={wwccExpiry} onChange={(e) => setWwccExpiry(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
             </div>
           </div>
 
           {/* National Police Check */}
-          <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#64748B]">security</span>
+              <h5 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-on-surface-variant">security</span>
                 National Police Check
               </h5>
               <DocumentScanner docType="police_check" label="" existingImageUrl={policeCheckImageUrl}
@@ -822,19 +822,19 @@ export default function PortalProfile() {
                   showToast('Police check date extracted from image!');
                 }} />
             </div>
-            <p className="text-sm text-gray-500 mb-4">Must be no more than 3 months old for initial applications in most states.</p>
+            <p className="text-sm text-on-surface-variant mb-4">Must be no more than 3 months old for initial applications in most states.</p>
             <div className="max-w-xs flex flex-col gap-1.5">
-              <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Date of Check</label>
+              <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Date of Check</label>
               <input type="date" value={policeCheckDate} onChange={(e) => setPoliceCheckDate(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
             </div>
           </div>
 
           {/* Medical Assessment */}
-          <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#64748B]">stethoscope</span>
+              <h5 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-on-surface-variant">stethoscope</span>
                 Medical Assessment
               </h5>
               <DocumentScanner docType="medical_assessment" label="" existingImageUrl={medAssessmentImageUrl}
@@ -846,26 +846,26 @@ export default function PortalProfile() {
                   showToast('Medical assessment details extracted from image!');
                 }} />
             </div>
-            <p className="text-sm text-gray-500 mb-4">Commercial vehicle fitness-to-drive assessment. Typically required every 3 years.</p>
+            <p className="text-sm text-on-surface-variant mb-4">Commercial vehicle fitness-to-drive assessment. Typically required every 3 years.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Assessment Date</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Assessment Date</label>
                 <input type="date" value={medAssessmentDate} onChange={(e) => setMedAssessmentDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Expiry Date</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Expiry Date</label>
                 <input type="date" value={medAssessmentExpiry} onChange={(e) => setMedAssessmentExpiry(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
             </div>
           </div>
 
           {/* Public Liability Insurance */}
-          <div className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+          <div className="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#64748B]">verified_user</span>
+              <h5 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-on-surface-variant">verified_user</span>
                 Public Liability Insurance
               </h5>
               <DocumentScanner docType="public_liability" label="" existingImageUrl={pubLiabImageUrl}
@@ -878,22 +878,22 @@ export default function PortalProfile() {
                   showToast('Insurance details extracted from image!');
                 }} />
             </div>
-            <p className="text-sm text-gray-500 mb-4">Required in some states (e.g. ACT requires $5M cover).</p>
+            <p className="text-sm text-on-surface-variant mb-4">Required in some states (e.g. ACT requires $5M cover).</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Insurance Provider</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Insurance Provider</label>
                 <input type="text" placeholder="e.g. AAMI" value={pubLiabProvider} onChange={(e) => setPubLiabProvider(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Policy Number</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Policy Number</label>
                 <input type="text" placeholder="e.g. POL-123456" value={pubLiabPolicy} onChange={(e) => setPubLiabPolicy(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Expiry Date</label>
+                <label className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Expiry Date</label>
                 <input type="date" value={pubLiabExpiry} onChange={(e) => setPubLiabExpiry(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-[#E5E7EB] rounded-lg text-gray-900" />
+                  className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg text-on-surface" />
               </div>
             </div>
           </div>
@@ -902,10 +902,10 @@ export default function PortalProfile() {
 
         {/* Verification Status Banner */}
         {!isVerified && (
-          <div className={`rounded-[20px] p-4 flex items-center gap-3 mt-gutter ${
+          <div className={`rounded-2xl p-4 flex items-center gap-3 mt-gutter ${
             hasPendingReview
-              ? 'bg-[#064E3B]/80 text-white border border-[#064E3B]'
-              : 'bg-[#064E3B] text-white border border-[#053A2C]'
+              ? 'bg-primary-container/80 text-white border border-primary-container'
+              : 'bg-primary-container text-white border border-primary'
           }`}>
             <span className="material-symbols-outlined text-[20px]">
               {hasPendingReview ? 'schedule' : 'edit_note'}
@@ -924,9 +924,9 @@ export default function PortalProfile() {
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-4 py-10 border-t border-[#E5E7EB]/30 mt-gutter">
+        <div className="flex items-center justify-end gap-4 py-10 border-t border-outline-variant/30 mt-gutter">
           <button type="button" onClick={handleReset}
-            className="px-8 py-3 text-gray-500 font-bold hover:text-[#064E3B] transition-colors rounded-xl">
+            className="px-8 py-3 text-on-surface-variant font-bold hover:text-primary-container transition-colors rounded-xl">
             Discard Changes
           </button>
           {!isVerified && !hasPendingReview && (
@@ -941,13 +941,13 @@ export default function PortalProfile() {
                 finally { setSubmitLoading(false); }
               }}
               disabled={submitLoading}
-              className="px-8 py-3 border border-[#E5E7EB] text-gray-500 font-bold rounded-xl hover:border-[#064E3B] hover:text-[#064E3B] hover:bg-[#064E3B]/5 transition-all disabled:opacity-50"
+              className="px-8 py-3 border border-outline-variant text-on-surface-variant font-bold rounded-xl hover:border-primary-container hover:text-primary-container hover:bg-primary-container/5 transition-all disabled:opacity-50"
             >
               {submitLoading ? 'Submitting...' : 'Submit for Review'}
             </button>
           )}
           <button type="submit" disabled={saving}
-            className="px-10 py-3 bg-[#064E3B] text-white font-bold rounded-xl shadow-lg hover:bg-[#053A2C] transition-all disabled:opacity-50">
+            className="px-10 py-3 bg-primary-container text-white font-bold rounded-xl shadow-lg hover:bg-primary-container/90 transition-all disabled:opacity-50">
             {saving ? 'Saving...' : 'Save Profile'}
           </button>
         </div>
