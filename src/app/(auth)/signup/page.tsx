@@ -2,13 +2,22 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useSignUp, useAuth } from '@clerk/nextjs';
+import { useSignUp, useAuth, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
   const { signUp, isLoaded, setActive } = useSignUp();
   const { isSignedIn } = useAuth();
+  const { signOut } = useClerk();
   const router = useRouter();
+
+  useEffect(() => {
+    const msg = sessionStorage.getItem('signup_warning');
+    if (msg) {
+      setWarning(msg);
+      sessionStorage.removeItem('signup_warning');
+    }
+  }, []);
 
   useEffect(() => {
     if (isSignedIn) {
@@ -32,6 +41,7 @@ export default function SignUpPage() {
   const [isInstructor, setIsInstructor] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState('');
   const [loading, setLoading] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [verifying, setVerifying] = useState(false);
@@ -63,10 +73,13 @@ export default function SignUpPage() {
           } catch (e) {
             console.warn('Instructor profile request failed', e);
           }
+          const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+          const adminData = await adminRes.json();
+          router.push(adminData.isAdmin ? '/admin' : '/portal');
+        } else {
+          await signOut();
+          router.push('/');
         }
-        const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
-        const adminData = await adminRes.json();
-        router.push(adminData.isAdmin ? '/admin' : '/portal');
       } else if (result.status === 'missing_requirements') {
         await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
         setVerifying(true);
@@ -101,10 +114,13 @@ export default function SignUpPage() {
           } catch (e) {
             console.warn('Instructor profile request failed', e);
           }
+          const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+          const adminData = await adminRes.json();
+          router.push(adminData.isAdmin ? '/admin' : '/portal');
+        } else {
+          await signOut();
+          router.push('/');
         }
-        const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
-        const adminData = await adminRes.json();
-        router.push(adminData.isAdmin ? '/admin' : '/portal');
       } else {
         setError('Verification failed. Please try again.');
       }
@@ -129,11 +145,13 @@ export default function SignUpPage() {
       checkAdmin();
       return;
     }
+    sessionStorage.setItem('instructor_signup', isInstructor ? 'true' : 'false');
     signUp.authenticateWithRedirect({
       strategy: `oauth_${provider}`,
       redirectUrl: '/sso-callback',
-      redirectUrlComplete: '/portal',
+      redirectUrlComplete: '/login',
     }).catch((err: any) => {
+      sessionStorage.removeItem('instructor_signup');
       if (err.errors?.[0]?.code === 'session_exists') {
         const checkAdmin = async () => {
           try {
@@ -182,6 +200,14 @@ export default function SignUpPage() {
                 <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
               {error}
+            </div>
+          )}
+          {warning && (
+            <div className="mb-3 p-2.5 bg-amber-50 text-amber-800 rounded-xl text-sm font-semibold text-center border border-amber-300 flex items-center justify-center gap-2">
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              {warning}
             </div>
           )}
 

@@ -44,10 +44,14 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     fetch('/api/portal/profile')
       .then(r => r.json())
       .then(d => {
-        if (d.instructor) setInstructor(d.instructor);
-        if (d.hasPendingReview) setHasPendingReview(true);
+        if (d.instructor) {
+          setInstructor(d.instructor);
+          if (d.hasPendingReview) setHasPendingReview(true);
+        } else {
+          router.push('/');
+        }
       })
-      .catch(() => {});
+      .catch(() => router.push('/'));
   }, []);
 
   useEffect(() => {

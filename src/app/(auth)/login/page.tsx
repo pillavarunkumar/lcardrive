@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { useSignIn, useAuth } from '@clerk/nextjs';
+import { useState, useEffect, useRef } from 'react';
+import { useSignIn, useAuth, useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
 const redirectAfterAuth = async (defaultPath: string) => {
@@ -22,13 +22,9 @@ const redirectAfterAuth = async (defaultPath: string) => {
 export default function LoginPage() {
   const { signIn, isLoaded, setActive } = useSignIn();
   const { isSignedIn } = useAuth();
+  const { user, isLoaded: isUserLoaded } = useUser();
+  const { signOut } = useClerk();
   const router = useRouter();
-
-  useEffect(() => {
-    if (isSignedIn) {
-      redirectAfterAuth('/portal');
-    }
-  }, [isSignedIn, router]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,6 +32,65 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const authCheckDone = useRef(false);
+
+  useEffect(() => {
+    if (isSignedIn && isUserLoaded && user && !authCheckDone.current) {
+      authCheckDone.current = true;
+      handlePostSignIn();
+    }
+  }, [isSignedIn, isUserLoaded, user]);
+
+  const handlePostSignIn = async () => {
+    const instructorSignup = sessionStorage.getItem('instructor_signup');
+    sessionStorage.removeItem('instructor_signup');
+
+    if (instructorSignup === 'true') {
+      const first_name = user?.firstName || 'User';
+      const last_name = user?.lastName || first_name;
+      try {
+        await fetch('/api/portal/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name, last_name }),
+        });
+      } catch (e) {
+        console.warn('Instructor profile creation failed', e);
+      }
+      redirectAfterAuth('/portal');
+      return;
+    }
+
+    if (instructorSignup === 'false') {
+      await signOut();
+      sessionStorage.setItem('signup_warning', 'Please sign up as an instructor first. User not registered yet.');
+      router.push('/signup');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/portal/profile/check');
+      const data = await res.json();
+      if (data.exists) {
+        redirectAfterAuth('/portal');
+      } else {
+        const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+        const adminData = await adminRes.json();
+        if (adminData.isAdmin) {
+          window.location.href = '/admin';
+        } else {
+          await signOut();
+          sessionStorage.setItem('signup_warning', 'Please sign up as an instructor first. User not registered yet.');
+          router.push('/signup');
+        }
+      }
+    } catch {
+      await signOut();
+      sessionStorage.setItem('signup_warning', 'Please sign up as an instructor first. User not registered yet.');
+      router.push('/signup');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +101,16 @@ export default function LoginPage() {
       const result = await signIn.create({ identifier: email, password });
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        await redirectAfterAuth('/portal');
+        const checkRes = await fetch('/api/portal/profile/check');
+        const checkData = await checkRes.json();
+        if (checkData.exists) {
+          await redirectAfterAuth('/portal');
+        } else {
+          await signOut();
+          sessionStorage.setItem('signup_warning', 'Please sign up as an instructor first. User not registered yet.');
+          router.push('/signup');
+          return;
+        }
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -61,7 +125,7 @@ export default function LoginPage() {
     if (!isLoaded) return;
     setError('');
     if (isSignedIn) {
-      redirectAfterAuth('/portal');
+      handlePostSignIn();
       return;
     }
     signIn.authenticateWithRedirect({
@@ -143,6 +207,7 @@ export default function LoginPage() {
               {error}
             </div>
           )}
+
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

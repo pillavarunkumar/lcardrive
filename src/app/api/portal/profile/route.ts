@@ -31,50 +31,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Auto-create row if it doesn't exist yet (catches OAuth signups, failed signup PUTs, etc.)
   if (!data) {
-    let firstName = 'User';
-    let lastName = 'Instructor';
-    let email = '';
-    let profilePhotoUrl = '';
-    try {
-      const client = await clerkClient();
-      const clerkUser = await client.users.getUser(userId);
-      firstName = clerkUser.firstName || firstName;
-      lastName = clerkUser.lastName || clerkUser.firstName || lastName;
-      email = clerkUser.emailAddresses?.[0]?.emailAddress || '';
-      profilePhotoUrl = clerkUser.imageUrl || '';
-    } catch (e) {
-      console.warn('Could not fetch Clerk user for auto-create:', e);
-    }
-
-    const slug = generateSlug(firstName, lastName, userId);
-
-    const { error: insertError } = await supabase
-      .from('instructors')
-      .upsert({
-        clerk_user_id: userId,
-        slug,
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        profile_photo_url: profilePhotoUrl,
-        suburb: 'Unknown',
-        profile_completeness: 0,
-      }, { onConflict: 'clerk_user_id' });
-
-    if (insertError) {
-      console.error('Auto-create instructor row error:', insertError);
-      return NextResponse.json({ instructor: null, hasPendingReview: false });
-    }
-
-    const { data: newData } = await supabase
-      .from('instructors')
-      .select('*')
-      .eq('clerk_user_id', userId)
-      .maybeSingle();
-
-    return NextResponse.json({ instructor: newData ?? null, hasPendingReview: false });
+    return NextResponse.json({ instructor: null, hasPendingReview: false });
   }
 
   let hasPendingReview = false;
@@ -178,6 +136,23 @@ export async function PUT(req: NextRequest) {
     const last = existing?.last_name;
     const isAutoGen = last && (last.includes('_') || /\d/.test(last));
     upsertData.last_name = sanitized.last_name || (isAutoGen ? undefined : last) || sanitized.first_name as string || existing?.first_name || 'Instructor';
+  }
+
+  // If names are default fallbacks, try fetching real name from Clerk
+  if (
+    !existing &&
+    (upsertData.first_name === 'User' || upsertData.last_name === 'Instructor')
+  ) {
+    try {
+      const client = await clerkClient();
+      const clerkUser = await client.users.getUser(userId);
+      if (clerkUser.firstName) upsertData.first_name = clerkUser.firstName;
+      if (clerkUser.lastName) upsertData.last_name = clerkUser.lastName;
+      upsertData.email = upsertData.email || clerkUser.emailAddresses?.[0]?.emailAddress || '';
+      upsertData.profile_photo_url = upsertData.profile_photo_url || clerkUser.imageUrl || '';
+    } catch (e) {
+      console.warn('Could not fetch Clerk user for name fallback:', e);
+    }
   }
   upsertData.suburb = sanitized.suburb || existing?.suburb || 'Unknown';
 

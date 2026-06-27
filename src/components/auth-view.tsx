@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
-import { useSignIn, useSignUp, useAuth } from '@clerk/nextjs';
+import { useSignIn, useSignUp, useAuth, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 
 const redirectAfterAuth = async (defaultPath: string) => {
@@ -218,6 +218,8 @@ function SignUpPanel({ onToggle }: { onToggle: () => void }) {
   const [verificationCode, setVerificationCode] = useState('');
   const [verifying, setVerifying] = useState(false);
 
+  const { signOut } = useClerk();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeTerms) { setError('Please agree to the Terms of Service and Privacy Policy'); return; }
@@ -243,10 +245,13 @@ function SignUpPanel({ onToggle }: { onToggle: () => void }) {
             });
             if (!putRes.ok) console.warn('Instructor profile creation failed');
           } catch {}
+          const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+          const adminData = await adminRes.json();
+          router.push(adminData.isAdmin ? '/admin' : '/portal');
+        } else {
+          await signOut();
+          router.push('/');
         }
-        const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
-        const adminData = await adminRes.json();
-        router.push(adminData.isAdmin ? '/admin' : '/portal');
       } else if (result.status === 'missing_requirements') {
         await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
         setVerifying(true);
@@ -269,9 +274,23 @@ function SignUpPanel({ onToggle }: { onToggle: () => void }) {
       const result = await signUp.attemptEmailAddressVerification({ code: verificationCode });
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
-        const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
-        const adminData = await adminRes.json();
-        window.location.href = adminData.isAdmin ? '/admin' : '/portal';
+        if (isInstructor) {
+          const nameParts = fullName.trim().split(/\s+/);
+          try {
+            const putRes = await fetch('/api/portal/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ first_name: nameParts[0], last_name: nameParts.slice(1).join(' ') || nameParts[0] }),
+            });
+            if (!putRes.ok) console.warn('Instructor profile creation failed');
+          } catch {}
+          const adminRes = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+          const adminData = await adminRes.json();
+          window.location.href = adminData.isAdmin ? '/admin' : '/portal';
+        } else {
+          await signOut();
+          window.location.href = '/';
+        }
       } else {
         setError('Verification failed. Please try again.');
       }
@@ -285,11 +304,13 @@ function SignUpPanel({ onToggle }: { onToggle: () => void }) {
   const handleOAuth = (provider: 'google') => {
     if (!isLoaded) return;
     setError('');
+    sessionStorage.setItem('instructor_signup', isInstructor ? 'true' : 'false');
     signUp.authenticateWithRedirect({
       strategy: `oauth_${provider}`,
       redirectUrl: '/sso-callback',
-      redirectUrlComplete: '/portal',
+      redirectUrlComplete: '/login',
     }).catch((err: any) => {
+      sessionStorage.removeItem('instructor_signup');
       if (err.errors?.[0]?.code === 'session_exists') {
         redirectAfterAuth('/portal');
       } else {

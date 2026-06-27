@@ -24,16 +24,23 @@ export default function Header() {
   const { signOut } = useClerk();
   const [open, setOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminChecked, setAdminChecked] = useState(false);
+  const [isInstructor, setIsInstructor] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isSignedIn && user) {
-      fetch('/api/admin/login-via-clerk', { method: 'POST' })
-        .then(r => r.json())
-        .then(data => { setIsAdmin(data.isAdmin); setAdminChecked(true); })
-        .catch(() => setAdminChecked(true));
+      Promise.all([
+        fetch('/api/admin/login-via-clerk', { method: 'POST' }).then(r => r.json()),
+        fetch('/api/portal/profile/check').then(r => r.json()),
+      ])
+        .then(([adminData, profileData]) => {
+          setIsAdmin(adminData.isAdmin);
+          setIsInstructor(profileData.exists);
+          setRoleChecked(true);
+        })
+        .catch(() => setRoleChecked(true));
     }
   }, [isSignedIn, user]);
 
@@ -83,9 +90,11 @@ export default function Header() {
             <div className="flex items-center gap-3 md:gap-4">
               <div className="text-right hidden md:block">
                 <p className="text-sm font-bold text-primary">{user.fullName || 'Profile'}</p>
-                <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">
-                  {adminChecked ? (isAdmin ? 'Admin' : 'Instructor') : '...'}
-                </p>
+                {roleChecked && (isAdmin || isInstructor) && (
+                  <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">
+                    {isAdmin ? 'Admin' : 'Instructor'}
+                  </p>
+                )}
               </div>
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -104,22 +113,24 @@ export default function Header() {
                       <p className="text-sm font-bold text-primary">{user.fullName}</p>
                       <p className="text-xs text-on-surface-variant">{user.primaryEmailAddress?.emailAddress}</p>
                     </div>
-                    <button
-                      onClick={async () => {
-                        setShowDropdown(false);
-                        try {
-                          const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
-                          const data = await res.json();
-                          router.push(data.isAdmin ? '/admin' : '/portal');
-                        } catch {
-                          router.push('/portal');
-                        }
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-secondary">dashboard</span>
-                      Dashboard
-                    </button>
+                    {(isAdmin || isInstructor) && (
+                      <button
+                        onClick={async () => {
+                          setShowDropdown(false);
+                          try {
+                            const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+                            const data = await res.json();
+                            router.push(data.isAdmin ? '/admin' : '/portal');
+                          } catch {
+                            router.push('/portal');
+                          }
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[18px] text-secondary">dashboard</span>
+                        Dashboard
+                      </button>
+                    )}
                     <button
                       onClick={() => { setShowDropdown(false); signOut({ redirectUrl: '/' }); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors"
@@ -151,19 +162,7 @@ export default function Header() {
       {open && (
         <div className="md:hidden border-t border-outline-variant bg-white px-margin-mobile py-4 space-y-4">
           {isSignedIn && user && (
-            <button
-              onClick={async () => {
-                setOpen(false);
-                try {
-                  const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
-                  const data = await res.json();
-                  router.push(data.isAdmin ? '/admin' : '/portal');
-                } catch {
-                  router.push('/portal');
-                }
-              }}
-              className="flex items-center gap-3 pb-3 border-b border-outline-variant w-full"
-            >
+            <div className="flex items-center gap-3 pb-3 border-b border-outline-variant w-full">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-sm font-bold overflow-hidden shrink-0 border-2 border-white shadow-sm">
                 {user.imageUrl ? (
                   <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
@@ -173,11 +172,30 @@ export default function Header() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold text-primary">{user.fullName}</p>
-                <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">
-                  {adminChecked ? (isAdmin ? 'Admin' : 'Instructor') : '...'}
-                </p>
+                {roleChecked && (isAdmin || isInstructor) && (
+                  <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium">
+                    {isAdmin ? 'Admin' : 'Instructor'}
+                  </p>
+                )}
               </div>
-            </button>
+              {(isAdmin || isInstructor) && (
+                <button
+                  onClick={async () => {
+                    setOpen(false);
+                    try {
+                      const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
+                      const data = await res.json();
+                      router.push(data.isAdmin ? '/admin' : '/portal');
+                    } catch {
+                      router.push('/portal');
+                    }
+                  }}
+                  className="ml-auto text-sm font-bold text-primary hover:underline"
+                >
+                  Dashboard
+                </button>
+              )}
+            </div>
           )}
           {navLinks.map((link) => {
             const active = isActive(link.href, pathname);
