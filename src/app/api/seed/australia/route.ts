@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 const instructors = [
   // NSW — Sydney metro + regional
   { first_name: 'James', last_name: 'Mitchell', suburb: 'Parramatta', state: 'NSW', postcode: '2150', lat: -33.8162, lng: 151.0032, hourly_rate: 70, transmission: 'both', licence_types: ['car'], lesson_duration_mins: 60, vehicle_make: 'Toyota', vehicle_model: 'Corolla', vehicle_year: 2023, languages: ['English'], bio: 'Patient instructor with 10 years experience. Specialising in test preparation for Parramatta and Hills districts.', years_experience: 10, dual_controls: true, specialises_anxiety: true, accepts_international: true, availability_days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], service_suburbs: ['Parramatta', 'Westmead', 'Wentworthville', 'Merrylands', 'Granville'], service_radius_km: 12, adi_registration: 'ADI-NSW-101', gender: 'male', familiar_test_centres: ['Parramatta', 'Seven Hills'], package_options: [{ hours: 5, price: 330, label: '5-Hour Pack' }, { hours: 10, price: 620, label: '10-Hour Pack' }] },

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 const instructors = [
   {
     first_name: 'Sarah', last_name: 'Mitchell', suburb: 'Coburg', state: 'VIC', postcode: '3058',

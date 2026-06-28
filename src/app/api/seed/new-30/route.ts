@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 const instructors = [
   // NSW — 5 instructors
   { first_name: 'Oliver', last_name: 'Hayes', suburb: 'Chatswood', state: 'NSW', postcode: '2067', lat: -33.7964, lng: 151.1837, hourly_rate: 75, transmission: 'both', licence_types: ['car'], lesson_duration_mins: 60, vehicle_make: 'Toyota', vehicle_model: 'Camry', vehicle_year: 2023, languages: ['English', 'Korean'], bio: 'Patient instructor serving Sydneys lower north shore. Specialises in nervous drivers and test preparation.', years_experience: 9, dual_controls: true, specialises_anxiety: true, accepts_international: true, availability_days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], service_suburbs: ['Chatswood', 'St Leonards', 'North Sydney', 'Artarmon', 'Roseville'], service_radius_km: 10, adi_registration: 'ADI-NSW-707', gender: 'male', familiar_test_centres: ['Chatswood', 'Ryde'], package_options: [{ hours: 5, price: 350, label: '5 Pack' }, { hours: 10, price: 660, label: '10 Pack' }] },
