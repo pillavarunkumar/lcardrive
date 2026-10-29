@@ -64,10 +64,11 @@ export async function POST() {
 
   const now = new Date().toISOString();
 
+  // Record the submission, but never grant is_verified here. Only an admin
+  // approval can flip the public verification flag.
   const { error: updateError } = await supabase
     .from('instructors')
     .update({
-      is_verified: true,
       identity_verified_at: now,
       documents_submitted_at: now,
     })
@@ -77,5 +78,28 @@ export async function POST() {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
-  return NextResponse.json({ verified: true, verified_at: now });
+  const { data: existingFlag } = await supabase
+    .from('listing_flags')
+    .select('id')
+    .eq('instructor_id', instructor.id)
+    .eq('detail', 'profile_review')
+    .eq('is_resolved', false)
+    .maybeSingle();
+
+  if (!existingFlag) {
+    const { error: insertError } = await supabase
+      .from('listing_flags')
+      .insert({
+        instructor_id: instructor.id,
+        reason: 'other',
+        detail: 'profile_review',
+        is_resolved: false,
+      });
+
+    if (insertError) {
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ submitted: true, pendingReview: true, submitted_at: now });
 }

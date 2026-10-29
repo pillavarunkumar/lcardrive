@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { PUBLIC_INSTRUCTOR_COLUMNS, sanitizePublicInstructor } from '@/lib/instructors/public';
 
 export async function GET(request: Request) {
   if (!supabase) {
@@ -30,7 +31,10 @@ export async function GET(request: Request) {
     .eq('is_resolved', false);
   const deactivatedIds = deactivated?.map(d => d.instructor_id).filter(Boolean) || [];
 
-  let query = supabase.from('instructors').select('*', { count: 'exact' });
+  // Dynamic column list, so keep the builder loosely typed.
+  let query: any = supabase
+    .from('instructors')
+    .select(PUBLIC_INSTRUCTOR_COLUMNS.join(', '), { count: 'exact' });
 
   query = query.eq('is_verified', true);
 
@@ -119,13 +123,14 @@ export async function GET(request: Request) {
   }
 
   const instructors = (data || []).map((inst: any) => {
-    if (!inst.average_rating || !inst.review_count) {
-      const seed = inst.first_name?.charCodeAt(0) + inst.last_name?.charCodeAt(0) + inst.id?.charCodeAt(0) || 0;
+    const safe = sanitizePublicInstructor(inst);
+    if (!safe.average_rating || !safe.review_count) {
+      const seed = String(inst.first_name).charCodeAt(0) + String(inst.last_name).charCodeAt(0) + String(inst.id).charCodeAt(0);
       const rating = (4.2 + ((seed * 7) % 8) / 10).toFixed(1);
       const reviews = 10 + ((seed * 13) % 91);
-      return { ...inst, average_rating: parseFloat(rating), review_count: reviews };
+      return { ...safe, average_rating: parseFloat(rating), review_count: reviews };
     }
-    return inst;
+    return safe;
   });
 
   try {
