@@ -27,10 +27,28 @@ async function main() {
   console.log('Connected.\n');
 
   const migrationsDir = resolve(__dirname, '../supabase/migrations');
-  const files = readdirSync(migrationsDir).sort();
+  let files = readdirSync(migrationsDir).sort().filter((file) => file.endsWith('.sql'));
+
+  // Optional arguments apply only the named migrations, e.g.
+  //   node scripts/apply-migrations.mjs 00014_document_reviews.sql 00015_documents_bucket_private.sql
+  // This avoids replaying historical migrations (some of which clean up or
+  // rewrite existing rows) against a database that is already set up.
+  const requested = process.argv.slice(2);
+  if (requested.length > 0) {
+    const missing = requested.filter((name) => !files.includes(name));
+    if (missing.length > 0) {
+      console.error(`Unknown migration(s): ${missing.join(', ')}`);
+      console.error(`Available: ${files.join(', ')}`);
+      process.exit(1);
+    }
+    files = files.filter((file) => requested.includes(file));
+  } else {
+    console.warn(
+      'No migration names supplied: applying ALL migrations. On an existing database prefer naming only the new ones.',
+    );
+  }
 
   for (const file of files) {
-    if (!file.endsWith('.sql')) continue;
     const sql = readFileSync(resolve(migrationsDir, file), 'utf-8');
     process.stdout.write(`Applying ${file}...`);
     try {
