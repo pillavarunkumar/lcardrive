@@ -4,6 +4,31 @@ import { useEffect, useState, useCallback } from 'react';
 import type { Instructor } from '@/types';
 import { getAvatarUrl } from '@/lib/utils';
 
+interface AdminDocument {
+  docType: string;
+  label: string;
+  uploaded: boolean;
+  path: string | null;
+  signedUrl: string | null;
+}
+
+interface DocumentReviewRow {
+  id: string;
+  doc_type: string;
+  confidence: number | null;
+  reason: string | null;
+  extracted: Record<string, unknown>;
+  image_url: string | null;
+  model_attempts: number;
+  created_at: string;
+}
+
+interface DocumentResponse {
+  instructor: { id: string; name: string };
+  documents: AdminDocument[];
+  pendingReviews: DocumentReviewRow[];
+}
+
 export default function AdminInstructors() {
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [total, setTotal] = useState(0);
@@ -23,6 +48,7 @@ export default function AdminInstructors() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deletingBulk, setDeletingBulk] = useState(false);
+  const [docViewer, setDocViewer] = useState<{ loading: boolean; error: string | null; data: DocumentResponse | null } | null>(null);
   const limit = 50;
 
   const fetchInstructors = useCallback(async (p: number, q: string, vf?: string, cf?: string, so?: string) => {
@@ -53,6 +79,25 @@ export default function AdminInstructors() {
   useEffect(() => {
     fetchInstructors(page, searchQuery, verificationFilter, claimFilter, sortOrder);
   }, [page, searchQuery, verificationFilter, claimFilter, sortOrder, fetchInstructors]);
+
+  const openDocuments = async (id: string) => {
+    setDocViewer({ loading: true, error: null, data: null });
+    try {
+      const res = await fetch(`/api/admin/documents/${id}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || 'Failed to load documents');
+      }
+      const data = (await res.json()) as DocumentResponse;
+      setDocViewer({ loading: false, error: null, data });
+    } catch (error) {
+      setDocViewer({
+        loading: false,
+        error: error instanceof Error ? error.message : 'Failed to load documents',
+        data: null,
+      });
+    }
+  };
 
   const totalPages = Math.ceil(total / limit);
 
@@ -345,6 +390,13 @@ export default function AdminInstructors() {
                     </td>
                     <td className="pl-3 pr-6 py-3 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-0.5">
+                        <button
+                          onClick={() => openDocuments(inst.id)}
+                          className="p-1 rounded-md text-gray-500 hover:text-[#064E3B] hover:bg-gray-100 transition-all"
+                          title="View documents"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">folder_open</span>
+                        </button>
                         <a
                           href={`/instructors/${(inst.suburb || '').toLowerCase().replace(/\s+/g, '-')}/${inst.slug || ''}`}
                           target="_blank"
@@ -539,6 +591,93 @@ export default function AdminInstructors() {
           </div>
         </div>
       )}
+      {docViewer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[20px] max-w-3xl w-full shadow-xl border border-[#E5E7EB] max-h-[85vh] overflow-y-auto">
+            <div className="flex items-start justify-between p-5 border-b border-[#E5E7EB]">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">
+                  {docViewer.data ? `Documents — ${docViewer.data.instructor.name}` : 'Documents'}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">Private files are served through 5-minute signed links.</p>
+              </div>
+              <button
+                onClick={() => setDocViewer(null)}
+                className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <div className="p-5">
+              {docViewer.loading && <p className="text-sm text-gray-500">Loading documents…</p>}
+
+              {docViewer.error && (
+                <p className="text-sm text-red-500">{docViewer.error}</p>
+              )}
+
+              {docViewer.data && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {docViewer.data.documents.map((doc) => (
+                      <div key={doc.docType} className="border border-[#E5E7EB] rounded-xl p-3 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-bold text-gray-900">{doc.label}</p>
+                          <p className="text-[10px] text-gray-500 mt-0.5">
+                            {doc.uploaded ? (doc.signedUrl ? 'Uploaded' : 'Uploaded (file unavailable)') : 'Not uploaded'}
+                          </p>
+                        </div>
+                        {doc.signedUrl ? (
+                          <a
+                            href={doc.signedUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] font-bold text-[#064E3B] hover:underline"
+                          >
+                            Open
+                          </a>
+                        ) : (
+                          <span className="text-[11px] text-gray-400">—</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6">
+                    <h4 className="text-xs font-bold text-gray-900 mb-2">Pending manual reviews</h4>
+                    {docViewer.data.pendingReviews.length === 0 ? (
+                      <p className="text-xs text-gray-500">No low-confidence scans queued.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {docViewer.data.pendingReviews.map((review) => (
+                          <div key={review.id} className="border border-amber-200 bg-amber-50 rounded-xl p-3 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-amber-900">{review.doc_type}</span>
+                              <span className="text-amber-700">
+                                {review.reason} · {typeof review.confidence === 'number' ? `${Math.round(review.confidence * 100)}%` : 'n/a'} · {review.model_attempts} attempt(s)
+                              </span>
+                            </div>
+                            <pre className="mt-2 text-[10px] text-amber-900 whitespace-pre-wrap break-words">
+                              {JSON.stringify(review.extracted, null, 2)}
+                            </pre>
+                            {review.image_url && (
+                              <a href={review.image_url} target="_blank" rel="noreferrer" className="mt-2 inline-block font-bold text-amber-900 hover:underline">
+                                Open scanned file
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

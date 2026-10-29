@@ -129,6 +129,14 @@ export default function PortalProfile() {
       setPubLiabProvider(inst.public_liability_provider || '');
       setPubLiabPolicy(inst.public_liability_policy_number || '');
       setPubLiabExpiry(inst.public_liability_expiry || '');
+      setDriversLicenceImageUrl(inst.drivers_licence_image_url || null);
+      setAdiRegImageUrl(inst.adi_registration_image_url || null);
+      setCertIVImageUrl(inst.certificate_iv_image_url || null);
+      setWwccImageUrl(inst.wwcc_image_url || null);
+      setPoliceCheckImageUrl(inst.police_check_image_url || null);
+      setMedAssessmentImageUrl(inst.medical_assessment_image_url || null);
+      setPubLiabImageUrl(inst.public_liability_image_url || null);
+      setVehicleImageUrl(inst.vehicle_image_url || null);
       setMobileNumber(inst.phone || '');
       setGender(inst.gender || 'male');
       setLastName(inst.last_name || user?.lastName || '');
@@ -159,11 +167,11 @@ export default function PortalProfile() {
     try {
       const res = await fetch('/api/portal/verify', { method: 'POST' });
       const data = await res.json();
-      if (data.verified) {
-        setIsVerified(true);
-        showToast('Profile verified successfully!');
+      if (data.submitted) {
+        setHasPendingReview(true);
+        showToast('Documents submitted for admin review.');
       } else {
-        showToast('Verification failed.');
+        showToast(data.error || 'Verification failed.');
       }
     } catch {
       showToast('Verification failed.');

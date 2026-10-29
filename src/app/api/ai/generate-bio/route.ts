@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { auth } from '@clerk/nextjs/server';
+import { generateContent } from '@/lib/gemini';
+import { rateLimit, rateLimitHeaders } from '@/lib/http/rate-limit';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const limit = rateLimit(`ai:bio:${userId}`, 10, 60 * 60 * 1000);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many bio generations. Please try again later.' },
+      { status: 429, headers: rateLimitHeaders(limit) },
+    );
+  }
+
   try {
     const body = await req.json();
     const { experience, licenceTypes, teachingStyle, learnerTypes, specialisations, proudest } = body;
@@ -25,9 +40,7 @@ Write a bio that is:
 
 Return ONLY the bio text, no quotes, no JSON, no prefixes.`;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-    const result = await model.generateContent(prompt);
-    const bio = result.response.text().trim();
+    const bio = (await generateContent(prompt)).trim();
 
     return NextResponse.json({ bio });
   } catch (error) {

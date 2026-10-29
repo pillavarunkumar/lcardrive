@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 
 interface DocumentScannerProps {
@@ -10,12 +10,36 @@ interface DocumentScannerProps {
   onScanned: (data: Record<string, string>, imageUrl: string | null, documentName?: string | null) => void;
 }
 
+async function resolvePreview(value: string | null | undefined): Promise<string | null> {
+  if (!value) return null;
+  if (!value.startsWith('documents/')) return value;
+
+  try {
+    const res = await fetch(`/api/portal/documents/url?path=${encodeURIComponent(value)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.url || null;
+  } catch {
+    return null;
+  }
+}
+
 export default function DocumentScanner({ docType, label, existingImageUrl, onScanned }: DocumentScannerProps) {
   const { user } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [scanning, setScanning] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(existingImageUrl || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    resolvePreview(existingImageUrl).then((url) => {
+      if (!cancelled) setPreviewUrl(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [existingImageUrl]);
 
   const handleScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,11 +50,11 @@ export default function DocumentScanner({ docType, label, existingImageUrl, onSc
 
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
+    let keepObjectUrl = false;
 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('doc_type', docType);
-    formData.append('clerk_user_id', user.id);
 
     try {
       const res = await fetch('/api/ai/scan-document', {
@@ -44,13 +68,26 @@ export default function DocumentScanner({ docType, label, existingImageUrl, onSc
       }
 
       const data = await res.json();
-      onScanned(data.extracted, data.image_url || objectUrl, data.document_name);
+
+      if (data.requires_review) {
+        setError(
+          data.review_reason === 'timeout'
+            ? 'The scan timed out and has been sent for manual review.'
+            : 'We could not read this document confidently. It has been sent for manual review.',
+        );
+      }
+
+      // Store the private storage path, not a signed URL that expires.
+      const storedValue = data.image_path || data.image_url || objectUrl;
+      keepObjectUrl = !data.image_url && !data.image_path;
+
+      onScanned(data.extracted || {}, storedValue, data.document_name);
+      setPreviewUrl(data.image_url || objectUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Scan failed');
-      URL.revokeObjectURL(objectUrl);
-      setPreviewUrl(existingImageUrl || null);
+      setPreviewUrl(await resolvePreview(existingImageUrl));
     } finally {
-      URL.revokeObjectURL(objectUrl);
+      if (!keepObjectUrl) URL.revokeObjectURL(objectUrl);
       setScanning(false);
       e.target.value = '';
     }
@@ -66,7 +103,7 @@ export default function DocumentScanner({ docType, label, existingImageUrl, onSc
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
         className="hidden"
         onChange={handleScan}
       />
