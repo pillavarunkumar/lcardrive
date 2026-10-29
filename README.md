@@ -178,7 +178,10 @@ node scripts/apply-migrations.mjs 00014_document_reviews.sql 00015_documents_buc
 ```
 
 `00014` creates the manual review table and `00015` makes the `documents` bucket
-private. Apply them before deploying the code that depends on them.
+private. Apply them before deploying the code that depends on them. The script
+refuses to run without arguments; use `--all` only for a fresh database.
+See `docs/post-deploy-security.md` for the migration verification and
+post-deploy checks.
 
 ## License
 
