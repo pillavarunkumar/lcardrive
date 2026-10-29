@@ -12,7 +12,40 @@ async function ask(question) {
   return new Promise(resolve => rl.question(question, answer => { rl.close(); resolve(answer); }));
 }
 
+function selectFiles() {
+  const migrationsDir = resolve(__dirname, '../supabase/migrations');
+  const allFiles = readdirSync(migrationsDir).sort().filter((file) => file.endsWith('.sql'));
+  const requested = process.argv.slice(2);
+
+  // Named arguments apply only those migrations, e.g.
+  //   node scripts/apply-migrations.mjs 00014_document_reviews.sql 00015_documents_bucket_private.sql
+  // This avoids replaying historical migrations (some of which clean up or
+  // rewrite existing rows) against a database that is already set up.
+  if (requested.length === 0) {
+    console.error('Refusing to apply every migration to an existing database.');
+    console.error('Pass --all for a fresh database, or name the migrations to apply.');
+    console.error(`Available: ${allFiles.join(', ')}`);
+    process.exit(1);
+  }
+
+  if (requested.length === 1 && requested[0] === '--all') {
+    console.warn('Applying ALL migrations. Use this only on a fresh database.\n');
+    return { migrationsDir, files: allFiles };
+  }
+
+  const missing = requested.filter((name) => !allFiles.includes(name));
+  if (missing.length > 0) {
+    console.error(`Unknown migration(s): ${missing.join(', ')}`);
+    console.error(`Available: ${allFiles.join(', ')}`);
+    process.exit(1);
+  }
+
+  return { migrationsDir, files: allFiles.filter((file) => requested.includes(file)) };
+}
+
 async function main() {
+  const { migrationsDir, files } = selectFiles();
+
   let dbUrl = process.env.DATABASE_URL;
 
   if (!dbUrl) {
@@ -26,28 +59,7 @@ async function main() {
   await client.connect();
   console.log('Connected.\n');
 
-  const migrationsDir = resolve(__dirname, '../supabase/migrations');
-  let files = readdirSync(migrationsDir).sort().filter((file) => file.endsWith('.sql'));
-
-  // Optional arguments apply only the named migrations, e.g.
-  //   node scripts/apply-migrations.mjs 00014_document_reviews.sql 00015_documents_bucket_private.sql
-  // This avoids replaying historical migrations (some of which clean up or
-  // rewrite existing rows) against a database that is already set up.
-  const requested = process.argv.slice(2);
-  if (requested.length > 0) {
-    const missing = requested.filter((name) => !files.includes(name));
-    if (missing.length > 0) {
-      console.error(`Unknown migration(s): ${missing.join(', ')}`);
-      console.error(`Available: ${files.join(', ')}`);
-      process.exit(1);
-    }
-    files = files.filter((file) => requested.includes(file));
-  } else {
-    console.warn(
-      'No migration names supplied: applying ALL migrations. On an existing database prefer naming only the new ones.',
-    );
-  }
-
+  let failures = 0;
   for (const file of files) {
     const sql = readFileSync(resolve(migrationsDir, file), 'utf-8');
     process.stdout.write(`Applying ${file}...`);
@@ -55,12 +67,17 @@ async function main() {
       await client.query(sql);
       console.log(' OK');
     } catch (err) {
+      failures += 1;
       console.log(` FAILED — ${err.message}`);
     }
   }
 
   await client.end();
   console.log('\nDone! Now restart your Next.js dev server for PostgREST to refresh its schema cache.');
+  if (failures > 0) {
+    console.error(`${failures} migration(s) failed. Review the errors above before continuing.`);
+    process.exitCode = 1;
+  }
 }
 
 main().catch(err => {
