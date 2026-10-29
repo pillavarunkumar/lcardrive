@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: Lint, test, eval and build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+
+    env:
+      # Dummy values only. The build evaluates API route modules, so a
+      # well-formed URL is required; nothing connects to these services.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk
+      CLERK_SECRET_KEY: sk_test_ci_placeholder
+      SUPABASE_SERVICE_KEY: ci-placeholder
+      GEMINI_API_KEY: ci-placeholder
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit and route tests
+        run: npm test
+
+      - name: AI scanning evaluation
+        run: npm run eval
+
+      - name: Upload evaluation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results-node-${{ matrix.node-version }}
+          path: eval/results.md
+          if-no-files-found: ignore
+
+      - name: Build
+        run: npm run build
