@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { computeCompleteness } from '@/lib/utils';
+import { findOrLinkInstructor, getClerkProfile, syncClerkPhoto } from '@/lib/instructors/link';
 import type { NextRequest } from 'next/server';
 
 function generateSlug(firstName: string, lastName: string, userId: string): string {
@@ -21,46 +22,40 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from('instructors')
-    .select('*')
-    .eq('clerk_user_id', userId)
-    .maybeSingle();
+  const profile = await getClerkProfile(userId);
+  const { instructor: found } = await findOrLinkInstructor(userId, profile);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  if (!data) {
+  if (!found) {
     return NextResponse.json({ instructor: null, hasPendingReview: false });
   }
 
+  // Keep the public profile photo in sync with the signed-in Clerk (Google)
+  // account so the listing always shows the same image as the Gmail photo.
+  const data = await syncClerkPhoto(found, profile);
+
   let hasPendingReview = false;
-  if (data?.id) {
-    const { data: flag } = await supabase
-      .from('listing_flags')
-      .select('id')
-      .eq('instructor_id', data.id)
-      .eq('detail', 'profile_review')
-      .eq('is_resolved', false)
-      .maybeSingle();
-    hasPendingReview = !!flag;
-  }
+  const { data: flag } = await supabase
+    .from('listing_flags')
+    .select('id')
+    .eq('instructor_id', data.id)
+    .eq('detail', 'profile_review')
+    .eq('is_resolved', false)
+    .maybeSingle();
+  hasPendingReview = !!flag;
 
   // Check deactivation status via listing_flags
-  let isHidden = false;
-  if (data?.id) {
-    const { data: deactivated } = await supabase
-      .from('listing_flags')
-      .select('id')
-      .eq('instructor_id', data.id)
-      .eq('detail', 'deactivated')
-      .eq('is_resolved', false)
-      .maybeSingle();
-    isHidden = !!deactivated;
-  }
+  const { data: deactivated } = await supabase
+    .from('listing_flags')
+    .select('id')
+    .eq('instructor_id', data.id)
+    .eq('detail', 'deactivated')
+    .eq('is_resolved', false)
+    .maybeSingle();
 
-  return NextResponse.json({ instructor: { ...data, is_hidden: isHidden }, hasPendingReview });
+  return NextResponse.json({
+    instructor: { ...data, is_hidden: !!deactivated },
+    hasPendingReview,
+  });
 }
 
 export async function PUT(req: NextRequest) {
@@ -73,7 +68,12 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
   const allowedFields = [
     'first_name', 'last_name', 'email',
@@ -108,66 +108,73 @@ export async function PUT(req: NextRequest) {
     }
   }
 
-  // Fetch existing record so computeCompleteness sees all fields, not just the partial update
-  const { data: existing } = await supabase
-    .from('instructors')
-    .select('*')
-    .eq('clerk_user_id', userId)
-    .maybeSingle();
+  // Clerk is the source of truth for the account's Google profile photo.
+  const profile = await getClerkProfile(userId);
+  const { instructor: existing } = await findOrLinkInstructor(userId, profile);
+  const clerkImageUrl = profile?.imageUrl || '';
+  const clerkEmail = profile?.email || '';
+  const clerkFirstName = profile?.firstName || '';
+  const clerkLastName = profile?.lastName || '';
 
-  const merged = { ...existing, ...sanitized };
+  // Fetch existing record so computeCompleteness sees all fields, not just the partial update
+  const merged = {
+    ...existing,
+    ...sanitized,
+    ...(clerkImageUrl ? { profile_photo_url: clerkImageUrl } : {}),
+  };
   const completeness = computeCompleteness(merged);
 
-  const upsertData: Record<string, unknown> = {
+  const data: Record<string, unknown> = {
     ...sanitized,
     profile_completeness: completeness,
     clerk_user_id: userId,
   };
 
   // Always provide slug — required NOT NULL for both new and existing records
-  upsertData.slug = existing?.slug || generateSlug(
-    (sanitized.first_name as string) || existing?.first_name || 'User',
-    (sanitized.last_name as string) || existing?.last_name || '',
+  data.slug = existing?.slug || generateSlug(
+    (sanitized.first_name as string) || existing?.first_name || clerkFirstName || 'User',
+    (sanitized.last_name as string) || existing?.last_name || clerkLastName || '',
     userId,
   );
   // Ensure NOT NULL columns always have a value in the upsert row
-  upsertData.first_name = sanitized.first_name || existing?.first_name || 'User';
+  data.first_name = sanitized.first_name || existing?.first_name || clerkFirstName || 'User';
   {
     const last = existing?.last_name;
     const isAutoGen = last && (last.includes('_') || /\d/.test(last));
-    upsertData.last_name = sanitized.last_name || (isAutoGen ? undefined : last) || sanitized.first_name as string || existing?.first_name || 'Instructor';
+    data.last_name = sanitized.last_name || (isAutoGen ? undefined : last) || sanitized.first_name as string || existing?.first_name || clerkLastName || 'Instructor';
   }
 
-  // If names are default fallbacks, try fetching real name from Clerk
-  if (
-    !existing &&
-    (upsertData.first_name === 'User' || upsertData.last_name === 'Instructor')
-  ) {
-    try {
-      const client = await clerkClient();
-      const clerkUser = await client.users.getUser(userId);
-      if (clerkUser.firstName) upsertData.first_name = clerkUser.firstName;
-      if (clerkUser.lastName) upsertData.last_name = clerkUser.lastName;
-      upsertData.email = upsertData.email || clerkUser.emailAddresses?.[0]?.emailAddress || '';
-      upsertData.profile_photo_url = upsertData.profile_photo_url || clerkUser.imageUrl || '';
-    } catch (e) {
-      console.warn('Could not fetch Clerk user for name fallback:', e);
+  // If names are default fallbacks, use the Clerk account name.
+  if (!existing && (data.first_name === 'User' || data.last_name === 'Instructor')) {
+    if (clerkFirstName) data.first_name = clerkFirstName;
+    if (clerkLastName) data.last_name = clerkLastName;
+  }
+
+  // Keep the public photo identical to the Google/Clerk profile photo.
+  data.profile_photo_url =
+    clerkImageUrl || (data.profile_photo_url as string) || existing?.profile_photo_url || '';
+  data.email = data.email || clerkEmail || existing?.email || '';
+  data.suburb = sanitized.suburb || existing?.suburb || 'Unknown';
+
+  if (existing?.id) {
+    const { error } = await supabase
+      .from('instructors')
+      .update(data)
+      .eq('id', existing.id);
+
+    if (error) {
+      console.error('PUT /api/portal/profile update error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-  }
-  upsertData.suburb = sanitized.suburb || existing?.suburb || 'Unknown';
+  } else {
+    const { error } = await supabase
+      .from('instructors')
+      .upsert(data, { onConflict: 'clerk_user_id' });
 
-  const { error } = await supabase
-    .from('instructors')
-    .upsert(upsertData, { onConflict: 'clerk_user_id' });
-
-  if (error) {
-    console.error('PUT /api/portal/profile upsert error:', error);
-    return NextResponse.json({
-      error: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
-    }, { status: 500 });
+    if (error) {
+      console.error('PUT /api/portal/profile upsert error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ success: true });

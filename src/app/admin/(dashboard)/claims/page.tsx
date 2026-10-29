@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 
 interface Claim {
   id: string;
+  instructor_id?: string;
   instructor_name: string;
   adi_registration: string | null;
   suburb?: string;
@@ -11,6 +12,9 @@ interface Claim {
   is_verified?: boolean;
   reason?: string;
   detail?: string | null;
+  claimant_name?: string | null;
+  claimant_email?: string | null;
+  already_claimed?: boolean;
   created_at: string;
 }
 
@@ -22,11 +26,11 @@ export default function AdminClaims() {
   useEffect(() => {
     Promise.all([
       fetch('/api/admin/claims/unverified').then(r => r.json()),
-      fetch('/api/admin/stats').then(r => r.json()),
+      fetch('/api/admin/claims/submitted').then(r => r.json()),
     ])
-      .then(([unverifiedData, statsData]) => {
+      .then(([unverifiedData, submittedData]) => {
         if (unverifiedData.claims) setUnverified(unverifiedData.claims);
-        if (statsData.recentClaims) setSubmittedClaims(statsData.recentClaims);
+        if (submittedData.claims) setSubmittedClaims(submittedData.claims);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -228,8 +232,13 @@ export default function AdminClaims() {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-gray-900">{claim.instructor_name}</p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {claim.claimant_name || claim.claimant_email
+                            ? [claim.claimant_name, claim.claimant_email].filter(Boolean).join(' · ')
+                            : 'Claimant details unavailable'}
+                        </p>
                         <p className="text-xs text-[#064E3B] flex items-center gap-1">
-                          View Marketplace Listing
+                          {claim.already_claimed ? 'Profile already linked' : 'View Marketplace Listing'}
                           <span className="material-symbols-outlined text-[12px]">open_in_new</span>
                         </p>
                       </div>

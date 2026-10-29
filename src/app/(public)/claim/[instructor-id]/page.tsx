@@ -1,26 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useParams, usePathname } from 'next/navigation';
+import { SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
 
 export default function ClaimPage() {
   const params = useParams();
-  const [step, setStep] = useState<'signup' | 'submit' | 'done'>('signup');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const pathname = usePathname();
+  const { user, isLoaded, isSignedIn } = useUser();
+  const [step, setStep] = useState<'submit' | 'done'>('submit');
   const [adiNumber, setAdiNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStep('submit');
-  };
+  const instructorId = String(params['instructor-id'] || '');
+  const displayName =
+    user?.fullName ||
+    [user?.firstName, user?.lastName].filter(Boolean).join(' ') ||
+    user?.primaryEmailAddress?.emailAddress ||
+    '';
+  const displayEmail = user?.primaryEmailAddress?.emailAddress || '';
+
+  useEffect(() => {
+    document.title = 'Claim This Profile | LCarDrive';
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!instructorId) return;
     setLoading(true);
     setError('');
     try {
@@ -28,14 +36,11 @@ export default function ClaimPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instructor_id: params['instructor-id'],
-          first_name: firstName,
-          last_name: lastName,
-          email,
+          instructor_id: instructorId,
           adi_number: adiNumber || undefined,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setStep('done');
       } else {
@@ -59,47 +64,80 @@ export default function ClaimPage() {
       </div>
 
       <div className="card-shadow bg-white rounded-2xl p-8">
-        {step === 'signup' && (
-          <form onSubmit={handleSignup} className="space-y-4">
-            <h3 className="font-bold text-on-surface mb-2">Your Details</h3>
-            {error && (
-              <div className="p-3 bg-error-container text-on-error-container rounded-xl text-sm flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px]">error</span>
-                {error}
-              </div>
-            )}
-            <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" required />
-            <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" required />
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" required />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" required minLength={8} />
-            <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all">
-              Continue
-            </button>
-          </form>
+        {!isLoaded && (
+          <div className="py-10 text-center text-sm text-gray-500">Checking your account…</div>
         )}
 
-        {step === 'submit' && (
+        {isLoaded && !isSignedIn && (
+          <div className="space-y-4 text-center">
+            <h3 className="font-bold text-on-surface">Sign in to continue</h3>
+            <p className="text-sm text-on-surface-variant">
+              Use the email address on your existing listing. We&apos;ll match it automatically and send the
+              claim to our team for review.
+            </p>
+            <div className="flex flex-col gap-2">
+              <SignInButton mode="modal" forceRedirectUrl={pathname}>
+                <button className="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all">
+                  Sign in
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal" forceRedirectUrl={pathname}>
+                <button className="w-full border border-primary text-primary py-3 rounded-lg font-bold text-sm hover:bg-primary/5 transition-all">
+                  Create an account
+                </button>
+              </SignUpButton>
+            </div>
+            <p className="text-xs text-gray-400">
+              Trouble signing in?{' '}
+              <Link href="/login" className="text-primary hover:underline">
+                Use the password login
+              </Link>
+            </p>
+          </div>
+        )}
+
+        {isLoaded && isSignedIn && step === 'submit' && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h3 className="font-bold text-on-surface mb-2">Verify Your ADI Registration</h3>
-            <p className="text-sm text-on-surface-variant">Enter your ADI registration number to verify your identity.</p>
+            <div className="rounded-xl bg-gray-50 p-3 text-sm">
+              <p className="font-semibold text-gray-900">{displayName || 'Signed in'}</p>
+              <p className="text-xs text-gray-500">{displayEmail}</p>
+            </div>
+            <p className="text-sm text-on-surface-variant">
+              Enter your ADI registration number so our team can confirm ownership. This usually takes 1–2
+              business days.
+            </p>
             {error && (
               <div className="p-3 bg-error-container text-on-error-container rounded-xl text-sm flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px]">error</span>
                 {error}
               </div>
             )}
-            <input type="text" placeholder="ADI Registration Number" value={adiNumber} onChange={(e) => setAdiNumber(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none" />
-            <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50">
+            <input
+              type="text"
+              placeholder="ADI Registration Number"
+              value={adiNumber}
+              onChange={(e) => setAdiNumber(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg border border-outline-variant text-sm text-on-surface focus:ring-2 focus:ring-primary outline-none"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50"
+            >
               {loading ? 'Submitting...' : 'Submit for Review'}
             </button>
           </form>
         )}
 
-        {step === 'done' && (
+        {isLoaded && isSignedIn && step === 'done' && (
           <div className="text-center py-6">
             <span className="material-symbols-outlined text-4xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
             <h3 className="font-bold text-on-surface text-lg mt-4 mb-2">Claim Submitted!</h3>
-            <p className="text-sm text-on-surface-variant">You&apos;ll receive an email once it&apos;s approved, usually within 1–2 business days.</p>
+            <p className="text-sm text-on-surface-variant">We&apos;ll notify you once it&apos;s approved, usually within 1–2 business days.</p>
+            <Link href="/portal" className="mt-5 inline-block text-sm font-bold text-primary hover:underline">
+              Go to your portal
+            </Link>
           </div>
         )}
       </div>

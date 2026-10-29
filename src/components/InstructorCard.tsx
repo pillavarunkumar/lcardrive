@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import type { Instructor } from '@/types';
-import { getAvatarUrl } from '@/lib/utils';
+import Avatar from '@/components/Avatar';
 
 interface Props {
   instructor: Instructor;
@@ -60,7 +60,8 @@ function SaveButton({ instructorId }: { instructorId: string }) {
 
 export default function InstructorCard({ instructor, aiReason, variant = 'stacked', limitedSpots }: Props) {
   const fullName = `${instructor.first_name} ${instructor.last_name}`;
-  const avatarUrl = getAvatarUrl(instructor);
+  const rating = Number.isFinite(instructor.average_rating) ? instructor.average_rating : 0;
+  const reviewCount = instructor.review_count || 0;
 
   if (variant === 'horizontal') {
     return (
@@ -70,9 +71,12 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
       >
         <div className="flex gap-4 p-4">
           <div className="relative flex-shrink-0">
-            <img
-              src={avatarUrl}
-              alt=""
+            <Avatar
+              instructor={instructor}
+              size={64}
+              width={64}
+              height={64}
+              alt={fullName}
               className="w-16 h-16 rounded-xl object-cover border border-[#E5E7EB] shadow-sm"
             />
             {limitedSpots && (
@@ -91,9 +95,9 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
               )}
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <StarRating rating={instructor.average_rating} size="w-3 h-3" />
-              <span className="text-xs font-semibold text-gray-900">{instructor.average_rating.toFixed(1)}</span>
-              <span className="text-[11px] text-[#64748B]">({instructor.review_count})</span>
+              <StarRating rating={rating} size="w-3 h-3" />
+              <span className="text-xs font-semibold text-gray-900">{reviewCount > 0 ? rating.toFixed(1) : 'New'}</span>
+              <span className="text-[11px] text-[#64748B]">{reviewCount > 0 ? `(${reviewCount})` : ''}</span>
             </div>
             <div className="flex items-center gap-1 text-[#64748B] text-xs mt-0.5">
               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -155,9 +159,12 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="relative flex-shrink-0">
-              <img
-                src={avatarUrl}
-                alt={instructor.first_name}
+              <Avatar
+                instructor={instructor}
+                size={56}
+                width={56}
+                height={56}
+                alt={fullName}
                 className="w-14 h-14 rounded-xl object-cover border border-[#E5E7EB] shadow-sm"
               />
               {limitedSpots && (
@@ -190,9 +197,9 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
         </div>
 
         <div className="flex items-center gap-2 mb-3">
-          <StarRating rating={instructor.average_rating} size="w-4 h-4" />
-          <span className="text-sm font-bold text-gray-900">{instructor.average_rating.toFixed(1)}</span>
-          <span className="text-xs text-[#64748B]">({instructor.review_count})</span>
+          <StarRating rating={rating} size="w-4 h-4" />
+          <span className="text-sm font-bold text-gray-900">{reviewCount > 0 ? rating.toFixed(1) : 'New'}</span>
+          <span className="text-xs text-[#64748B]">{reviewCount > 0 ? `(${reviewCount})` : ''}</span>
         </div>
 
         <div className="flex flex-wrap gap-1.5 mb-3">

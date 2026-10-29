@@ -2,8 +2,13 @@ import { Metadata } from 'next';
 import InstructorProfileClient from './InstructorProfileClient';
 import { supabase } from '@/lib/supabase';
 import { PUBLIC_INSTRUCTOR_COLUMNS, sanitizePublicInstructor } from '@/lib/instructors/public';
+import { getClerkProfile } from '@/lib/instructors/link';
 import type { Instructor, Review } from '@/types';
 import { notFound } from 'next/navigation';
+
+// Public profiles change rarely; cache the rendered page and refresh in the
+// background so navigation between profiles is instant.
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: { suburb: string; slug: string } }): Promise<Metadata> {
   const name = params.slug.split('-').slice(0, 2).join(' ');
@@ -22,12 +27,25 @@ export default async function InstructorProfilePage({ params }: { params: { subu
 
   const { data: instructor } = (await supabase
     .from('instructors')
-    .select(PUBLIC_INSTRUCTOR_COLUMNS.join(', '))
+    .select(`${PUBLIC_INSTRUCTOR_COLUMNS.join(', ')}, clerk_user_id`)
     .eq('slug', params.slug)
     .maybeSingle()) as { data: Record<string, unknown> | null };
 
   if (!instructor) {
     notFound();
+  }
+
+  // A linked instructor may never have opened the portal. Pull their Clerk /
+  // Google photo here (once) so the public listing still shows the Gmail image.
+  if (!instructor.profile_photo_url && instructor.clerk_user_id) {
+    const profile = await getClerkProfile(String(instructor.clerk_user_id));
+    if (profile?.imageUrl) {
+      instructor.profile_photo_url = profile.imageUrl;
+      await supabase
+        .from('instructors')
+        .update({ profile_photo_url: profile.imageUrl })
+        .eq('id', instructor.id as string);
+    }
   }
 
   const { data: reviews } = await supabase

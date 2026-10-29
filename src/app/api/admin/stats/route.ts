@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/admin-guard';
+import { parseClaimDetail } from '@/lib/claims';
 
 export async function GET() {
   const guard = await requireAdmin();
@@ -15,6 +16,7 @@ export async function GET() {
     { count: totalInstructors },
     { count: unverifiedInstructors },
     { count: pendingClaimFlags },
+    { count: pendingNewClaims },
     { count: pendingReviews },
     { count: newReviews },
     { count: searches30d },
@@ -26,6 +28,7 @@ export async function GET() {
     supabase.from('instructors').select('*', { count: 'exact', head: true }),
     supabase.from('instructors').select('*', { count: 'exact', head: true }).eq('is_verified', false),
     supabase.from('listing_flags').select('*', { count: 'exact', head: true }).eq('is_resolved', false).eq('detail', 'ownership'),
+    supabase.from('listing_flags').select('*', { count: 'exact', head: true }).eq('is_resolved', false).like('detail', 'claim:%'),
     supabase.from('listing_flags').select('*', { count: 'exact', head: true }).eq('is_resolved', false).eq('detail', 'profile_review'),
     supabase.from('reviews').select('*', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 86400000).toISOString()),
     supabase.from('search_logs').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
@@ -48,6 +51,14 @@ export async function GET() {
     .order('created_at', { ascending: false })
     .limit(10);
 
+  const { data: newClaimFlags } = await supabase
+    .from('listing_flags')
+    .select('id, reason, detail, created_at, instructor:instructors(first_name, last_name, adi_registration)')
+    .eq('is_resolved', false)
+    .like('detail', 'claim:%')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
   const mergedClaims = [
     ...(unverifiedInstructorData || []).map((i: any) => ({
       id: i.id,
@@ -65,14 +76,27 @@ export async function GET() {
       instructor_name: c.instructor ? `${c.instructor.first_name} ${c.instructor.last_name}` : 'Unknown',
       adi_registration: c.instructor?.adi_registration || null,
     })),
+    ...(newClaimFlags || []).map((c: any) => {
+      const claim = parseClaimDetail(c.detail);
+      return {
+        id: c.id,
+        reason: 'ownership',
+        detail: c.detail,
+        created_at: c.created_at,
+        instructor_name: c.instructor ? `${c.instructor.first_name} ${c.instructor.last_name}` : 'Unknown',
+        adi_registration: claim?.adi_number || c.instructor?.adi_registration || null,
+        claimant_name: claim?.name || null,
+        claimant_email: claim?.email || null,
+      };
+    }),
   ];
 
   return NextResponse.json({
     totalInstructors: totalInstructors ?? 0,
     searches30d: searches30d ?? 0,
-    pendingClaims: (unverifiedInstructors ?? 0) + (pendingClaimFlags ?? 0),
+    pendingClaims: (unverifiedInstructors ?? 0) + (pendingClaimFlags ?? 0) + (pendingNewClaims ?? 0),
     unverifiedInstructors: unverifiedInstructors ?? 0,
-    pendingClaimFlags: pendingClaimFlags ?? 0,
+    pendingClaimFlags: (pendingClaimFlags ?? 0) + (pendingNewClaims ?? 0),
     pendingReviews: pendingReviews ?? 0,
     newReviews: newReviews ?? 0,
     recentInstructors: recentInstructors || [],

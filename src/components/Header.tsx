@@ -30,18 +30,44 @@ export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isSignedIn && user) {
-      Promise.all([
-        fetch('/api/admin/login-via-clerk', { method: 'POST' }).then(r => r.json()),
-        fetch('/api/portal/profile/check').then(r => r.json()),
-      ])
-        .then(([adminData, profileData]) => {
-          setIsAdmin(adminData.isAdmin);
-          setIsInstructor(profileData.exists);
+    if (!isSignedIn || !user) return;
+
+    const cacheKey = `lc_role_${user.id}`;
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached) as { isAdmin: boolean; isInstructor: boolean; expires: number };
+        if (parsed.expires > Date.now()) {
+          setIsAdmin(parsed.isAdmin);
+          setIsInstructor(parsed.isInstructor);
           setRoleChecked(true);
-        })
-        .catch(() => setRoleChecked(true));
+          return;
+        }
+      }
+    } catch {
+      // sessionStorage may be unavailable (private mode); fall through to fetch.
     }
+
+    fetch('/api/me/role')
+      .then((r) => r.json())
+      .then((data) => {
+        setIsAdmin(Boolean(data.isAdmin));
+        setIsInstructor(Boolean(data.isInstructor));
+        setRoleChecked(true);
+        try {
+          sessionStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              isAdmin: Boolean(data.isAdmin),
+              isInstructor: Boolean(data.isInstructor),
+              expires: Date.now() + 5 * 60 * 1000,
+            }),
+          );
+        } catch {
+          // ignore storage failures
+        }
+      })
+      .catch(() => setRoleChecked(true));
   }, [isSignedIn, user]);
 
   useEffect(() => {
@@ -102,7 +128,7 @@ export default function Header() {
                   className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border-2 border-white shadow-sm hover:ring-2 hover:ring-primary/30 transition-all cursor-pointer"
                 >
                   {user.imageUrl ? (
-                    <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
+                    <img src={user.imageUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   ) : (
                     user.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U'
                   )}
@@ -115,15 +141,9 @@ export default function Header() {
                     </div>
                     {(isAdmin || isInstructor) && (
                       <button
-                        onClick={async () => {
+                        onClick={() => {
                           setShowDropdown(false);
-                          try {
-                            const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
-                            const data = await res.json();
-                            router.push(data.isAdmin ? '/admin' : '/portal');
-                          } catch {
-                            router.push('/portal');
-                          }
+                          router.push(isAdmin ? '/admin' : '/portal');
                         }}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container transition-colors"
                       >
@@ -165,7 +185,7 @@ export default function Header() {
             <div className="flex items-center gap-3 pb-3 border-b border-outline-variant w-full">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-sm font-bold overflow-hidden shrink-0 border-2 border-white shadow-sm">
                 {user.imageUrl ? (
-                  <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
+                  <img src={user.imageUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 ) : (
                   user.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U'
                 )}
@@ -180,15 +200,9 @@ export default function Header() {
               </div>
               {(isAdmin || isInstructor) && (
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     setOpen(false);
-                    try {
-                      const res = await fetch('/api/admin/login-via-clerk', { method: 'POST' });
-                      const data = await res.json();
-                      router.push(data.isAdmin ? '/admin' : '/portal');
-                    } catch {
-                      router.push('/portal');
-                    }
+                    router.push(isAdmin ? '/admin' : '/portal');
                   }}
                   className="ml-auto text-sm font-bold text-primary hover:underline"
                 >

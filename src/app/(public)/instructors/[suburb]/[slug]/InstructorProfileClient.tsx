@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import type { Instructor, Review } from '@/types';
-import { getAvatarUrl } from '@/lib/utils';
+import Avatar from '@/components/Avatar';
+import ContactInstructorButton from '@/components/ContactInstructorButton';
 
 interface Props {
   instructor: Instructor | null;
@@ -37,11 +38,19 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
   }
 
   const displayRatings = [
-    { label: 'Patience', value: instructor.avg_rating_patience },
-    { label: 'Communication', value: instructor.avg_rating_communication },
-    { label: 'Value', value: instructor.avg_rating_value },
-    { label: 'Punctuality', value: instructor.avg_rating_punctuality },
+    { label: 'Patience', value: Number(instructor.avg_rating_patience) || 0 },
+    { label: 'Communication', value: Number(instructor.avg_rating_communication) || 0 },
+    { label: 'Value', value: Number(instructor.avg_rating_value) || 0 },
+    { label: 'Punctuality', value: Number(instructor.avg_rating_punctuality) || 0 },
   ];
+  const rating = Number(instructor.average_rating) || 0;
+  const reviewCount = instructor.review_count || 0;
+  const languages = instructor.languages || [];
+  const availabilityDays = instructor.availability_days || [];
+  const packageOptions = instructor.package_options || [];
+  const testCentres = instructor.familiar_test_centres || [];
+  const serviceSuburbs = instructor.service_suburbs || [];
+  const hasReviewData = reviewCount > 0;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -50,7 +59,15 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
         <div className="relative p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
           <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-2 border-white/30 shadow-lg flex-shrink-0">
-            <img src={getAvatarUrl(instructor)} alt="" className="w-full h-full object-cover" />
+            <Avatar
+              instructor={instructor}
+              size={112}
+              width={112}
+              height={112}
+              alt={`${instructor.first_name} ${instructor.last_name}`}
+              priority
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -69,24 +86,38 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
             <div className="flex items-center gap-3 mt-2">
               <div className="flex items-center gap-1">
                 <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <span key={i} className="material-symbols-outlined text-xl text-yellow-400" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      {i <= Math.round(instructor.average_rating) ? 'star' : i - 0.5 <= instructor.average_rating ? 'star_half' : 'star'}
-                    </span>
-                  ))}
+                  {[1, 2, 3, 4, 5].map((i) => {
+                    const starRating = hasReviewData ? rating : 0;
+                    const icon =
+                      i <= Math.floor(starRating)
+                        ? 'star'
+                        : i - 0.5 <= starRating
+                          ? 'star_half'
+                          : 'star';
+                    const filled = i - 0.5 <= starRating;
+                    return (
+                      <span
+                        key={i}
+                        className="material-symbols-outlined text-xl text-yellow-400"
+                        style={{ fontVariationSettings: `'FILL' ${filled ? 1 : 0}` }}
+                      >
+                        {icon}
+                      </span>
+                    );
+                  })}
                 </div>
-                <span className="text-white font-bold text-lg ml-1">{instructor.average_rating.toFixed(1)}</span>
-                <span className="text-white/60 text-sm">({instructor.review_count} reviews)</span>
+                <span className="text-white font-bold text-lg ml-1">{hasReviewData ? rating.toFixed(1) : 'New'}</span>
+                <span className="text-white/60 text-sm">{hasReviewData ? `(${reviewCount} reviews)` : ''}</span>
               </div>
             </div>
             {instructor.bio && (
               <p className="text-white/70 text-sm mt-2 line-clamp-2 max-w-2xl">{instructor.bio}</p>
             )}
             <div className="flex flex-wrap gap-3 mt-4">
-              <button className="bg-white text-[#064E3B] text-base font-semibold px-6 py-2.5 rounded-xl hover:bg-white/90 transition-all flex items-center gap-2 shadow-md">
-                <span className="material-symbols-outlined text-xl">mail</span>
-                Contact {instructor.first_name}
-              </button>
+              <ContactInstructorButton
+                instructorId={instructor.id}
+                firstName={instructor.first_name}
+              />
               <button onClick={copyLink} className="bg-white/10 text-white text-base font-semibold px-5 py-2.5 rounded-xl hover:bg-white/20 transition-all flex items-center gap-2 backdrop-blur-sm border border-white/20">
                 <span className="material-symbols-outlined text-xl">share</span>
                 {copied ? 'Copied!' : 'Share'}
@@ -95,7 +126,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
           </div>
           <div className="hidden md:grid grid-cols-2 gap-x-8 gap-y-3 bg-white/10 rounded-xl p-5 backdrop-blur-sm border border-white/10 shrink-0">
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">${instructor.hourly_rate}</p>
+              <p className="text-3xl font-bold text-white">{instructor.hourly_rate ? `$${instructor.hourly_rate}` : '—'}</p>
               <p className="text-xs text-white/60 uppercase tracking-wider mt-0.5">per hour</p>
             </div>
             <div className="text-center">
@@ -103,7 +134,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
               <p className="text-xs text-white/60 uppercase tracking-wider mt-0.5">experience</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">{instructor.review_count}</p>
+              <p className="text-3xl font-bold text-white">{reviewCount}</p>
               <p className="text-xs text-white/60 uppercase tracking-wider mt-0.5">reviews</p>
             </div>
             <div className="text-center">
@@ -117,9 +148,9 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
       {/* Quick Stats Row (mobile) */}
       <div className="grid grid-cols-4 gap-3 mb-6 md:hidden">
         {[
-          { label: 'Rate', value: `$${instructor.hourly_rate}`, sub: '/hr' },
+          { label: 'Rate', value: instructor.hourly_rate ? `$${instructor.hourly_rate}` : '—', sub: '/hr' },
           { label: 'Experience', value: `${instructor.years_experience || 0}y`, sub: '' },
-          { label: 'Reviews', value: instructor.review_count, sub: '' },
+          { label: 'Reviews', value: reviewCount, sub: '' },
           { label: 'Pass Rate', value: '82%', sub: '' },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 text-center">
@@ -191,7 +222,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Languages</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {instructor.languages.map((lang) => (
+                        {languages.map((lang) => (
                           <span key={lang} className="bg-gray-50 text-gray-600 text-sm px-3 py-1.5 rounded-lg border border-gray-100">{lang}</span>
                         ))}
                       </div>
@@ -204,9 +235,9 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                     )}
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Test Centres</p>
-                      {instructor.familiar_test_centres?.length > 0 ? (
+                      {testCentres.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
-                          {instructor.familiar_test_centres.map((tc) => (
+                          {testCentres.map((tc) => (
                             <span key={tc} className="bg-gray-50 text-gray-600 text-sm px-3 py-1.5 rounded-lg border border-gray-100">{tc}</span>
                           ))}
                         </div>
@@ -214,12 +245,12 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                         <p className="text-base text-gray-400">No test centres listed</p>
                       )}
                     </div>
-                    {instructor.service_suburbs?.length > 0 && (
+                    {serviceSuburbs.length > 0 && (
                       <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Service Areas</p>
                         <p className="text-base text-gray-700">
-                          {instructor.service_suburbs.slice(0, 6).join(', ')}
-                          {instructor.service_suburbs.length > 6 && <span className="text-[#064E3B] font-semibold"> +{instructor.service_suburbs.length - 6} more</span>}
+                          {serviceSuburbs.slice(0, 6).join(', ')}
+                          {serviceSuburbs.length > 6 && <span className="text-[#064E3B] font-semibold"> +{serviceSuburbs.length - 6} more</span>}
                         </p>
                         {instructor.service_radius_km && (
                           <p className="text-sm text-gray-400 mt-1">Within {instructor.service_radius_km} km radius</p>
@@ -244,9 +275,9 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                   <span className="material-symbols-outlined text-[#064E3B] text-2xl">redeem</span>
                   <h2 className="text-lg font-bold text-gray-900">Packages</h2>
                 </div>
-                {instructor.package_options?.length > 0 ? (
+                {packageOptions.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {instructor.package_options.map((pkg, i) => (
+                    {packageOptions.map((pkg, i) => (
                       <div key={i} className="border border-gray-100 rounded-xl p-4 text-center hover:shadow-md hover:border-[#064E3B]/20 transition-all">
                         <p className="text-2xl font-bold text-gray-900">{pkg.hours}<span className="text-sm font-normal text-gray-400">h</span></p>
                         <p className="text-2xl font-bold text-[#064E3B] mt-1">${pkg.price}</p>
@@ -273,7 +304,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                 <div className="grid grid-cols-7 gap-2">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => {
                     const d = day.toLowerCase().slice(0, 3);
-                    const available = instructor.availability_days.includes(d);
+                    const available = availabilityDays.includes(d);
                     return (
                       <div key={day} className={`py-3 rounded-xl text-center text-base font-semibold ${
                         available ? 'bg-[#064E3B] text-white shadow-sm' : 'bg-gray-50 text-gray-300'
@@ -294,7 +325,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                 <div className="flex items-center gap-2 mb-4">
                   <span className="material-symbols-outlined text-[#064E3B] text-2xl">reviews</span>
                   <h2 className="text-lg font-bold text-gray-900">Reviews</h2>
-                  <span className="text-sm text-gray-400 ml-auto">{instructor.review_count} reviews</span>
+                  <span className="text-sm text-gray-400 ml-auto">{reviewCount} reviews</span>
                 </div>
 
                 {/* Sub-ratings */}
@@ -323,9 +354,9 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-[#064E3B]/10 flex items-center justify-center">
-                              <span className="text-sm font-bold text-[#064E3B]">{review.reviewer_name.charAt(0).toUpperCase()}</span>
+                              <span className="text-sm font-bold text-[#064E3B]">{(review.reviewer_name || 'Anonymous').charAt(0).toUpperCase()}</span>
                             </div>
-                            <span className="text-sm font-semibold text-gray-900">{review.reviewer_name}</span>
+                            <span className="text-sm font-semibold text-gray-900">{review.reviewer_name || 'Anonymous'}</span>
                           </div>
                           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                             review.pass_outcome === 'passed_first' ? 'bg-green-50 text-green-700' :

@@ -56,29 +56,4 @@ export function truncate(str: string, len: number): string {
   return str.slice(0, len).trimEnd() + '...';
 }
 
-function hashName(name: string): number {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = ((hash << 5) - hash) + name.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
-export function getAvatarUrl(instructor: { first_name: string; last_name: string; profile_photo_url?: string; gender?: string; email?: string }): string {
-  if (instructor.profile_photo_url) return instructor.profile_photo_url;
-  if (instructor.email) {
-    const email = instructor.email.trim().toLowerCase();
-    let hash = 0;
-    for (let i = 0; i < email.length; i++) {
-      hash = ((hash << 5) - hash) + email.charCodeAt(i);
-      hash |= 0;
-    }
-    const hex = Math.abs(hash).toString(16).padStart(32, '0');
-    return `https://www.gravatar.com/avatar/${hex}?d=robohash&s=200`;
-  }
-  const seed = hashName(`${instructor.first_name}${instructor.last_name}`);
-  const idx = seed % 99;
-  const gender = instructor.gender === 'female' ? 'women' : 'men';
-  return `https://randomuser.me/api/portraits/${gender}/${idx}.jpg`;
-}
+export { getAvatarUrl, getAvatarFallback, gravatarUrl, getInitialsAvatar } from './avatar';

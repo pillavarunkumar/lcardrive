@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
+import { findOrLinkInstructor, getClerkProfile } from '@/lib/instructors/link';
 import type { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
@@ -13,14 +14,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ exists: false });
   }
 
-  const { count, error } = await supabase
-    .from('instructors')
-    .select('id', { count: 'exact', head: true })
-    .eq('clerk_user_id', userId);
+  // Also links an imported, unclaimed listing when the signed-in user has a
+  // verified email that matches it. Without this, login checks would say the
+  // instructor does not exist and sign them out.
+  const profile = await getClerkProfile(userId);
+  const { instructor } = await findOrLinkInstructor(userId, profile);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ exists: (count ?? 0) > 0 });
+  return NextResponse.json(
+    { exists: Boolean(instructor) },
+    { headers: { 'Cache-Control': 'private, no-store' } },
+  );
 }

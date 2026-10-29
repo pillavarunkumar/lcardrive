@@ -168,6 +168,40 @@ documents. The scanner is model-agnostic via `GEMINI_MODEL`; these six clean
 fixtures are an easy sample and do not establish real-world accuracy on messy
 photos.
 
+## Accounts, avatars and claims
+
+- **Google/Gmail photos are the source of truth.** `GET` and `PUT /api/portal/profile`
+  copy the signed-in Clerk `imageUrl` to `profile_photo_url`. Public profiles also
+  pull and cache it on first view for linked instructors who have never opened
+  the portal.
+- **Avatar fallbacks are honest.** `src/lib/avatar.ts` uses the real RFC 1321 MD5
+  (not a lookup hash) for Gravatar, then a deterministic local initials SVG.
+  There is no random stock portrait pretending to be the instructor. Avatar
+  images are lazy by default (the profile hero is eager) and fall back on error.
+- **Imported listings link automatically.** When a verified Clerk email matches
+  exactly one unclaimed instructor row with no `clerk_user_id`,
+  `findOrLinkInstructor` attaches the account, marks it claimed and keeps the
+  existing slug. Ambiguous/claimed rows go through manual review instead.
+- **Ownership claims require sign-in.** `POST /api/claims` rejects unauthenticated
+  users, rate-limits per account, ignores caller-supplied identity, and stores
+  the verified Clerk identity plus ADI number in `listing_flags.detail` as
+  `claim:{...}`. Admin approval (`PATCH /api/admin/claims/[id]`) links
+  `clerk_user_id`, not just `is_claimed`.
+- **Contact works.** The public profile CTA posts to `POST /api/leads`
+  (validated + rate-limited) and the enquiry appears in the instructor portal.
+
+## Performance and caching
+
+- The home page is server-rendered with the featured instructors and count, and
+  revalidates every 5 minutes instead of fetching after hydration.
+- Public instructor profiles revalidate every 5 minutes; `/api/search` is cached
+  for 60 seconds with stale-while-revalidate, and location autocomplete/reverse
+  geocoding for a day.
+- `GET /api/me/role` returns both admin/instructor flags in one request and the
+  header caches the result in `sessionStorage` for five minutes, removing two
+  round-trips on every navigation.
+- Route-level loading skeletons cover search and instructor profiles.
+
 ## Database Migrations
 
 Migrations are in `supabase/migrations/`. Apply **only the new files** to an

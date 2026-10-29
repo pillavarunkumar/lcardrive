@@ -3,6 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Pagination from '@/components/Pagination';
+import Avatar from '@/components/Avatar';
+import { getAvatarUrl } from '@/lib/utils';
 import type { Instructor } from '@/types';
 
 interface MatchResult {
@@ -180,7 +182,7 @@ export default function FindMyInstructorPage() {
               if (!inst) return null;
               return {
                 name: `${inst.first_name} ${inst.last_name}`,
-                image: inst.profile_photo_url || '',
+                image: getAvatarUrl(inst, 96),
                 rating: inst.average_rating,
                 reviews: inst.review_count,
                 bio: inst.bio || '',
@@ -302,7 +304,7 @@ export default function FindMyInstructorPage() {
                         <div className="flex items-start gap-3">
                           <div className="w-12 h-12 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden ring-2 ring-[#E5E7EB] group-hover:ring-[#064E3B]/30 transition-all">
                             {r.image ? (
-                              <img src={r.image} alt="" className="w-full h-full object-cover" />
+                              <img src={r.image} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-[#64748B]">
                                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -361,16 +363,7 @@ export default function FindMyInstructorPage() {
                         className="bg-white rounded-[20px] overflow-hidden shadow-sm border border-[#E5E7EB] hover:border-[#064E3B] hover:shadow-md transition-all duration-300 flex flex-col group"
                       >
                         <div className="relative h-40 w-full bg-gray-50">
-                          {inst.profile_photo_url ? (
-                            <img src={inst.profile_photo_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[#64748B]">
-                              <svg className="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                <circle cx="12" cy="7" r="4" />
-                              </svg>
-                            </div>
-                          )}
+                          <Avatar instructor={inst} size={320} alt={`${inst.first_name} ${inst.last_name}`} className="w-full h-full object-cover" />
                           <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1 shadow-sm">
                             <svg className="w-3.5 h-3.5 text-[#064E3B]" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
@@ -436,16 +429,7 @@ export default function FindMyInstructorPage() {
                     {allInstructors.filter((i) => !i.is_verified).map((inst) => (
                       <div key={inst.id} className="bg-white rounded-[20px] overflow-hidden shadow-sm border border-[#E5E7EB] hover:border-[#064E3B] hover:shadow-md transition-all duration-300 flex flex-col group">
                         <div className="relative h-40 w-full bg-gray-50">
-                          {inst.profile_photo_url ? (
-                            <img src={inst.profile_photo_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[#64748B]">
-                              <svg className="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                <circle cx="12" cy="7" r="4" />
-                              </svg>
-                            </div>
-                          )}
+                          <Avatar instructor={inst} size={320} alt={`${inst.first_name} ${inst.last_name}`} className="w-full h-full object-cover" />
                         </div>
                         <div className="p-4 flex-grow flex flex-col">
                           <div className="flex items-center gap-1.5 mb-1">
