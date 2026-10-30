@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { Instructor, Review } from '@/types';
 import Avatar from '@/components/Avatar';
 import ContactInstructorButton from '@/components/ContactInstructorButton';
@@ -138,8 +139,8 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
               <p className="text-xs text-white/60 uppercase tracking-wider mt-0.5">reviews</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">82%</p>
-              <p className="text-xs text-white/60 uppercase tracking-wider mt-0.5">pass rate</p>
+              <p className="text-3xl font-bold text-white">{hasReviewData ? rating.toFixed(1) : '—'}</p>
+              <p className="text-xs text-white/60 uppercase tracking-wider mt-0.5">rating</p>
             </div>
           </div>
         </div>
@@ -151,7 +152,7 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
           { label: 'Rate', value: instructor.hourly_rate ? `$${instructor.hourly_rate}` : '—', sub: '/hr' },
           { label: 'Experience', value: `${instructor.years_experience || 0}y`, sub: '' },
           { label: 'Reviews', value: reviewCount, sub: '' },
-          { label: 'Pass Rate', value: '82%', sub: '' },
+          { label: 'Rating', value: hasReviewData ? rating.toFixed(1) : '—', sub: '' },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 text-center">
             <p className="text-lg font-bold text-gray-900">{s.value}<span className="text-xs font-normal text-gray-400">{s.sub}</span></p>
@@ -423,6 +424,24 @@ export default function InstructorProfileClient({ instructor: propInstructor, re
               </ul>
             </div>
           </div>
+
+          {!instructor.is_claimed && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-[#064E3B] text-xl">verified</span>
+                <h3 className="text-base font-bold text-gray-900">Is this your listing?</h3>
+              </div>
+              <p className="text-sm text-gray-500 leading-relaxed mb-4">
+                Claim this profile to update your rates, availability, and details.
+              </p>
+              <Link
+                href={`/claim/${instructor.id}`}
+                className="inline-flex items-center justify-center w-full border border-[#064E3B] text-[#064E3B] px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-[#064E3B]/5 transition-colors"
+              >
+                Claim this profile
+              </Link>
+            </div>
+          )}
 
           {(instructor.social_facebook || instructor.social_google_biz) && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">

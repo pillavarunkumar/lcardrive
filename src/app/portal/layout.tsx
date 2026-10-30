@@ -8,6 +8,7 @@ import type { Instructor } from '@/types';
 
 const navItems = [
   { href: '/portal', label: 'Dashboard', icon: 'dashboard' },
+  { href: '/portal/onboarding', label: 'Registration', icon: 'assignment' },
   { href: '/portal/profile', label: 'My Profile', icon: 'person' },
   { href: '/portal/leads', label: 'Leads', icon: 'conversion_path' },
   { href: '/portal/rates', label: 'Pricing', icon: 'payments' },
@@ -19,6 +20,7 @@ const navItems = [
 
 const pageTitles: Record<string, string> = {
   '/portal': 'Dashboard',
+  '/portal/onboarding': 'Instructor Registration',
   '/portal/profile': 'My Profile',
   '/portal/leads': 'Student Leads',
   '/portal/rates': 'Pricing Management',
@@ -37,6 +39,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const [mobileOpen, setMobileOpen] = useState(false);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [hasPendingReview, setHasPendingReview] = useState(false);
+  const [approvalStatus, setApprovalStatus] = useState('draft');
+  const [reviewNote, setReviewNote] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -46,13 +50,17 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       .then(d => {
         if (d.instructor) {
           setInstructor(d.instructor);
+          setApprovalStatus(d.approvalStatus || 'draft');
+          setReviewNote(d.reviewNote || null);
           if (d.hasPendingReview) setHasPendingReview(true);
-        } else {
+        } else if (pathname !== '/portal/onboarding') {
           router.push('/');
         }
       })
-      .catch(() => router.push('/'));
-  }, []);
+      .catch(() => {
+        if (pathname !== '/portal/onboarding') router.push('/');
+      });
+  }, [pathname, router]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -83,11 +91,14 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     : '';
 
   const displayName = `${instructor?.first_name || user?.firstName || ''} ${instructor?.last_name || user?.lastName || ''}`.trim();
-  const profileStatus = instructor?.is_verified
-    ? { label: 'Profile verified', color: 'bg-green-500', pulse: false }
-    : hasPendingReview
-      ? { label: 'Under review', color: 'bg-amber-500', pulse: false }
-      : { label: 'Profile pending', color: 'bg-error', pulse: true };
+  const profileStatus =
+    approvalStatus === 'approved' || instructor?.is_verified
+      ? { label: 'Profile verified', color: 'bg-green-500', pulse: false }
+      : approvalStatus === 'pending_review' || hasPendingReview
+        ? { label: 'Under review', color: 'bg-amber-500', pulse: false }
+        : approvalStatus === 'rejected'
+          ? { label: 'Changes requested', color: 'bg-error', pulse: false }
+          : { label: 'Registration incomplete', color: 'bg-error', pulse: true };
 
   return (
     <div className="min-h-screen bg-surface">
@@ -209,6 +220,45 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         </header>
 
         <div className="flex-1 p-6 md:p-12 pt-8 md:pt-12 max-w-6xl mx-auto w-full bg-surface">
+          {instructor && pathname !== '/portal/onboarding' && approvalStatus !== 'approved' && !instructor.is_verified && (
+            <div
+              className={`mb-6 rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center gap-3 ${
+                approvalStatus === 'rejected'
+                  ? 'bg-red-50 border-red-200 text-red-800'
+                  : approvalStatus === 'pending_review' || hasPendingReview
+                    ? 'bg-amber-50 border-amber-200 text-amber-800'
+                    : 'bg-blue-50 border-blue-200 text-blue-800'
+              }`}
+            >
+              <span className="material-symbols-outlined">
+                {approvalStatus === 'rejected' ? 'error' : approvalStatus === 'pending_review' || hasPendingReview ? 'schedule' : 'assignment'}
+              </span>
+              <div className="flex-1">
+                <p className="text-sm font-bold">
+                  {approvalStatus === 'rejected'
+                    ? 'Your registration needs changes'
+                    : approvalStatus === 'pending_review' || hasPendingReview
+                      ? 'Your registration is under admin review'
+                      : 'Finish your instructor registration'}
+                </p>
+                <p className="text-xs opacity-80 mt-0.5">
+                  {approvalStatus === 'rejected'
+                    ? reviewNote || 'Review the requested changes, update your details, and submit again.'
+                    : approvalStatus === 'pending_review' || hasPendingReview
+                      ? 'Your profile will become publicly searchable once an administrator approves it.'
+                      : 'Complete the guided steps and submit your profile for approval.'}
+                </p>
+              </div>
+              {approvalStatus !== 'pending_review' && !hasPendingReview && (
+                <Link
+                  href="/portal/onboarding"
+                  className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-xs font-bold shadow-sm hover:shadow"
+                >
+                  {approvalStatus === 'rejected' ? 'Update registration' : 'Continue registration'}
+                </Link>
+              )}
+            </div>
+          )}
           {children}
         </div>
       </main>

@@ -104,7 +104,12 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
                 <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
-              <span className="truncate">{instructor.suburb}</span>
+              <span className="truncate">
+                {instructor.suburb}
+                {typeof instructor.distance_km === 'number'
+                  ? ` • ${instructor.distance_km.toFixed(1)} km`
+                  : ''}
+              </span>
             </div>
           </div>
           <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
@@ -189,7 +194,10 @@ export default function InstructorCard({ instructor, aiReason, variant = 'stacke
                   <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
-                {instructor.suburb} &bull; {instructor.service_radius_km}km
+                {instructor.suburb}
+                {typeof instructor.distance_km === 'number'
+                  ? ` • ${instructor.distance_km.toFixed(1)} km away`
+                  : ` • ${instructor.service_radius_km}km radius`}
               </p>
             </div>
           </div>

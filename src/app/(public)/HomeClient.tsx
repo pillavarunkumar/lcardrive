@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import InstructorCard from '@/components/InstructorCard';
-import type { Instructor } from '@/types';
+import type { HomeReview, Instructor } from '@/types';
 
 function Star({ filled }: { filled: boolean }) {
   return (
@@ -13,32 +13,37 @@ function Star({ filled }: { filled: boolean }) {
   );
 }
 
-function StarRow({ count = 5 }: { count?: number }) {
+function RatingStars({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: count }, (_, i) => (
-        <Star key={i} filled={true} />
+    <div className="flex items-center gap-0.5" aria-label={`${rating} out of 5 stars`}>
+      {[1, 2, 3, 4, 5].map((value) => (
+        <Star key={value} filled={value <= Math.round(rating)} />
       ))}
     </div>
   );
 }
 
-function SparkleIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z" />
-      <path d="M18 14l.7 2.3L21 17l-2.3.7L18 20l-.7-2.3L15 17l2.3-.7z" />
-      <path d="M6 14l.7 2.3L9 17l-2.3.7L6 20l-.7-2.3L3 17l2.3-.7z" />
-    </svg>
-  );
+function formatReviewDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-AU', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 }
 
 export default function HomeClient({
   featured,
   instructorCount,
+  initialError,
+  reviews,
 }: {
   featured: Instructor[];
   instructorCount: number;
+  initialError?: string | null;
+  reviews: HomeReview[];
 }) {
   const [suburb, setSuburb] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -50,6 +55,40 @@ export default function HomeClient({
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
+
+  const [featuredInstructors, setFeaturedInstructors] = useState<Instructor[]>(featured);
+  const [totalInstructors, setTotalInstructors] = useState(instructorCount);
+  const [featuredState, setFeaturedState] = useState<'ready' | 'loading' | 'error' | 'empty'>(
+    featured.length > 0 ? 'ready' : 'loading',
+  );
+  const [featuredError, setFeaturedError] = useState(initialError || '');
+
+  const loadFeatured = useCallback(async () => {
+    setFeaturedState('loading');
+    setFeaturedError('');
+    try {
+      const res = await fetch('/api/search?limit=4&sort=rating', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Request failed');
+      const data = await res.json();
+      const instructors = Array.isArray(data.instructors) ? data.instructors : [];
+      setFeaturedInstructors(instructors);
+      if (typeof data.total === 'number') setTotalInstructors(data.total);
+      setFeaturedState(instructors.length > 0 ? 'ready' : 'empty');
+    } catch {
+      setFeaturedState('error');
+      setFeaturedError('We could not load instructors right now. Please try again.');
+    }
+  }, []);
+
+  const hasInitialInstructors = featured.length > 0 && !initialError;
+
+  useEffect(() => {
+    // If the server could not provide cards, retry once from the browser so a
+    // cached or transient database error does not leave the section stuck.
+    if (!hasInitialInstructors) {
+      loadFeatured();
+    }
+  }, [hasInitialInstructors, loadFeatured]);
 
   const fetchSuggestions = useCallback(async (query: string) => {
     if (query.trim().length < 2) {
@@ -93,9 +132,9 @@ export default function HomeClient({
             Find the Right <span className="text-[#064E3B] underline decoration-[#064E3B]/20 decoration-8 underline-offset-4">Driving Instructor</span> Near You
           </h1>
           <p className="text-lg text-[#64748B] mb-12 max-w-2xl mx-auto leading-relaxed">
-            {instructorCount > 0
-              ? `Search from ${instructorCount}+ verified instructors, compare prices, read reviews, and find an instructor that matches your learning style.`
-              : 'Search verified driving instructors, compare prices, read reviews, and find an instructor that matches your learning style.'}
+            {totalInstructors > 0
+              ? `Browse ${totalInstructors} verified instructor ${totalInstructors === 1 ? 'profile' : 'profiles'}, compare prices, read reviews, and find an instructor that matches your learning style.`
+              : 'Search driving instructors by suburb, compare prices, read reviews, and find one that matches your learning style.'}
           </p>
 
           {/* Search Module */}
@@ -276,31 +315,68 @@ export default function HomeClient({
         <div className="max-w-container-max mx-auto">
           <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Popular Instructors Near You</h2>
-              <p className="text-lg text-[#64748B]">Trusted professionals with proven success rates.</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Instructors Near You</h2>
+              <p className="text-lg text-[#64748B]">
+                Browse verified instructor profiles with rates, learner reviews, and availability.
+              </p>
             </div>
             <Link href="/search" className="hidden md:flex items-center gap-2 text-[#064E3B] font-bold group">
-              <span>Browse All Instructors{instructorCount > 0 ? ` (${instructorCount})` : ''}</span>
+              <span>Browse All Instructors{totalInstructors > 0 ? ` (${totalInstructors})` : ''}</span>
               <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m9 18 6-6-6-6" />
               </svg>
             </Link>
           </div>
 
-          {featured.length > 0 ? (
+          {featuredState === 'ready' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featured.map((instructor) => (
+              {featuredInstructors.map((instructor) => (
                 <InstructorCard key={instructor.id} instructor={instructor} />
               ))}
             </div>
-          ) : (
-            <div className="text-center py-12 text-gray-400">
-              <svg className="w-12 h-12 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <line x1="3" y1="9" x2="21" y2="9" />
-                <line x1="9" y1="21" x2="9" y2="9" />
-              </svg>
-              <p>No instructors available yet.</p>
+          )}
+
+          {featuredState === 'loading' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" aria-busy="true" aria-label="Loading instructors">
+              {[1, 2, 3, 4].map((item) => (
+                <div key={item} className="border border-[#E5E7EB] rounded-[20px] p-5 space-y-4 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 bg-gray-200 rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-3/4 bg-gray-200 rounded" />
+                      <div className="h-3 w-1/2 bg-gray-100 rounded" />
+                    </div>
+                  </div>
+                  <div className="h-3 w-full bg-gray-100 rounded" />
+                  <div className="h-3 w-5/6 bg-gray-100 rounded" />
+                  <div className="h-9 w-full bg-gray-100 rounded-lg" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {featuredState === 'error' && (
+            <div className="text-center py-12 border border-dashed border-[#E5E7EB] rounded-[20px]">
+              <span className="material-symbols-outlined text-[40px] text-gray-300">cloud_off</span>
+              <p className="mt-2 text-gray-600">{featuredError || 'We could not load instructors right now.'}</p>
+              <button
+                type="button"
+                onClick={loadFeatured}
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#064E3B] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#053A2C] transition-colors"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
+          {featuredState === 'empty' && (
+            <div className="text-center py-12 border border-dashed border-[#E5E7EB] rounded-[20px]">
+              <span className="material-symbols-outlined text-[40px] text-gray-300">search_off</span>
+              <p className="mt-2 font-semibold text-gray-700">No instructors are listed right now.</p>
+              <p className="mt-1 text-sm text-gray-500">Try searching your suburb, or check back soon as new instructors join.</p>
+              <Link href="/search" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#064E3B] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#053A2C] transition-colors">
+                Search all instructors
+              </Link>
             </div>
           )}
 
@@ -332,7 +408,7 @@ export default function HomeClient({
         </div>
 
         <div className="max-w-container-max mx-auto relative z-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-10 text-center">Why Learners Choose LCarDrive</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-10 text-center">How LCarDrive Helps You</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="relative bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm text-center group hover:shadow-md hover:border-[#064E3B]/20 transition-all duration-300">
               <div className="absolute inset-0 rounded-[20px] bg-gradient-to-b from-[#064E3B]/[0.02] to-transparent pointer-events-none" />
@@ -340,7 +416,7 @@ export default function HomeClient({
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
               </svg>
               <h3 className="text-lg font-bold text-gray-900 mb-4 relative">Find Instructors Faster</h3>
-              <p className="text-base text-[#64748B] leading-relaxed relative">No more calling around. Our instant search gives you real-time availability in seconds.</p>
+              <p className="text-base text-[#64748B] leading-relaxed relative">Search by suburb and compare instructor profiles in one place, instead of calling around.</p>
             </div>
             <div className="relative bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm text-center group hover:shadow-md hover:border-[#064E3B]/20 transition-all duration-300">
               <div className="absolute inset-0 rounded-[20px] bg-gradient-to-b from-[#064E3B]/[0.02] to-transparent pointer-events-none" />
@@ -353,7 +429,7 @@ export default function HomeClient({
                 <path d="m16 8-8 8" />
               </svg>
               <h3 className="text-lg font-bold text-gray-900 mb-4 relative">Compare With Confidence</h3>
-              <p className="text-base text-[#64748B] leading-relaxed relative">Compare instructors side-by-side based on price, vehicle type, and verified learner ratings.</p>
+              <p className="text-base text-[#64748B] leading-relaxed relative">Compare instructors by price, vehicle type, transmission, languages, and learner ratings.</p>
             </div>
             <div className="relative bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm text-center group hover:shadow-md hover:border-[#064E3B]/20 transition-all duration-300">
               <div className="absolute inset-0 rounded-[20px] bg-gradient-to-b from-[#064E3B]/[0.02] to-transparent pointer-events-none" />
@@ -372,8 +448,8 @@ export default function HomeClient({
                 <path d="M12 2v2" />
                 <path d="M12 14v2" />
               </svg>
-              <h3 className="text-lg font-bold text-gray-900 mb-4 relative">Verified Profiles</h3>
-              <p className="text-base text-[#64748B] leading-relaxed relative">Every instructor on our platform is pre-vetted with valid working with children checks and licenses.</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-4 relative">Details That Matter</h3>
+              <p className="text-base text-[#64748B] leading-relaxed relative">Profiles include licence types, experience, vehicle details, and learner reviews so you can check what matters before booking.</p>
             </div>
           </div>
         </div>
@@ -415,26 +491,26 @@ export default function HomeClient({
           <div className="md:w-1/2">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">Are You A Driving Instructor?</h2>
             <p className="text-lg text-white/80 mb-6 leading-relaxed">
-              Join Australia&apos;s fastest-growing instructor marketplace and grow your business with premium leads and professional tools.
+              Create a free listing, show your rates and availability, and receive enquiries from learners in your area.
             </p>
             <ul className="space-y-3 mb-8">
               <li className="flex items-center gap-3">
                 <svg className="w-5 h-5 text-white/80 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                 </svg>
-                <span className="text-base">Free listing with zero upfront costs</span>
+                <span className="text-base">Free to create a profile and list your services</span>
               </li>
               <li className="flex items-center gap-3">
                 <svg className="w-5 h-5 text-white/80 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                 </svg>
-                <span className="text-base">AI-powered bio generation for your profile</span>
+                <span className="text-base">AI-assisted bio writing to help you get started</span>
               </li>
               <li className="flex items-center gap-3">
                 <svg className="w-5 h-5 text-white/80 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                 </svg>
-                <span className="text-base">Full booking and student management dashboard</span>
+                <span className="text-base">Manage enquiries, rates, and availability in the instructor portal</span>
               </li>
             </ul>
             <Link href="/claim" className="bg-white text-[#064E3B] px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all inline-block shadow-md">
@@ -443,62 +519,84 @@ export default function HomeClient({
           </div>
           <div className="md:w-1/2 flex justify-center">
             <div className="bg-white/10 p-4 rounded-[20px] backdrop-blur-sm border border-white/20">
-              <div className="bg-white text-gray-900 p-6 rounded-xl shadow-2xl max-w-sm rotate-2">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-[#064E3B]/10 rounded-full flex items-center justify-center text-[#064E3B] font-bold text-lg">
-                    JD
+              <div className="bg-white text-gray-900 p-6 rounded-xl shadow-2xl max-w-sm">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 bg-[#064E3B]/10 rounded-lg flex items-center justify-center text-[#064E3B]">
+                    <span className="material-symbols-outlined">dashboard</span>
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900">Jason D.</p>
-                    <p className="text-sm text-[#64748B]">Melbourne Instructor</p>
+                    <p className="font-bold text-gray-900">Instructor Portal</p>
+                    <p className="text-sm text-[#64748B]">Your listing, in one place</p>
                   </div>
                 </div>
-                <p className="text-base text-gray-600 italic">
-                  &ldquo;I filled my weekly schedule within 14 days of claiming my profile. The AI bio tool made me look professional instantly.&rdquo;
-                </p>
+                <ul className="space-y-3 text-sm text-gray-600">
+                  <li className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-[#064E3B]">payments</span>
+                    Update your rates and lesson packages
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-[#064E3B]">event_available</span>
+                    Keep your availability and service areas current
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-[#064E3B]">inbox</span>
+                    View and respond to learner enquiries
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Success Stories */}
-      <section id="success-stories" className="py-16 md:py-20 px-margin-mobile md:px-margin-desktop bg-white">
-        <div className="max-w-container-max mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Success Stories</h2>
-            <p className="text-lg text-[#64748B]">Join thousands of Aussies who found their perfect match.</p>
+      {/* Approved learner reviews */}
+      {reviews.length > 0 && (
+        <section id="reviews" className="py-16 md:py-20 px-margin-mobile md:px-margin-desktop bg-white">
+          <div className="max-w-container-max mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Learner Reviews</h2>
+              <p className="text-lg text-[#64748B]">Reviews submitted by learners and approved by our team.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {reviews.map((review) => {
+                const instructorName = review.instructor
+                  ? `${review.instructor.first_name || ''} ${review.instructor.last_name || ''}`.trim()
+                  : '';
+                const instructorHref =
+                  review.instructor?.slug && review.instructor?.suburb
+                    ? `/instructors/${review.instructor.suburb.toLowerCase().replace(/\s+/g, '-')}/${review.instructor.slug}`
+                    : null;
+
+                return (
+                  <div key={review.id} className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
+                    <RatingStars rating={review.rating_overall} />
+                    <p className="text-base text-gray-600 mb-6 italic mt-4 leading-relaxed">
+                      &ldquo;{review.review_text}&rdquo;
+                    </p>
+                    <div className="border-t border-[#E5E7EB] pt-4 flex items-end justify-between gap-4">
+                      <div>
+                        <p className="font-bold text-gray-900">{review.reviewer_name}</p>
+                        <p className="text-xs text-[#64748B]">{formatReviewDate(review.created_at)}</p>
+                      </div>
+                      {instructorName &&
+                        (instructorHref ? (
+                          <Link
+                            href={instructorHref}
+                            className="text-sm text-[#064E3B] font-semibold hover:underline text-right"
+                          >
+                            about {instructorName}
+                          </Link>
+                        ) : (
+                          <span className="text-sm text-[#64748B] text-right">about {instructorName}</span>
+                        ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: 'Emma R.',
-                instructor: 'w/ Sarah T.',
-                text: 'I was so nervous about starting, but the AI match found me Sarah who specialised in anxious learners. Passed first go!',
-              },
-              {
-                name: 'Liam W.',
-                instructor: 'w/ David C.',
-                text: 'Great platform. I could see David\'s availability and book instantly. Saved me so much time calling around different schools.',
-              },
-              {
-                name: 'Priya K.',
-                instructor: 'w/ Marcus R.',
-                text: 'The filters are amazing. I needed a manual instructor who spoke Hindi for my dad, and LCarDrive found 3 options in minutes.',
-              },
-            ].map((testimonial) => (
-              <div key={testimonial.name} className="bg-white p-8 rounded-[20px] border border-[#E5E7EB] shadow-sm">
-                <StarRow />
-                <p className="text-base text-gray-600 mb-6 italic mt-4 leading-relaxed">&ldquo;{testimonial.text}&rdquo;</p>
-                <div className="border-t border-[#E5E7EB] pt-4 flex items-center justify-between">
-                  <span className="font-bold text-gray-900">{testimonial.name}</span>
-                  <span className="text-sm text-[#64748B]">{testimonial.instructor}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* FAQ */}
       <section className="py-16 md:py-20 px-margin-mobile md:px-margin-desktop bg-white">
@@ -508,7 +606,7 @@ export default function HomeClient({
             {[
               {
                 q: 'How do I know if an instructor is qualified?',
-                a: 'Every instructor on LCarDrive must upload their current driving instructor license and Working With Children Check (WWCC). We verify these documents before their profile goes live.',
+                a: 'Check the details on their profile, such as their ADI registration, licence types, years of experience, and learner reviews. If something is not listed, contact the instructor directly to ask before booking.',
               },
               {
                 q: 'Can I switch instructors if it\'s not a good match?',

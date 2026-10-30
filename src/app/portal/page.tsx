@@ -5,83 +5,50 @@ import Link from 'next/link';
 import { Star, Eye, Pencil, DollarSign, Calendar, Sparkles, ChevronRight, MessageSquare, TrendingUp } from 'lucide-react';
 import type { Instructor } from '@/types';
 
-function getNextProfileStep(instructor: Instructor | null, comp: number = 0, hasPendingReview?: boolean) {
-  if (!instructor) {
+function getNextProfileStep(
+  instructor: Instructor | null,
+  comp: number = 0,
+  hasPendingReview?: boolean,
+  approvalStatus: string = 'draft',
+) {
+  if (!instructor || approvalStatus === 'rejected') {
     return {
-      href: '/portal/profile',
-      icon: 'person_add',
-      label: 'Create your profile',
-      helper: 'A complete profile increases trust and bookings.',
+      href: '/portal/onboarding',
+      icon: approvalStatus === 'rejected' ? 'edit_note' : 'person_add',
+      label: approvalStatus === 'rejected' ? 'Update and resubmit' : 'Start instructor registration',
+      helper: approvalStatus === 'rejected'
+        ? 'Review the admin notes and resubmit your details.'
+        : 'The guided registration covers your details, documents, vehicle, service areas and pricing.',
       action: 'link' as const,
     };
   }
 
-  if (!instructor.bio) {
+  if (approvalStatus === 'pending_review' || hasPendingReview) {
     return {
-      href: '/portal/profile',
-      icon: 'edit_note',
-      label: 'Add your bio',
-      helper: 'Describe your teaching style and experience.',
+      href: '/portal/onboarding',
+      icon: 'schedule',
+      label: 'View registration status',
+      helper: 'Your profile is waiting for administrator approval.',
       action: 'link' as const,
     };
   }
 
-  if (!instructor.vehicle_make || !instructor.vehicle_model || !instructor.vehicle_year) {
-    return {
-      href: '/portal/vehicle',
-      icon: 'directions_car',
-      label: 'Add vehicle details',
-      helper: 'Show students what they will be learning in.',
-      action: 'link' as const,
-    };
-  }
+  if (!instructor.is_verified) {
+    if (comp < 100 || !instructor.vehicle_make || !instructor.hourly_rate || !instructor.availability_days?.length || !instructor.service_suburbs?.length) {
+      return {
+        href: '/portal/onboarding',
+        icon: 'assignment',
+        label: 'Continue registration',
+        helper: 'Finish the remaining steps and submit your profile for approval.',
+        action: 'link' as const,
+      };
+    }
 
-  if (!instructor.hourly_rate) {
-    return {
-      href: '/portal/rates',
-      icon: 'payments',
-      label: 'Set your pricing',
-      helper: 'Publish your hourly rate and lesson packages.',
-      action: 'link' as const,
-    };
-  }
-
-  if (!instructor.availability_days?.length) {
-    return {
-      href: '/portal/availability',
-      icon: 'event_available',
-      label: 'Set availability',
-      helper: 'Let students know when you usually teach.',
-      action: 'link' as const,
-    };
-  }
-
-  if (!instructor.service_suburbs?.length) {
-    return {
-      href: '/portal/service-areas',
-      icon: 'map',
-      label: 'Add service areas',
-      helper: 'Choose the suburbs where students can find you.',
-      action: 'link' as const,
-    };
-  }
-
-  if (comp < 100) {
-    return {
-      href: '/portal/profile',
-      icon: 'edit_note',
-      label: 'Complete your profile',
-      helper: 'Add optional details like your photo, specialisations, and experience to reach 100%.',
-      action: 'link' as const,
-    };
-  }
-
-  if (!hasPendingReview && !instructor?.is_verified) {
     return {
       href: '',
       icon: 'verified',
       label: 'Submit for Review',
-      helper: 'Submit your completed profile for admin approval.',
+      helper: 'Submit your completed registration for admin approval.',
       action: 'submit' as const,
     };
   }
@@ -95,19 +62,27 @@ function getNextProfileStep(instructor: Instructor | null, comp: number = 0, has
   };
 }
 
-function getVerificationCopy(instructor: Instructor | null, hasPendingReview: boolean) {
-  if (instructor?.is_verified) {
+function getVerificationCopy(
+  instructor: Instructor | null,
+  hasPendingReview: boolean,
+  approvalStatus: string = 'draft',
+) {
+  if (approvalStatus === 'rejected') {
+    return { label: 'Changes Requested', body: 'Update your details and submit again for approval.' };
+  }
+  if (instructor?.is_verified || approvalStatus === 'approved') {
     return { label: 'Verified', body: 'Your profile is approved and visible to students.' };
   }
-  if (hasPendingReview) {
+  if (hasPendingReview || approvalStatus === 'pending_review') {
     return { label: 'Under Review', body: 'Admin is reviewing your submitted profile.' };
   }
-  return { label: 'Pending', body: 'Complete your profile and submit for admin review.' };
+  return { label: 'Pending', body: 'Complete your registration and submit for admin review.' };
 }
 
 export default function PortalDashboard() {
   const [instructor, setInstructor] = useState<Instructor | null>(null);
   const [hasPendingReview, setHasPendingReview] = useState(false);
+  const [approvalStatus, setApprovalStatus] = useState('draft');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [appearanceLabels, setAppearanceLabels] = useState<string[]>([]);
@@ -125,6 +100,7 @@ export default function PortalDashboard() {
       .then(([profileData, analytics]) => {
         if (profileData.instructor) setInstructor(profileData.instructor);
         if (profileData.hasPendingReview) setHasPendingReview(true);
+        if (profileData.approvalStatus) setApprovalStatus(profileData.approvalStatus);
         if (analytics.days?.length) {
           setAppearanceLabels(analytics.days);
           setAppearanceTotals(analytics.totals);
@@ -137,8 +113,8 @@ export default function PortalDashboard() {
   const comp = instructor?.profile_completeness ?? 0;
   const totalReviews = instructor?.review_count ?? 0;
   const avgRating = instructor?.average_rating ?? 0;
-  const nextStep = getNextProfileStep(instructor, comp, hasPendingReview);
-  const verification = getVerificationCopy(instructor, hasPendingReview);
+  const nextStep = getNextProfileStep(instructor, comp, hasPendingReview, approvalStatus);
+  const verification = getVerificationCopy(instructor, hasPendingReview, approvalStatus);
 
   const [submitting, setSubmitting] = useState(false);
 

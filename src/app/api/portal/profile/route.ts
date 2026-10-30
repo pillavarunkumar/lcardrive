@@ -3,6 +3,12 @@ import { supabase } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 import { computeCompleteness } from '@/lib/utils';
 import { findOrLinkInstructor, getClerkProfile, syncClerkPhoto } from '@/lib/instructors/link';
+import {
+  computeOnboardingChecks,
+  deriveApprovalStatus,
+  normalizeBusinessInfo,
+  parseOnboardingDetail,
+} from '@/lib/onboarding';
 import type { NextRequest } from 'next/server';
 
 function generateSlug(firstName: string, lastName: string, userId: string): string {
@@ -33,28 +39,38 @@ export async function GET(req: NextRequest) {
   // account so the listing always shows the same image as the Gmail photo.
   const data = await syncClerkPhoto(found, profile);
 
-  let hasPendingReview = false;
-  const { data: flag } = await supabase
+  const { data: flags } = await supabase
     .from('listing_flags')
-    .select('id')
-    .eq('instructor_id', data.id)
-    .eq('detail', 'profile_review')
-    .eq('is_resolved', false)
-    .maybeSingle();
-  hasPendingReview = !!flag;
+    .select('detail, is_resolved')
+    .eq('instructor_id', data.id);
+  const flagRows = (flags || []) as Array<{ detail: string | null; is_resolved: boolean | null }>;
 
-  // Check deactivation status via listing_flags
-  const { data: deactivated } = await supabase
-    .from('listing_flags')
-    .select('id')
-    .eq('instructor_id', data.id)
-    .eq('detail', 'deactivated')
-    .eq('is_resolved', false)
-    .maybeSingle();
+  const hasPendingReview = flagRows.some(
+    (flag) => flag.detail === 'profile_review' && !flag.is_resolved,
+  );
+  const isDeactivated = flagRows.some(
+    (flag) => flag.detail === 'deactivated' && !flag.is_resolved,
+  );
+
+  const metadata = flagRows
+    .map((flag) => parseOnboardingDetail(flag.detail))
+    .find((value) => Boolean(value));
+  const business = normalizeBusinessInfo(metadata?.business);
+  const approvalStatus = deriveApprovalStatus(data, hasPendingReview);
+  const checks = computeOnboardingChecks(data, business);
 
   return NextResponse.json({
-    instructor: { ...data, is_hidden: !!deactivated },
+    instructor: { ...data, is_hidden: isDeactivated },
     hasPendingReview,
+    approvalStatus,
+    reviewNote: metadata?.review_note || null,
+    onboarding: {
+      status: approvalStatus,
+      step: metadata?.step || 'account',
+      checks,
+      submittedAt: metadata?.submitted_at || null,
+      reviewNote: metadata?.review_note || null,
+    },
   });
 }
 

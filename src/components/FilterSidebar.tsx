@@ -7,7 +7,21 @@ interface Props {
   onFilterChange: (filters: SearchFilters) => void;
 }
 
-const languages = ['English', 'Mandarin', 'Hindi', 'Arabic'];
+const languages = [
+  'English',
+  'Arabic',
+  'Cantonese',
+  'French',
+  'Gujarati',
+  'Hindi',
+  'Italian',
+  'Mandarin',
+  'Polish',
+  'Punjabi',
+  'Somali',
+  'Spanish',
+  'Vietnamese',
+];
 
 export default function FilterSidebar({ filters, onFilterChange }: Props) {
   const update = (partial: Partial<SearchFilters>) => {

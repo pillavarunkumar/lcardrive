@@ -59,7 +59,7 @@ export default function Footer() {
               <h5 className="text-xs font-bold text-white/40 uppercase tracking-[0.12em] mb-5">Company</h5>
               <ul className="space-y-3">
                 <li><Link href="/about" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">About Us</Link></li>
-                <li><Link href="/#success-stories" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Reviews</Link></li>
+                <li><Link href="/#reviews" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Reviews</Link></li>
                 <li><Link href="/privacy" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="text-sm text-white/70 hover:text-[#34D399] transition-colors">Terms &amp; Conditions</Link></li>
               </ul>

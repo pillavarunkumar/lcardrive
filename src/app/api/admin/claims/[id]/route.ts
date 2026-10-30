@@ -57,7 +57,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     } else if (flag.detail === 'profile_review') {
       const { error: updateInstructorError } = await supabase
         .from('instructors')
-        .update({ is_verified: true })
+        .update({ is_verified: true, is_claimed: true, status: 'approved' })
         .eq('id', flag.instructor_id);
 
       if (updateInstructorError) {
@@ -78,6 +78,31 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   if (action === 'reject') {
+    const { data: flag } = await supabase
+      .from('listing_flags')
+      .select('instructor_id, detail')
+      .eq('id', params.id)
+      .maybeSingle();
+
+    if (flag?.detail === 'profile_review') {
+      const { error: instructorError } = await supabase
+        .from('instructors')
+        .update({ is_verified: false, status: 'rejected' })
+        .eq('id', flag.instructor_id);
+      if (instructorError) {
+        return NextResponse.json({ error: instructorError.message }, { status: 500 });
+      }
+
+      const { error } = await supabase
+        .from('listing_flags')
+        .update({ is_resolved: true })
+        .eq('id', params.id);
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      return NextResponse.json({ success: true });
+    }
+
     const { error } = await supabase
       .from('listing_flags')
       .delete()

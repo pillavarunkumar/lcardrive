@@ -25,15 +25,23 @@ export async function GET(request: Request) {
   try {
     const results = await autocompleteSuburb(q);
 
-    const suggestions: { display: string; suburb: string; state: string; postcode?: string }[] = (
-      results || []
-    ).map((r: any) => {
+    const suggestions: {
+      display: string;
+      suburb: string;
+      state: string;
+      postcode?: string;
+      lat?: number;
+      lng?: number;
+    }[] = (results || []).map((r: any) => {
       const parts = r.display_name?.split(',') || [];
+      const lat = Number.parseFloat(r.lat);
+      const lng = Number.parseFloat(r.lon);
       return {
         display: parts.slice(0, 3).join(',').trim(),
         suburb: r.address?.suburb || r.address?.city || r.address?.town || parts[0]?.trim() || '',
         state: r.address?.state || '',
         postcode: r.address?.postcode,
+        ...(Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : {}),
       };
     });
 

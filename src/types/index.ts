@@ -59,6 +59,7 @@ export interface Instructor {
   vehicle_image_url?: string;
   years_experience?: number;
   profile_completeness: number;
+  status?: 'draft' | 'pending_review' | 'approved' | 'rejected';
   is_claimed: boolean;
   is_verified: boolean;
   has_pending_claim?: boolean;
@@ -74,6 +75,7 @@ export interface Instructor {
   avg_rating_value: number;
   avg_rating_punctuality: number;
   review_count: number;
+  distance_km?: number;
   created_at: string;
   updated_at: string;
 }
@@ -100,6 +102,21 @@ export interface Review {
   review_text?: string;
   is_approved: boolean;
   created_at: string;
+}
+
+/** An approved review together with the public instructor it belongs to. */
+export interface HomeReview {
+  id: string;
+  reviewer_name: string;
+  rating_overall: number;
+  review_text: string;
+  created_at: string;
+  instructor?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    slug?: string | null;
+    suburb?: string | null;
+  } | null;
 }
 
 export type PassOutcome = 'passed_first' | 'passed_retry' | 'still_learning' | 'not_tested';
@@ -149,7 +166,8 @@ export interface SearchFilters {
   anxiety_friendly?: boolean;
   international_conversion?: boolean;
   test_centre_familiarity?: boolean;
-  sort?: 'price_asc' | 'price_desc' | 'rating' | 'name_asc' | 'name_desc';
+  available_days?: 'weekdays' | 'weekends';
+  sort?: 'price_asc' | 'price_desc' | 'rating' | 'distance' | 'name_asc' | 'name_desc';
 }
 
 export interface AIQuery {

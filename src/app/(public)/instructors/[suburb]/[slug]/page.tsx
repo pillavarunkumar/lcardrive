@@ -29,6 +29,7 @@ export default async function InstructorProfilePage({ params }: { params: { subu
     .from('instructors')
     .select(`${PUBLIC_INSTRUCTOR_COLUMNS.join(', ')}, clerk_user_id`)
     .eq('slug', params.slug)
+    .eq('is_verified', true)
     .maybeSingle()) as { data: Record<string, unknown> | null };
 
   if (!instructor) {
